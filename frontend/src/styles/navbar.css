@@ -1,0 +1,198 @@
+.navbar {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 60px;
+  background: white;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+
+/* SCROLL TARGET OFFSET */
+
+.page-section {
+  scroll-margin-top: 95px;
+}
+
+
+/* LOGO */
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+}
+
+.nav-logo img {
+  width: 150px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+
+/* MENU */
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  list-style: none;
+  font-size: 15px;
+  font-weight: 500;
+  color: #64748B;
+}
+
+.nav-links li {
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.nav-links li:hover {
+  color: #F2B705;
+}
+
+
+/* BUTTONS */
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-actions button {
+  padding: 11px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+
+/* LOGIN */
+
+.login-btn {
+  background: white;
+  color: #0B1F3A;
+  border: 1px solid #0B1F3A;
+}
+
+.login-btn:hover {
+  background: #0B1F3A;
+  color: white;
+}
+
+
+/* SIGNUP */
+
+.signup-btn {
+  background: #102A43;
+  color: white;
+  border: 1px solid #102A43;
+}
+
+.signup-btn:hover {
+  background: #1E3A5F;
+}
+
+
+/* BOOK */
+
+.book-btn {
+  background: #D4A017;
+  color: white;
+  border: none;
+}
+
+.book-btn:hover {
+  background: #F2B705;
+  transform: translateY(-2px);
+}
+
+
+/* MOBILE ICON */
+
+.mobile-menu {
+  display: none;
+  cursor: pointer;
+  color: #0B1F3A;
+}
+
+
+/* TABLET */
+
+@media (max-width: 1100px) {
+  .navbar {
+    padding: 0 30px;
+  }
+
+  .nav-links {
+    display: none;
+  }
+
+  .mobile-menu {
+    display: block;
+  }
+
+  .nav-actions {
+    display: none;
+  }
+
+  .nav-links.active {
+    display: flex;
+    position: absolute;
+    top: 80px;
+    left: 0;
+    width: 100%;
+    background: white;
+    flex-direction: column;
+    padding: 25px 0;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .nav-actions.active {
+    display: flex;
+    position: absolute;
+    top: 360px;
+    left: 0;
+    width: 100%;
+    background: white;
+    flex-direction: column;
+    padding-bottom: 25px;
+  }
+
+  .nav-actions.active button {
+    width: 80%;
+  }
+}
+
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+  .navbar {
+    height: 75px;
+    padding: 0 20px;
+  }
+
+  .page-section {
+    scroll-margin-top: 85px;
+  }
+
+  .nav-logo img {
+    width: 120px;
+  }
+
+  .nav-links.active {
+    top: 75px;
+  }
+
+  .nav-actions.active {
+    top: 350px;
+  }
+}
