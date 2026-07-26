@@ -10,7 +10,12 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 
-import { cars, getCarQuantity } from "../data/cars";
+import {
+  cars,
+  formatCarPrice,
+  getCarQuantity,
+  getCarStartingPrice,
+} from "../data/cars";
 import { locations } from "../data/locations";
 import "../styles/booking.css";
 
@@ -327,7 +332,9 @@ function BookingSection() {
                     disabled={quantity < 1}
                   >
                     {car.name} - {car.seats} Seat
-                    - {quantity}{" "}
+                    - {formatCarPrice(
+                      getCarStartingPrice(car)
+                    )}/day - {quantity}{" "}
                     {quantity === 1
                       ? "Car"
                       : "Cars"}{" "}
@@ -350,10 +357,18 @@ function BookingSection() {
                 {getCarQuantity(
                   selectedCarData
                 ) === 1
-                  ? "Only 1 car of this model is currently listed in the RideRent fleet."
+                  ? `Only 1 car of this model is currently listed. Starting body rent: ${formatCarPrice(
+                      getCarStartingPrice(
+                        selectedCarData
+                      )
+                    )}/day for 1 day.`
                   : `${getCarQuantity(
                       selectedCarData
-                    )} cars of this model are currently listed in the RideRent fleet.`}
+                    )} cars of this model are currently listed. Starting body rent: ${formatCarPrice(
+                      getCarStartingPrice(
+                        selectedCarData
+                      )
+                    )}/day for 1 day.`}
               </p>
             )}
           </div>

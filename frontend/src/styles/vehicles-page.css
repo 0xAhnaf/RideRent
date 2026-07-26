@@ -664,10 +664,30 @@
 }
 
 .vehicle-price-info strong {
-  display: block;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px;
   color: #071c32;
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 800;
+  line-height: 1.2;
+}
+
+.vehicle-price-info strong em {
+  color: #64748b;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.vehicle-price-info small {
+  display: block;
+  margin-top: 5px;
+  color: #8a99a8;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.35;
 }
 
 .vehicle-card-footer button {
@@ -1043,5 +1063,175 @@
 
   .vehicle-availability-badge {
     right: 10px;
+  }
+}
+/* =================================
+   STARTING PRICE FILTER
+================================= */
+
+.vehicles-price-inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.vehicles-price-inputs > label {
+  min-width: 0;
+  margin: 0;
+}
+
+.vehicles-price-inputs > label > span {
+  display: block;
+  margin-bottom: 7px;
+  color: #718196;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.vehicles-price-input-box {
+  position: relative;
+}
+
+.vehicles-price-input-box b {
+  position: absolute;
+  top: 50%;
+  left: 11px;
+  z-index: 1;
+  color: #d4a017;
+  font-size: 13px;
+  font-weight: 800;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.vehicles-price-input-box input {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  padding: 8px 7px 8px 27px;
+  border: 1px solid #dce4ec;
+  border-radius: 8px;
+  outline: none;
+  background: #f8fafc;
+  color: #071c32;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease;
+}
+
+.vehicles-price-input-box input:focus {
+  border-color: #d4a017;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.13);
+}
+
+.vehicles-price-input-box input::-webkit-outer-spin-button,
+.vehicles-price-input-box input::-webkit-inner-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.vehicles-price-input-box input[type="number"] {
+  appearance: textfield;
+}
+
+.vehicles-price-slider {
+  position: relative;
+  height: 28px;
+  margin-top: 16px;
+}
+
+.vehicles-price-slider-track,
+.vehicles-price-slider-progress {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 5px;
+  border-radius: 20px;
+  transform: translateY(-50%);
+}
+
+.vehicles-price-slider-track {
+  background: #dfe6ed;
+}
+
+.vehicles-price-slider-progress {
+  z-index: 1;
+  background: #d4a017;
+}
+
+.vehicles-price-slider input[type="range"] {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  z-index: 2;
+  width: 100%;
+  height: 5px;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.vehicles-price-slider input[type="range"]::-webkit-slider-thumb {
+  width: 18px;
+  height: 18px;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  appearance: none;
+  background: #d4a017;
+  box-shadow: 0 2px 8px rgba(7, 28, 50, 0.25);
+  cursor: grab;
+  pointer-events: auto;
+}
+
+.vehicles-price-slider input[type="range"]::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  background: #d4a017;
+  box-shadow: 0 2px 8px rgba(7, 28, 50, 0.25);
+  cursor: grab;
+  pointer-events: auto;
+}
+
+.vehicles-price-slider input[type="range"]:active::-webkit-slider-thumb {
+  cursor: grabbing;
+}
+
+.vehicles-selected-price-range {
+  margin: 5px 0 0;
+  color: #071c32;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.vehicles-price-filter-note {
+  display: block;
+  margin-top: 4px;
+  color: #8493a3;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .vehicles-price-input-box input {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 420px) {
+  .vehicles-price-inputs {
+    grid-template-columns: 1fr;
   }
 }

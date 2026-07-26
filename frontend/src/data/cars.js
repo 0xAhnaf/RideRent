@@ -6,6 +6,7 @@ export const cars = [
     category: "Sedan",
     seats: 5,
     quantity: 5,
+    startingPrice: 3000,
     imageKey: "Toyota Axio",
   },
   {
@@ -15,6 +16,7 @@ export const cars = [
     category: "Sedan",
     seats: 5,
     quantity: 4,
+    startingPrice: 3200,
     imageKey: "Toyota Allion",
   },
   {
@@ -24,6 +26,7 @@ export const cars = [
     category: "Sedan",
     seats: 5,
     quantity: 4,
+    startingPrice: 3500,
     imageKey: "Toyota Premio",
   },
   {
@@ -33,6 +36,7 @@ export const cars = [
     category: "Sedan",
     seats: 5,
     quantity: 6,
+    startingPrice: 2500,
     imageKey: "Toyota Corolla",
   },
   {
@@ -42,6 +46,7 @@ export const cars = [
     category: "Hatchback",
     seats: 5,
     quantity: 3,
+    startingPrice: 3200,
     imageKey: "Toyota Corolla Fielder",
   },
   {
@@ -51,6 +56,7 @@ export const cars = [
     category: "MPV",
     seats: 7,
     quantity: 9,
+    startingPrice: 4000,
     imageKey: "Toyota Noah Old",
   },
   {
@@ -60,6 +66,7 @@ export const cars = [
     category: "MPV",
     seats: 7,
     quantity: 4,
+    startingPrice: 6000,
     imageKey: "Toyota Noah",
   },
   {
@@ -69,6 +76,7 @@ export const cars = [
     category: "Microbus",
     seats: 10,
     quantity: 8,
+    startingPrice: 5500,
     imageKey: "Toyota Hiace 10 Seater",
   },
   {
@@ -78,6 +86,7 @@ export const cars = [
     category: "Microbus",
     seats: 12,
     quantity: 19,
+    startingPrice: 6000,
     imageKey: "Toyota Hiace 12 Seat",
   },
   {
@@ -87,6 +96,7 @@ export const cars = [
     category: "Microbus",
     seats: 15,
     quantity: 6,
+    startingPrice: 7000,
     imageKey: "Toyota Hiace 15 Seat Grand",
   },
   {
@@ -96,6 +106,7 @@ export const cars = [
     category: "Bus",
     seats: 25,
     quantity: 2,
+    startingPrice: 21000,
     imageKey: "Toyota Coaster",
   },
   {
@@ -105,6 +116,7 @@ export const cars = [
     category: "Premium SUV",
     seats: 5,
     quantity: 1,
+    startingPrice: 12000,
     imageKey: "Toyota Harrier",
   },
   {
@@ -114,6 +126,7 @@ export const cars = [
     category: "SUV",
     seats: 5,
     quantity: 2,
+    startingPrice: 5000,
     imageKey: "Honda Vezel",
   },
   {
@@ -123,6 +136,7 @@ export const cars = [
     category: "Premium Sedan",
     seats: 5,
     quantity: 1,
+    startingPrice: 4000,
     imageKey: "Honda Insight",
   },
   {
@@ -132,6 +146,7 @@ export const cars = [
     category: "Premium SUV",
     seats: 7,
     quantity: 1,
+    startingPrice: 18000,
     imageKey: "Toyota Prado",
   },
   {
@@ -141,6 +156,7 @@ export const cars = [
     category: "Luxury Sedan",
     seats: 5,
     quantity: 1,
+    startingPrice: 40000,
     imageKey: "BMW X5 M",
   },
   {
@@ -150,6 +166,7 @@ export const cars = [
     category: "Luxury Sedan",
     seats: 5,
     quantity: 1,
+    startingPrice: 35000,
     imageKey: "Mercedes Benz E-Class",
   },
 ];
@@ -162,4 +179,24 @@ export const getCarQuantity = (car) => {
   }
 
   return quantity;
+};
+
+export const getCarStartingPrice = (car) => {
+  const startingPrice = Number(car?.startingPrice ?? 0);
+
+  if (!Number.isFinite(startingPrice) || startingPrice < 0) {
+    return 0;
+  }
+
+  return startingPrice;
+};
+
+export const formatCarPrice = (price) => {
+  const numericPrice = Number(price);
+
+  if (!Number.isFinite(numericPrice) || numericPrice < 0) {
+    return "৳0";
+  }
+
+  return `৳${numericPrice.toLocaleString("en-BD")}`;
 };

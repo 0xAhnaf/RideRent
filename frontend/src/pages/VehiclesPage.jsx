@@ -15,7 +15,12 @@ import { useNavigate } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { cars, getCarQuantity } from "../data/cars";
+import {
+  cars,
+  formatCarPrice,
+  getCarQuantity,
+  getCarStartingPrice,
+} from "../data/cars";
 import "../styles/vehicles-page.css";
 
 const carImageModules = import.meta.glob("../assets/RideRentCars/*", {
@@ -65,6 +70,22 @@ const getAvailabilityText = (car) => {
   return `${quantity} Available`;
 };
 
+const allStartingPrices = cars
+  .map((car) => getCarStartingPrice(car))
+  .filter((price) => price > 0);
+
+const MIN_STARTING_PRICE =
+  allStartingPrices.length > 0
+    ? Math.min(...allStartingPrices)
+    : 0;
+
+const MAX_STARTING_PRICE =
+  allStartingPrices.length > 0
+    ? Math.max(...allStartingPrices)
+    : 0;
+
+const PRICE_STEP = 500;
+
 function VehicleImage({ car }) {
   const [imageError, setImageError] = useState(false);
   const imageSource = getCarImage(car);
@@ -97,6 +118,12 @@ function VehiclesPage() {
   const [selectedSeats, setSelectedSeats] = useState("All");
   const [sortOption, setSortOption] = useState("default");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [minimumPrice, setMinimumPrice] = useState(
+    MIN_STARTING_PRICE
+  );
+  const [maximumPrice, setMaximumPrice] = useState(
+    MAX_STARTING_PRICE
+  );
 
   useEffect(() => {
     window.scrollTo({
@@ -149,6 +176,47 @@ function VehiclesPage() {
     []
   );
 
+  const priceRangeSize = Math.max(
+    MAX_STARTING_PRICE - MIN_STARTING_PRICE,
+    1
+  );
+
+  const minimumPricePercent =
+    ((minimumPrice - MIN_STARTING_PRICE) / priceRangeSize) * 100;
+
+  const maximumPricePercent =
+    ((maximumPrice - MIN_STARTING_PRICE) / priceRangeSize) * 100;
+
+  const handleMinimumPriceChange = (event) => {
+    const nextPrice = Number(event.target.value);
+
+    if (!Number.isFinite(nextPrice)) {
+      return;
+    }
+
+    const limitedPrice = Math.max(
+      MIN_STARTING_PRICE,
+      Math.min(nextPrice, maximumPrice)
+    );
+
+    setMinimumPrice(limitedPrice);
+  };
+
+  const handleMaximumPriceChange = (event) => {
+    const nextPrice = Number(event.target.value);
+
+    if (!Number.isFinite(nextPrice)) {
+      return;
+    }
+
+    const limitedPrice = Math.min(
+      MAX_STARTING_PRICE,
+      Math.max(nextPrice, minimumPrice)
+    );
+
+    setMaximumPrice(limitedPrice);
+  };
+
   const filteredCars = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
 
@@ -159,6 +227,7 @@ function VehiclesPage() {
         car.category,
         `${car.seats} seat`,
         `${getCarQuantity(car)} available`,
+        `${getCarStartingPrice(car)} starting price`,
       ]
         .join(" ")
         .toLowerCase();
@@ -179,11 +248,18 @@ function VehiclesPage() {
         selectedSeats === "All" ||
         String(car.seats) === selectedSeats;
 
+      const startingPrice = getCarStartingPrice(car);
+
+      const matchesPrice =
+        startingPrice >= minimumPrice &&
+        startingPrice <= maximumPrice;
+
       return (
         matchesSearch &&
         matchesBrand &&
         matchesCategory &&
-        matchesSeats
+        matchesSeats &&
+        matchesPrice
       );
     });
 
@@ -229,12 +305,30 @@ function VehiclesPage() {
       );
     }
 
+    if (sortOption === "price-low-high") {
+      return [...results].sort(
+        (firstCar, secondCar) =>
+          getCarStartingPrice(firstCar) -
+          getCarStartingPrice(secondCar)
+      );
+    }
+
+    if (sortOption === "price-high-low") {
+      return [...results].sort(
+        (firstCar, secondCar) =>
+          getCarStartingPrice(secondCar) -
+          getCarStartingPrice(firstCar)
+      );
+    }
+
     return results;
   }, [
     searchTerm,
     selectedBrand,
     selectedCategory,
     selectedSeats,
+    minimumPrice,
+    maximumPrice,
     sortOption,
   ]);
 
@@ -260,6 +354,8 @@ function VehiclesPage() {
     setSelectedBrand("All");
     setSelectedCategory("All");
     setSelectedSeats("All");
+    setMinimumPrice(MIN_STARTING_PRICE);
+    setMaximumPrice(MAX_STARTING_PRICE);
     setSortOption("default");
   };
 
@@ -339,8 +435,8 @@ function VehiclesPage() {
               <h2>Explore RideRent Vehicles</h2>
 
               <p>
-                Search and filter vehicles by brand, category
-                and seating capacity.
+                Search and filter vehicles by brand, category,
+                seating capacity and starting price.
               </p>
             </div>
 
@@ -466,6 +562,90 @@ function VehiclesPage() {
 
               <div className="vehicles-filter-group">
                 <span className="vehicles-filter-title">
+                  Starting Price / Day
+                </span>
+
+                <div className="vehicles-price-inputs">
+                  <label htmlFor="minimum-vehicle-price">
+                    <span>Minimum</span>
+
+                    <div className="vehicles-price-input-box">
+                      <b>৳</b>
+
+                      <input
+                        id="minimum-vehicle-price"
+                        type="number"
+                        min={MIN_STARTING_PRICE}
+                        max={maximumPrice}
+                        step={PRICE_STEP}
+                        value={minimumPrice}
+                        onChange={handleMinimumPriceChange}
+                      />
+                    </div>
+                  </label>
+
+                  <label htmlFor="maximum-vehicle-price">
+                    <span>Maximum</span>
+
+                    <div className="vehicles-price-input-box">
+                      <b>৳</b>
+
+                      <input
+                        id="maximum-vehicle-price"
+                        type="number"
+                        min={minimumPrice}
+                        max={MAX_STARTING_PRICE}
+                        step={PRICE_STEP}
+                        value={maximumPrice}
+                        onChange={handleMaximumPriceChange}
+                      />
+                    </div>
+                  </label>
+                </div>
+
+                <div className="vehicles-price-slider">
+                  <div className="vehicles-price-slider-track" />
+
+                  <div
+                    className="vehicles-price-slider-progress"
+                    style={{
+                      left: `${minimumPricePercent}%`,
+                      right: `${100 - maximumPricePercent}%`,
+                    }}
+                  />
+
+                  <input
+                    type="range"
+                    aria-label="Minimum starting price"
+                    min={MIN_STARTING_PRICE}
+                    max={MAX_STARTING_PRICE}
+                    step={PRICE_STEP}
+                    value={minimumPrice}
+                    onChange={handleMinimumPriceChange}
+                  />
+
+                  <input
+                    type="range"
+                    aria-label="Maximum starting price"
+                    min={MIN_STARTING_PRICE}
+                    max={MAX_STARTING_PRICE}
+                    step={PRICE_STEP}
+                    value={maximumPrice}
+                    onChange={handleMaximumPriceChange}
+                  />
+                </div>
+
+                <p className="vehicles-selected-price-range">
+                  {formatCarPrice(minimumPrice)} – {formatCarPrice(maximumPrice)}
+                </p>
+
+                <small className="vehicles-price-filter-note">
+                  Body rent starting price for 1 day
+                </small>
+              </div>
+
+              <div className="vehicles-filter-group">
+                <span className="vehicles-filter-title">
                   Filter by Brand
                 </span>
 
@@ -568,6 +748,14 @@ function VehiclesPage() {
                     <option value="availability-low-high">
                       Availability: Low to High
                     </option>
+
+                    <option value="price-low-high">
+                      Price: Low to High
+                    </option>
+
+                    <option value="price-high-low">
+                      Price: High to Low
+                    </option>
                   </select>
                 </div>
               </div>
@@ -576,6 +764,7 @@ function VehiclesPage() {
                 <div className="vehicles-grid">
                   {filteredCars.map((car, index) => {
                     const quantity = getCarQuantity(car);
+                    const startingPrice = getCarStartingPrice(car);
 
                     return (
                       <motion.article
@@ -652,10 +841,16 @@ function VehiclesPage() {
 
                           <div className="vehicle-card-footer">
                             <div className="vehicle-price-info">
-                              <span>Rental Price</span>
+                              <span>Starting From</span>
+
                               <strong>
-                                Contact for quote
+                                {formatCarPrice(startingPrice)}
+                                <em>/ day</em>
                               </strong>
+
+                              <small>
+                                Body rent only • 1 day
+                              </small>
                             </div>
 
                             <button
