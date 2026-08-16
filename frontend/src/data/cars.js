@@ -49,6 +49,19 @@ export const cars = [
     startingPrice: 3200,
     imageKey: "Toyota Corolla Fielder",
   },
+
+  {
+    id: "toyota-probox",
+    name: "Toyota Probox",
+    brand: "Toyota",
+    category: "Hatchback",
+    seats: 5,
+    quantity: 6,
+    startingPrice: 2600,
+    imageKey: "Toyota Probox",
+  },
+
+
   {
     id: "toyota-noah-old",
     name: "Toyota Noah Old",
