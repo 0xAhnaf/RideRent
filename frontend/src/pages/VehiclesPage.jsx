@@ -581,21 +581,19 @@ function VehiclesPage() {
               <div className="vehicles-filter-group">
                 <span className="vehicles-filter-title">Filter by Brand</span>
 
-                <div className="vehicles-brand-list">
-                  {brandOptions.map((brand) => (
-                    <button
-                      key={brand}
-                      type="button"
-                      className={selectedBrand === brand ? "active" : ""}
-                      onClick={() => setSelectedBrand(brand)}
-                    >
-                      <span>{brand === "All" ? "All Brands" : brand}</span>
-
-                      <strong>{getBrandCount(brand)}</strong>
-                    </button>
-                  ))}
+               <div className="vehicles-brand-dropdown">
+                  <select
+                   value={selectedBrand}
+                    onChange={(e) => setSelectedBrand(e.target.value)}
+                  >
+                   {brandOptions.map((brand) => (
+                   <option key={brand} value={brand}>
+                   {brand === "All" ? "All Brands" : brand} ({getBrandCount(brand)})
+                   </option>
+                    ))}
+                  </select>
                 </div>
-              </div>
+               </div>
 
               <button
                 type="button"
