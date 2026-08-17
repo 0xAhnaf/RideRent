@@ -1,0 +1,66 @@
+/* src/styles/auth-responsive.css */
+@media (min-width: 787px) {
+  .auth-left {
+    background-image:
+      linear-gradient(
+        rgba(1, 8, 23, 0.75),
+        rgba(1, 8, 23, 0.75)
+      ),
+      url("../assets/authpage_bg.png");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+}
+@media (max-width: 786px) {
+
+  .auth-page {
+    flex-direction: column;
+  }
+
+  /* Only show name on the top */
+  .auth-left {
+    width: 100%;
+    min-height: 80px;
+
+    padding: 24px;
+
+    justify-content: center;
+    align-items: center;
+  }
+
+  .auth-intro,
+  .auth-security {
+    display: none;
+  }
+
+  .auth-left h1 {
+    font-size: 24px;
+  }
+
+  /* Form */
+  .auth-right {
+    width: 100%;
+    min-height: auto;
+
+    padding: 40px 30px;
+  }
+
+  .auth-content {
+    max-width: 500px;
+  }
+}
+
+
+@media (max-width: 500px) {
+
+  .auth-right {
+    padding: 35px 20px;
+  }
+
+  .auth-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+}

@@ -11,13 +11,11 @@
   z-index: 1000;
 }
 
-
 /* SCROLL TARGET OFFSET */
 
 .page-section {
   scroll-margin-top: 95px;
 }
-
 
 /* LOGO */
 
@@ -33,7 +31,6 @@
   display: block;
 }
 
-
 /* MENU */
 
 .nav-links {
@@ -43,7 +40,7 @@
   list-style: none;
   font-size: 15px;
   font-weight: 500;
-  color: #64748B;
+  color: #64748b;
 }
 
 .nav-links li {
@@ -52,9 +49,8 @@
 }
 
 .nav-links li:hover {
-  color: #F2B705;
+  color: #f2b705;
 }
-
 
 /* BUTTONS */
 
@@ -73,56 +69,51 @@
   transition: 0.3s;
 }
 
-
 /* LOGIN */
 
 .login-btn {
   background: white;
-  color: #0B1F3A;
-  border: 1px solid #0B1F3A;
+  color: #0b1f3a;
+  border: 1px solid #0b1f3a;
 }
 
 .login-btn:hover {
-  background: #0B1F3A;
+  background: #0b1f3a;
   color: white;
 }
-
 
 /* SIGNUP */
 
 .signup-btn {
-  background: #102A43;
+  background: #102a43;
   color: white;
-  border: 1px solid #102A43;
+  border: 1px solid #102a43;
 }
 
 .signup-btn:hover {
-  background: #1E3A5F;
+  background: #1e3a5f;
 }
-
 
 /* BOOK */
 
 .book-btn {
-  background: #D4A017;
+  background: #d4a017;
   color: white;
   border: none;
 }
 
 .book-btn:hover {
-  background: #F2B705;
+  background: #f2b705;
   transform: translateY(-2px);
 }
-
 
 /* MOBILE ICON */
 
 .mobile-menu {
   display: none;
   cursor: pointer;
-  color: #0B1F3A;
+  color: #0b1f3a;
 }
-
 
 /* TABLET */
 
@@ -170,7 +161,6 @@
     width: 80%;
   }
 }
-
 
 /* MOBILE */
 

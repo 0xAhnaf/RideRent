@@ -47,7 +47,7 @@ const carImageLookup = Object.entries(carImageModules).reduce(
 
     return imageMap;
   },
-  {}
+  {},
 );
 
 const getCarImage = (car) => {
@@ -75,14 +75,10 @@ const allStartingPrices = cars
   .filter((price) => price > 0);
 
 const MIN_STARTING_PRICE =
-  allStartingPrices.length > 0
-    ? Math.min(...allStartingPrices)
-    : 0;
+  allStartingPrices.length > 0 ? Math.min(...allStartingPrices) : 0;
 
 const MAX_STARTING_PRICE =
-  allStartingPrices.length > 0
-    ? Math.max(...allStartingPrices)
-    : 0;
+  allStartingPrices.length > 0 ? Math.max(...allStartingPrices) : 0;
 
 const PRICE_STEP = 500;
 
@@ -118,12 +114,8 @@ function VehiclesPage() {
   const [selectedSeats, setSelectedSeats] = useState("All");
   const [sortOption, setSortOption] = useState("default");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const [minimumPrice, setMinimumPrice] = useState(
-    MIN_STARTING_PRICE
-  );
-  const [maximumPrice, setMaximumPrice] = useState(
-    MAX_STARTING_PRICE
-  );
+  const [minimumPrice, setMinimumPrice] = useState(MIN_STARTING_PRICE);
+  const [maximumPrice, setMaximumPrice] = useState(MAX_STARTING_PRICE);
 
   useEffect(() => {
     window.scrollTo({
@@ -152,9 +144,7 @@ function VehiclesPage() {
   }, []);
 
   const categoryOptions = useMemo(() => {
-    const uniqueCategories = [
-      ...new Set(cars.map((car) => car.category)),
-    ];
+    const uniqueCategories = [...new Set(cars.map((car) => car.category))];
 
     return ["All", ...uniqueCategories.sort()];
   }, []);
@@ -162,24 +152,17 @@ function VehiclesPage() {
   const seatOptions = useMemo(
     () =>
       [...new Set(cars.map((car) => car.seats))].sort(
-        (firstSeat, secondSeat) => firstSeat - secondSeat
+        (firstSeat, secondSeat) => firstSeat - secondSeat,
       ),
-    []
+    [],
   );
 
   const totalFleetCount = useMemo(
-    () =>
-      cars.reduce(
-        (total, car) => total + getCarQuantity(car),
-        0
-      ),
-    []
+    () => cars.reduce((total, car) => total + getCarQuantity(car), 0),
+    [],
   );
 
-  const priceRangeSize = Math.max(
-    MAX_STARTING_PRICE - MIN_STARTING_PRICE,
-    1
-  );
+  const priceRangeSize = Math.max(MAX_STARTING_PRICE - MIN_STARTING_PRICE, 1);
 
   const minimumPricePercent =
     ((minimumPrice - MIN_STARTING_PRICE) / priceRangeSize) * 100;
@@ -196,7 +179,7 @@ function VehiclesPage() {
 
     const limitedPrice = Math.max(
       MIN_STARTING_PRICE,
-      Math.min(nextPrice, maximumPrice)
+      Math.min(nextPrice, maximumPrice),
     );
 
     setMinimumPrice(limitedPrice);
@@ -211,7 +194,7 @@ function VehiclesPage() {
 
     const limitedPrice = Math.min(
       MAX_STARTING_PRICE,
-      Math.max(nextPrice, minimumPrice)
+      Math.max(nextPrice, minimumPrice),
     );
 
     setMaximumPrice(limitedPrice);
@@ -233,26 +216,21 @@ function VehiclesPage() {
         .toLowerCase();
 
       const matchesSearch =
-        !normalizedSearch ||
-        searchableContent.includes(normalizedSearch);
+        !normalizedSearch || searchableContent.includes(normalizedSearch);
 
       const matchesBrand =
-        selectedBrand === "All" ||
-        car.brand === selectedBrand;
+        selectedBrand === "All" || car.brand === selectedBrand;
 
       const matchesCategory =
-        selectedCategory === "All" ||
-        car.category === selectedCategory;
+        selectedCategory === "All" || car.category === selectedCategory;
 
       const matchesSeats =
-        selectedSeats === "All" ||
-        String(car.seats) === selectedSeats;
+        selectedSeats === "All" || String(car.seats) === selectedSeats;
 
       const startingPrice = getCarStartingPrice(car);
 
       const matchesPrice =
-        startingPrice >= minimumPrice &&
-        startingPrice <= maximumPrice;
+        startingPrice >= minimumPrice && startingPrice <= maximumPrice;
 
       return (
         matchesSearch &&
@@ -265,59 +243,53 @@ function VehiclesPage() {
 
     if (sortOption === "name-ascending") {
       return [...results].sort((firstCar, secondCar) =>
-        firstCar.name.localeCompare(secondCar.name)
+        firstCar.name.localeCompare(secondCar.name),
       );
     }
 
     if (sortOption === "name-descending") {
       return [...results].sort((firstCar, secondCar) =>
-        secondCar.name.localeCompare(firstCar.name)
+        secondCar.name.localeCompare(firstCar.name),
       );
     }
 
     if (sortOption === "seats-low-high") {
       return [...results].sort(
-        (firstCar, secondCar) =>
-          firstCar.seats - secondCar.seats
+        (firstCar, secondCar) => firstCar.seats - secondCar.seats,
       );
     }
 
     if (sortOption === "seats-high-low") {
       return [...results].sort(
-        (firstCar, secondCar) =>
-          secondCar.seats - firstCar.seats
+        (firstCar, secondCar) => secondCar.seats - firstCar.seats,
       );
     }
 
     if (sortOption === "availability-high-low") {
       return [...results].sort(
         (firstCar, secondCar) =>
-          getCarQuantity(secondCar) -
-          getCarQuantity(firstCar)
+          getCarQuantity(secondCar) - getCarQuantity(firstCar),
       );
     }
 
     if (sortOption === "availability-low-high") {
       return [...results].sort(
         (firstCar, secondCar) =>
-          getCarQuantity(firstCar) -
-          getCarQuantity(secondCar)
+          getCarQuantity(firstCar) - getCarQuantity(secondCar),
       );
     }
 
     if (sortOption === "price-low-high") {
       return [...results].sort(
         (firstCar, secondCar) =>
-          getCarStartingPrice(firstCar) -
-          getCarStartingPrice(secondCar)
+          getCarStartingPrice(firstCar) - getCarStartingPrice(secondCar),
       );
     }
 
     if (sortOption === "price-high-low") {
       return [...results].sort(
         (firstCar, secondCar) =>
-          getCarStartingPrice(secondCar) -
-          getCarStartingPrice(firstCar)
+          getCarStartingPrice(secondCar) - getCarStartingPrice(firstCar),
       );
     }
 
@@ -333,12 +305,8 @@ function VehiclesPage() {
   ]);
 
   const filteredFleetCount = useMemo(
-    () =>
-      filteredCars.reduce(
-        (total, car) => total + getCarQuantity(car),
-        0
-      ),
-    [filteredCars]
+    () => filteredCars.reduce((total, car) => total + getCarQuantity(car), 0),
+    [filteredCars],
   );
 
   const getBrandCount = (brand) => {
@@ -380,10 +348,7 @@ function VehiclesPage() {
         <section className="vehicles-hero">
           <div className="vehicles-hero-content">
             <div className="vehicles-breadcrumb">
-              <button
-                type="button"
-                onClick={goToHome}
-              >
+              <button type="button" onClick={goToHome}>
                 Home
               </button>
 
@@ -392,18 +357,14 @@ function VehiclesPage() {
               <span>Vehicles</span>
             </div>
 
-            <p className="vehicles-hero-label">
-              RideRent Vehicle Collection
-            </p>
+            <p className="vehicles-hero-label">RideRent Vehicle Collection</p>
 
-            <h1>
-              Find the perfect vehicle for your journey
-            </h1>
+            <h1>Find the perfect vehicle for your journey</h1>
 
             <p className="vehicles-hero-description">
-              Browse RideRent cars, SUVs, microbuses and
-              premium vehicles. Choose your preferred vehicle
-              and continue directly to the booking section.
+              Browse RideRent cars, SUVs, microbuses and premium vehicles.
+              Choose your preferred vehicle and continue directly to the booking
+              section.
             </p>
 
             <div className="vehicles-hero-stats">
@@ -428,15 +389,13 @@ function VehiclesPage() {
         <section className="vehicles-catalog-section">
           <div className="vehicles-section-heading">
             <div>
-              <p className="vehicles-section-label">
-                Our Fleet
-              </p>
+              <p className="vehicles-section-label">Our Fleet</p>
 
               <h2>Explore RideRent Vehicles</h2>
 
               <p>
-                Search and filter vehicles by brand, category,
-                seating capacity and starting price.
+                Search and filter vehicles by brand, category, seating capacity
+                and starting price.
               </p>
             </div>
 
@@ -444,15 +403,11 @@ function VehiclesPage() {
               type="button"
               className="vehicles-filter-toggle"
               onClick={() =>
-                setMobileFiltersOpen(
-                  (previousState) => !previousState
-                )
+                setMobileFiltersOpen((previousState) => !previousState)
               }
             >
               <SlidersHorizontal size={19} />
-
               Filters
-
               <span>{filteredCars.length}</span>
             </button>
           </div>
@@ -489,9 +444,7 @@ function VehiclesPage() {
               </div>
 
               <div className="vehicles-filter-group">
-                <label htmlFor="vehicle-search">
-                  Vehicle Name
-                </label>
+                <label htmlFor="vehicle-search">Vehicle Name</label>
 
                 <div className="vehicles-search-field">
                   <Search size={18} />
@@ -501,59 +454,39 @@ function VehiclesPage() {
                     type="search"
                     placeholder="Search vehicles..."
                     value={searchTerm}
-                    onChange={(event) =>
-                      setSearchTerm(event.target.value)
-                    }
+                    onChange={(event) => setSearchTerm(event.target.value)}
                   />
                 </div>
               </div>
 
               <div className="vehicles-filter-group">
-                <label htmlFor="vehicle-category">
-                  Vehicle Category
-                </label>
+                <label htmlFor="vehicle-category">Vehicle Category</label>
 
                 <select
                   id="vehicle-category"
                   value={selectedCategory}
-                  onChange={(event) =>
-                    setSelectedCategory(event.target.value)
-                  }
+                  onChange={(event) => setSelectedCategory(event.target.value)}
                 >
                   {categoryOptions.map((category) => (
-                    <option
-                      key={category}
-                      value={category}
-                    >
-                      {category === "All"
-                        ? "All Categories"
-                        : category}
+                    <option key={category} value={category}>
+                      {category === "All" ? "All Categories" : category}
                     </option>
                   ))}
                 </select>
               </div>
 
               <div className="vehicles-filter-group">
-                <label htmlFor="vehicle-seats">
-                  Seating Capacity
-                </label>
+                <label htmlFor="vehicle-seats">Seating Capacity</label>
 
                 <select
                   id="vehicle-seats"
                   value={selectedSeats}
-                  onChange={(event) =>
-                    setSelectedSeats(event.target.value)
-                  }
+                  onChange={(event) => setSelectedSeats(event.target.value)}
                 >
-                  <option value="All">
-                    All Seat Capacities
-                  </option>
+                  <option value="All">All Seat Capacities</option>
 
                   {seatOptions.map((seat) => (
-                    <option
-                      key={seat}
-                      value={seat}
-                    >
+                    <option key={seat} value={seat}>
                       {seat} Seats
                     </option>
                   ))}
@@ -636,7 +569,8 @@ function VehiclesPage() {
                 </div>
 
                 <p className="vehicles-selected-price-range">
-                  {formatCarPrice(minimumPrice)} – {formatCarPrice(maximumPrice)}
+                  {formatCarPrice(minimumPrice)} –{" "}
+                  {formatCarPrice(maximumPrice)}
                 </p>
 
                 <small className="vehicles-price-filter-note">
@@ -645,31 +579,19 @@ function VehiclesPage() {
               </div>
 
               <div className="vehicles-filter-group">
-                <span className="vehicles-filter-title">
-                  Filter by Brand
-                </span>
+                <span className="vehicles-filter-title">Filter by Brand</span>
 
                 <div className="vehicles-brand-list">
                   {brandOptions.map((brand) => (
                     <button
                       key={brand}
                       type="button"
-                      className={
-                        selectedBrand === brand
-                          ? "active"
-                          : ""
-                      }
+                      className={selectedBrand === brand ? "active" : ""}
                       onClick={() => setSelectedBrand(brand)}
                     >
-                      <span>
-                        {brand === "All"
-                          ? "All Brands"
-                          : brand}
-                      </span>
+                      <span>{brand === "All" ? "All Brands" : brand}</span>
 
-                      <strong>
-                        {getBrandCount(brand)}
-                      </strong>
+                      <strong>{getBrandCount(brand)}</strong>
                     </button>
                   ))}
                 </div>
@@ -697,49 +619,32 @@ function VehiclesPage() {
               <div className="vehicles-results-toolbar">
                 <div className="vehicles-results-summary">
                   <p>
-                    Showing{" "}
-                    <strong>{filteredCars.length}</strong>{" "}
-                    of <strong>{cars.length}</strong>{" "}
-                    vehicle models
+                    Showing <strong>{filteredCars.length}</strong> of{" "}
+                    <strong>{cars.length}</strong> vehicle models
                   </p>
 
                   <span>
-                    {filteredFleetCount} cars available in
-                    these results
+                    {filteredFleetCount} cars available in these results
                   </span>
                 </div>
 
                 <div className="vehicles-sort-control">
-                  <label htmlFor="vehicle-sort">
-                    Sort by
-                  </label>
+                  <label htmlFor="vehicle-sort">Sort by</label>
 
                   <select
                     id="vehicle-sort"
                     value={sortOption}
-                    onChange={(event) =>
-                      setSortOption(event.target.value)
-                    }
+                    onChange={(event) => setSortOption(event.target.value)}
                   >
-                    <option value="default">
-                      Recommended
-                    </option>
+                    <option value="default">Recommended</option>
 
-                    <option value="name-ascending">
-                      Name: A to Z
-                    </option>
+                    <option value="name-ascending">Name: A to Z</option>
 
-                    <option value="name-descending">
-                      Name: Z to A
-                    </option>
+                    <option value="name-descending">Name: Z to A</option>
 
-                    <option value="seats-low-high">
-                      Seats: Low to High
-                    </option>
+                    <option value="seats-low-high">Seats: Low to High</option>
 
-                    <option value="seats-high-low">
-                      Seats: High to Low
-                    </option>
+                    <option value="seats-high-low">Seats: High to Low</option>
 
                     <option value="availability-high-low">
                       Availability: High to Low
@@ -749,13 +654,9 @@ function VehiclesPage() {
                       Availability: Low to High
                     </option>
 
-                    <option value="price-low-high">
-                      Price: Low to High
-                    </option>
+                    <option value="price-low-high">Price: Low to High</option>
 
-                    <option value="price-high-low">
-                      Price: High to Low
-                    </option>
+                    <option value="price-high-low">Price: High to Low</option>
                   </select>
                 </div>
               </div>
@@ -784,10 +685,7 @@ function VehiclesPage() {
                         }}
                         transition={{
                           duration: 0.4,
-                          delay: Math.min(
-                            index * 0.04,
-                            0.28
-                          ),
+                          delay: Math.min(index * 0.04, 0.28),
                         }}
                       >
                         <div className="vehicle-card-image">
@@ -799,23 +697,15 @@ function VehiclesPage() {
 
                           <span
                             className={`vehicle-availability-badge ${
-                              quantity === 1
-                                ? "is-limited"
-                                : ""
-                            } ${
-                              quantity === 0
-                                ? "is-unavailable"
-                                : ""
-                            }`}
+                              quantity === 1 ? "is-limited" : ""
+                            } ${quantity === 0 ? "is-unavailable" : ""}`}
                           >
                             {getAvailabilityText(car)}
                           </span>
                         </div>
 
                         <div className="vehicle-card-content">
-                          <p className="vehicle-card-brand">
-                            {car.brand}
-                          </p>
+                          <p className="vehicle-card-brand">{car.brand}</p>
 
                           <h3>{car.name}</h3>
 
@@ -834,9 +724,7 @@ function VehiclesPage() {
                           <div className="vehicle-verification">
                             <ShieldCheck size={18} />
 
-                            <span>
-                              RideRent verified vehicle
-                            </span>
+                            <span>RideRent verified vehicle</span>
                           </div>
 
                           <div className="vehicle-card-footer">
@@ -848,25 +736,17 @@ function VehiclesPage() {
                                 <em>/ day</em>
                               </strong>
 
-                              <small>
-                                Body rent only • 1 day
-                              </small>
+                              <small>Body rent only • 1 day</small>
                             </div>
 
                             <button
                               type="button"
                               disabled={quantity === 0}
-                              onClick={() =>
-                                goToBooking(car.name)
-                              }
+                              onClick={() => goToBooking(car.name)}
                             >
-                              {quantity === 0
-                                ? "Unavailable"
-                                : "Book Now"}
+                              {quantity === 0 ? "Unavailable" : "Book Now"}
 
-                              {quantity > 0 && (
-                                <ArrowRight size={17} />
-                              )}
+                              {quantity > 0 && <ArrowRight size={17} />}
                             </button>
                           </div>
                         </div>
@@ -882,15 +762,9 @@ function VehiclesPage() {
 
                   <h3>No vehicles found</h3>
 
-                  <p>
-                    Try changing your search or vehicle
-                    filters.
-                  </p>
+                  <p>Try changing your search or vehicle filters.</p>
 
-                  <button
-                    type="button"
-                    onClick={resetFilters}
-                  >
+                  <button type="button" onClick={resetFilters}>
                     <RotateCcw size={17} />
                     Clear All Filters
                   </button>

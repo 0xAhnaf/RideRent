@@ -27,16 +27,10 @@ function HeroSection() {
   return (
     <>
       <section className="hero-section">
-        <img
-          className="hero-background"
-          src={heroBackground}
-          alt=""
-        />
+        <img className="hero-background" src={heroBackground} alt="" />
 
         <div className="hero-content">
-          <p className="hero-label">
-            Reliable Car Rental Service
-          </p>
+          <p className="hero-label">Reliable Car Rental Service</p>
 
           <h1 className="hero-heading">
             Your Journey,
@@ -67,17 +61,11 @@ function HeroSection() {
             </button>
           </div>
 
-          <div className="hero-trust-list">
-            {/* Existing trust items */}
-          </div>
+          <div className="hero-trust-list">{/* Existing trust items */}</div>
         </div>
 
         <div className="hero-visual">
-          <img
-            className="hero-cars"
-            src={heroCars}
-            alt="RideRent vehicles"
-          />
+          <img className="hero-cars" src={heroCars} alt="RideRent vehicles" />
         </div>
       </section>
     </>

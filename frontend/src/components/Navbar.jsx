@@ -14,9 +14,6 @@ function Navbar() {
   const scrollToSection = (sectionId) => {
     setOpen(false);
 
-    /*
-      Landing page-এ থাকলে সরাসরি scroll করবে।
-    */
     if (location.pathname === "/") {
       const targetSection = document.getElementById(sectionId);
 
@@ -30,9 +27,6 @@ function Navbar() {
       return;
     }
 
-    /*
-      অন্য page-এ থাকলে LandingPage-এ section name পাঠাবে।
-    */
     navigate("/", {
       state: {
         scrollTo: sectionId,
@@ -43,6 +37,16 @@ function Navbar() {
   const goToVehiclesPage = () => {
     setOpen(false);
     navigate("/vehicles");
+  };
+
+  const goToLogin = () => {
+    setOpen(false);
+    navigate("/login");
+  };
+
+  const goToSignup = () => {
+    setOpen(false);
+    navigate("/signup");
   };
 
   const toggleMobileMenu = () => {
@@ -64,33 +68,20 @@ function Navbar() {
           }
         }}
       >
-        <img
-          src={logo}
-          alt="RideRent Logo"
-        />
+        <img src={logo} alt="RideRent Logo" />
       </div>
 
       {/* Menu */}
       <ul className={`nav-links ${open ? "active" : ""}`}>
-        <li onClick={() => scrollToSection("home")}>
-          Home
-        </li>
+        <li onClick={() => scrollToSection("home")}>Home</li>
 
-        <li onClick={() => scrollToSection("ambulance")}>
-          Ambulance
-        </li>
+        <li onClick={() => scrollToSection("ambulance")}>Ambulance</li>
 
-        <li onClick={goToVehiclesPage}>
-          Vehicles
-        </li>
+        <li onClick={goToVehiclesPage}>Vehicles</li>
 
-        <li onClick={() => scrollToSection("about")}>
-          About Us
-        </li>
+        <li onClick={() => scrollToSection("about")}>About Us</li>
 
-        <li onClick={() => scrollToSection("contact")}>
-          Contact
-        </li>
+        <li onClick={() => scrollToSection("contact")}>Contact</li>
       </ul>
 
       {/* Buttons */}
@@ -98,6 +89,7 @@ function Navbar() {
         <button
           type="button"
           className="login-btn"
+          onClick={goToLogin}
         >
           Login
         </button>
@@ -105,6 +97,7 @@ function Navbar() {
         <button
           type="button"
           className="signup-btn"
+          onClick={goToSignup}
         >
           Sign Up
         </button>

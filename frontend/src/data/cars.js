@@ -61,7 +61,6 @@ export const cars = [
     imageKey: "Toyota Probox",
   },
 
-
   {
     id: "toyota-noah-old",
     name: "Toyota Noah Old",

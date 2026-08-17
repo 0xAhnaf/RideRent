@@ -39,10 +39,7 @@ function LandingPage() {
     <>
       <Navbar />
 
-      <div
-        id="home"
-        className="page-section"
-      >
+      <div id="home" className="page-section">
         <HeroSection />
       </div>
 
@@ -51,37 +48,25 @@ function LandingPage() {
       </FadeIn>
 
       <FadeIn delay={0.1}>
-        <div
-          id="booking"
-          className="page-section"
-        >
+        <div id="booking" className="page-section">
           <BookingSection />
         </div>
       </FadeIn>
 
       <FadeIn delay={0.2}>
-        <div
-          id="ambulance"
-          className="page-section"
-        >
+        <div id="ambulance" className="page-section">
           <AmbulanceSection />
         </div>
       </FadeIn>
 
       <FadeIn delay={0.3}>
-        <div
-          id="about"
-          className="page-section"
-        >
+        <div id="about" className="page-section">
           <AboutSection />
         </div>
       </FadeIn>
 
       <FadeIn delay={0.4}>
-        <div
-          id="contact"
-          className="page-section"
-        >
+        <div id="contact" className="page-section">
           <ContactSection />
         </div>
       </FadeIn>
