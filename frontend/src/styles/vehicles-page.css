@@ -330,55 +330,37 @@
   box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.13);
 }
 
-.vehicles-brand-list {
-  display: grid;
-  gap: 8px;
+.vehicles-brand-dropdown {
+  width: 100%;
 }
 
-.vehicles-brand-list button {
+.vehicles-brand-dropdown select {
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   padding: 11px 12px;
-  border: 1px solid transparent;
+  border: 1px solid #dbe3ec;
   border-radius: 8px;
   background: #f8fafc;
   color: #536679;
   font-family: inherit;
   font-size: 14px;
   cursor: pointer;
+  outline: none;
   transition:
     border-color 0.25s ease,
     background 0.25s ease,
     color 0.25s ease;
 }
 
-.vehicles-brand-list button:hover {
-  border-color: rgba(212, 160, 23, 0.35);
+.vehicles-brand-dropdown select:hover {
+  border-color: rgba(212, 160, 23, 0.5);
   color: #071c32;
 }
 
-.vehicles-brand-list button.active {
-  border-color: rgba(212, 160, 23, 0.35);
-  background: rgba(212, 160, 23, 0.11);
+.vehicles-brand-dropdown select:focus {
+  border-color: #d4a017;
+  background: #ffffff;
   color: #071c32;
-  font-weight: 700;
-}
-
-.vehicles-brand-list strong {
-  min-width: 26px;
-  padding: 3px 7px;
-  border-radius: 20px;
-  background: #e9eef4;
-  color: #52677d;
-  font-size: 11px;
-  text-align: center;
-}
-
-.vehicles-brand-list button.active strong {
-  background: #d4a017;
-  color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(212, 160, 23, 0.12);
 }
 
 .vehicles-reset-button {
