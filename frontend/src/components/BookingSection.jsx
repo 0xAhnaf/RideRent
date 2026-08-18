@@ -50,7 +50,7 @@ function BookingSection() {
   // -----------------------------
 
   const formatCarPrice = (price) =>
-    `৳${Number(price).toLocaleString()}`;
+    `à§³${Number(price).toLocaleString()}`;
 
   const getCarQuantity = (car) =>
     Number(car?.quantity || 0);

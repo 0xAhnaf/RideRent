@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Car;
 use Illuminate\Database\Eloquent\Model;
 
 class Booking extends Model
@@ -22,4 +23,9 @@ class Booking extends Model
         'destination',
         'booking_status',
     ];
+
+    public function car()
+    {
+        return $this->belongsTo(Car::class, 'c_id', 'id');
+    }
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "../styles/admin-dashboard.css";
 
 const navItems = [
@@ -57,30 +57,6 @@ const stats = [
   },
 ];
 
-const bookings = [
-  {
-    id: "#BK-7829",
-    customer: "John Doe",
-    initials: "JD",
-    vehicle: "Mercedes S-Class",
-    status: "Pending",
-  },
-  {
-    id: "#BK-7828",
-    customer: "Alice Smith",
-    initials: "AS",
-    vehicle: "BMW X5",
-    status: "Active",
-  },
-  {
-    id: "#BK-7827",
-    customer: "Michael Wong",
-    initials: "MW",
-    vehicle: "Tesla Model 3",
-    status: "Completed",
-  },
-];
-
 const emergencyRequests = [
   {
     location: "Downtown Metro",
@@ -99,6 +75,38 @@ const emergencyRequests = [
 
 function AdminDashboard() {
   const [activeNav, setActiveNav] = useState("Dashboard");
+
+  // Real bookings from Laravel API
+  const [bookings, setBookings] = useState([]);
+  const [loadingBookings, setLoadingBookings] = useState(true);
+  const [bookingError, setBookingError] = useState("");
+
+  // READ: Get all bookings from Laravel
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        setLoadingBookings(true);
+        setBookingError("");
+
+        const response = await fetch("http://127.0.0.1:8000/api/bookings");
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch bookings.");
+        }
+
+        const data = await response.json();
+
+        setBookings(data);
+      } catch (error) {
+        console.error("Error fetching bookings:", error);
+        setBookingError("Unable to load bookings.");
+      } finally {
+        setLoadingBookings(false);
+      }
+    };
+
+    fetchBookings();
+  }, []);
 
   return (
     <div className="admin-layout">
@@ -155,7 +163,10 @@ function AdminDashboard() {
           </div>
 
           <div className="admin-header-right">
-            <button className="notification-button" aria-label="Notifications">
+            <button
+              className="notification-button"
+              aria-label="Notifications"
+            >
               ♢
               <span>3</span>
             </button>
@@ -219,68 +230,105 @@ function AdminDashboard() {
                 </thead>
 
                 <tbody>
-                  {bookings.map((booking) => (
-                    <tr key={booking.id}>
-                      <td className="booking-id">{booking.id}</td>
+                  {/* Loading state */}
+                  {loadingBookings && (
+                    <tr>
+                      <td colSpan="5" style={{ textAlign: "center" }}>
+                        Loading bookings...
+                      </td>
+                    </tr>
+                  )}
 
-                      <td>
-                        <div className="customer-cell">
-                          <div className="customer-avatar">
-                            {booking.initials}
+                  {/* Error state */}
+                  {!loadingBookings && bookingError && (
+                    <tr>
+                      <td colSpan="5" style={{ textAlign: "center" }}>
+                        {bookingError}
+                      </td>
+                    </tr>
+                  )}
+
+                  {/* Empty state */}
+                  {!loadingBookings &&
+                    !bookingError &&
+                    bookings.length === 0 && (
+                      <tr>
+                        <td colSpan="5" style={{ textAlign: "center" }}>
+                          No bookings found.
+                        </td>
+                      </tr>
+                    )}
+
+                  {/* Real bookings */}
+                  {!loadingBookings &&
+                    !bookingError &&
+                    bookings.map((booking) => (
+                      <tr key={booking.b_id}>
+                        <td className="booking-id">
+                          #BK-{booking.b_id}
+                        </td>
+
+                        <td>
+                          <div className="customer-cell">
+                            <div className="customer-avatar">
+                              {String(booking.u_id).slice(-2)}
+                            </div>
+
+                            <span>User #{booking.u_id}</span>
                           </div>
-                          <span>{booking.customer}</span>
-                        </div>
-                      </td>
+                        </td>
 
-                      <td>{booking.vehicle}</td>
+                        <td>
+                          {booking.car?.name || "Unknown Vehicle"}
+                        </td>
 
-                      <td>
-                        <span
-                          className={`booking-status ${booking.status.toLowerCase()}`}
-                        >
-                          {booking.status}
-                        </span>
-                      </td>
+                        <td>
+                          <span
+                            className={`booking-status ${booking.booking_status.toLowerCase()}`}
+                          >
+                            {booking.booking_status}
+                          </span>
+                        </td>
 
-                      <td>
-                        <div className="table-actions">
-                          {booking.status === "Pending" && (
-                            <>
+                        <td>
+                          <div className="table-actions">
+                            {booking.booking_status === "Pending" && (
+                              <>
+                                <button
+                                  className="action-button approve"
+                                  title="Approve"
+                                >
+                                  ✓
+                                </button>
+
+                                <button
+                                  className="action-button reject"
+                                  title="Reject"
+                                >
+                                  ×
+                                </button>
+                              </>
+                            )}
+
+                            <button
+                              className="action-button"
+                              title="View"
+                            >
+                              ◉
+                            </button>
+
+                            {booking.booking_status === "Confirmed" && (
                               <button
-                                className="action-button approve"
-                                title="Approve"
-                              >
-                                ✓
-                              </button>
-
-                              <button
-                                className="action-button reject"
-                                title="Reject"
+                                className="action-button delete"
+                                title="Delete"
                               >
                                 ×
                               </button>
-                            </>
-                          )}
-
-                          <button
-                            className="action-button"
-                            title="View"
-                          >
-                            ◉
-                          </button>
-
-                          {booking.status === "Active" && (
-                            <button
-                              className="action-button delete"
-                              title="Delete"
-                            >
-                              ×
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
@@ -339,7 +387,10 @@ function AdminDashboard() {
                   <span style={{ height: "60%" }} />
                   <span style={{ height: "30%" }} />
                   <span style={{ height: "80%" }} />
-                  <span className="highlight" style={{ height: "95%" }} />
+                  <span
+                    className="highlight"
+                    style={{ height: "95%" }}
+                  />
                 </div>
 
                 <p>Chart Data Loading...</p>

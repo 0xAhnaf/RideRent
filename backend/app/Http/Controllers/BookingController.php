@@ -47,7 +47,7 @@ class BookingController extends Controller
 
     public function index()
     {
-        return Booking::all();
+        return Booking::with('car')->get();
     }
 
     public function show($id)
