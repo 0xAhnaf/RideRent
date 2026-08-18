@@ -5,7 +5,7 @@ import VehiclesPage from "./pages/VehiclesPage";
 import LoginPage from "./pages/AuthPages/LoginPage";
 import SignUpPage from "./pages/AuthPages/SignUpPage";
 import AdminDashboard from "./pages/AdminDashboard";
-
+import AdminVehiclesPage from "./pages/AdminVehiclesPage";
 function App() {
   return (
     <BrowserRouter>
@@ -18,7 +18,7 @@ function App() {
         <Route path="/signup" element={<SignUpPage />} />
 
         <Route path="/admin" element={<AdminDashboard />} />
-
+        <Route path="/admin-vehicle" element={<AdminVehiclesPage />} />
         {/* Invalid URL → Home page */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
