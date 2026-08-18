@@ -42,6 +42,12 @@ function BookingSection() {
   const [success, setSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const minTripDatetime = new Date(
+    Date.now() - new Date().getTimezoneOffset() * 60000,
+  )
+    .toISOString()
+    .slice(0, 16);
+
   const allDistricts = Object.values(locations).flatMap((division) =>
     Object.keys(division),
   );
@@ -134,6 +140,11 @@ function BookingSection() {
       return;
     }
 
+    if (tripDatetime < minTripDatetime) {
+      setError("Please select a current or future trip date and time.");
+      return;
+    }
+
     // -----------------------------
     // CONSTRUCT DATABASE VALUES
     // -----------------------------
@@ -204,6 +215,21 @@ function BookingSection() {
       }
 
       setSuccess("Your booking has been saved successfully!");
+
+      setPickupDistrict("");
+      setPickupThana("");
+      setPickupThanas([]);
+      setPickupAddress("");
+
+      setDestinationDistrict("");
+      setDestinationThana("");
+      setDestinationThanas([]);
+      setDestinationAddress("");
+
+      setSelectedCar("");
+      setTripType("One Way");
+      setTripDatetime("");
+      setTripDuration("1 Day");
 
       console.log("Booking saved:", data);
     } catch (error) {
@@ -452,6 +478,7 @@ function BookingSection() {
             <input
               id="trip-date-time"
               type="datetime-local"
+              min={minTripDatetime}
               value={tripDatetime}
               onChange={(event) =>
                 setTripDatetime(event.target.value)
