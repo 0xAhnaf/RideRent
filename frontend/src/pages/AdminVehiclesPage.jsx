@@ -13,7 +13,6 @@ function AdminVehiclesPage() {
     status: "available",
   });
 
-  // Placeholder mock data to visually demonstrate the layout
   const [cars, setCars] = useState([
     {
       id: 1,
@@ -46,7 +45,7 @@ function AdminVehiclesPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Front-end state addition (Placeholder logic)
+
     const newCar = {
       ...formData,
       id: Date.now(),
@@ -54,9 +53,9 @@ function AdminVehiclesPage() {
       quantity: Number(formData.quantity),
       price: Number(formData.price),
     };
+
     setCars([newCar, ...cars]);
 
-    // Reset Form
     setFormData({
       name: "",
       brand: "",
@@ -70,20 +69,20 @@ function AdminVehiclesPage() {
   };
 
   return (
-    <div className="admin-vehicles-container">
-      <header className="admin-header">
+    <div className="admin-vehicle-container">
+      <header className="admin-vehicle-header">
         <h1>Admin Vehicle Management</h1>
       </header>
 
-      <main className="admin-main-content">
+      <main className="admin-vehicle-main-content">
         {/* TOP CARD: ADD A CAR FORM */}
-        <section className="add-car-card">
-          <div className="card-header">
+        <section className="admin-vehicle-add-car-card">
+          <div className="admin-vehicle-card-header">
             <h2>Add New Vehicle</h2>
           </div>
 
-          <form onSubmit={handleSubmit} className="add-car-form">
-            <div className="form-group">
+          <form onSubmit={handleSubmit} className="admin-vehicle-add-car-form">
+            <div className="admin-vehicle-form-group">
               <label htmlFor="name">Vehicle Name</label>
               <input
                 id="name"
@@ -96,7 +95,7 @@ function AdminVehiclesPage() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="admin-vehicle-form-group">
               <label htmlFor="brand">Brand</label>
               <input
                 id="brand"
@@ -109,7 +108,7 @@ function AdminVehiclesPage() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="admin-vehicle-form-group">
               <label htmlFor="category">Category</label>
               <select
                 id="category"
@@ -128,7 +127,7 @@ function AdminVehiclesPage() {
               </select>
             </div>
 
-            <div className="form-group">
+            <div className="admin-vehicle-form-group">
               <label htmlFor="seats">Seats</label>
               <input
                 id="seats"
@@ -141,7 +140,7 @@ function AdminVehiclesPage() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="admin-vehicle-form-group">
               <label htmlFor="quantity">Quantity</label>
               <input
                 id="quantity"
@@ -154,7 +153,7 @@ function AdminVehiclesPage() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="admin-vehicle-form-group">
               <label htmlFor="price">Price / Day (৳)</label>
               <input
                 id="price"
@@ -168,7 +167,7 @@ function AdminVehiclesPage() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="admin-vehicle-form-group">
               <label htmlFor="image_key">Image Key</label>
               <input
                 id="image_key"
@@ -180,7 +179,7 @@ function AdminVehiclesPage() {
               />
             </div>
 
-            <div className="form-group">
+            <div className="admin-vehicle-form-group">
               <label htmlFor="status">Status</label>
               <select
                 id="status"
@@ -193,8 +192,8 @@ function AdminVehiclesPage() {
               </select>
             </div>
 
-            <div className="form-actions">
-              <button type="submit" className="submit-btn">
+            <div className="admin-vehicle-form-actions">
+              <button type="submit" className="admin-vehicle-submit-btn">
                 Add Vehicle
               </button>
             </div>
@@ -202,37 +201,42 @@ function AdminVehiclesPage() {
         </section>
 
         {/* BOTTOM SECTION: LIST OF CARS */}
-        <section className="existing-cars-section">
-          <div className="section-title">
+        <section className="admin-vehicle-existing-cars-section">
+          <div className="admin-vehicle-section-title">
             <h2>Vehicles in System ({cars.length})</h2>
           </div>
 
-          <div className="cars-grid">
+          <div className="admin-vehicle-cars-grid">
             {cars.map((car) => (
-              <article key={car.id} className="car-card">
-                <div className="car-card-header">
+              <article key={car.id} className="admin-vehicle-car-card">
+                <div className="admin-vehicle-car-card-header">
                   <h3>{car.name}</h3>
-                  <span className={`status-badge ${car.status}`}>
+
+                  <span className={`admin-vehicle-status-badge ${car.status}`}>
                     {car.status}
                   </span>
                 </div>
 
-                <p className="car-brand">{car.brand}</p>
+                <p className="admin-vehicle-car-brand">{car.brand}</p>
 
-                <div className="car-details">
+                <div className="admin-vehicle-car-details">
                   <p>
                     <strong>Category:</strong> {car.category}
                   </p>
+
                   <p>
                     <strong>Seats:</strong> {car.seats} Seats
                   </p>
+
                   <p>
                     <strong>Quantity:</strong> {car.quantity} Available
                   </p>
+
                   <p>
                     <strong>Price:</strong> ৳
                     {Number(car.price).toLocaleString()} / day
                   </p>
+
                   {car.image_key && (
                     <p>
                       <strong>Image Key:</strong> {car.image_key}
