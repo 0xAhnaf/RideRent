@@ -1,8 +1,9 @@
 <?php
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CarController;
 use App\Http\Controllers\BookingController;
+Route::get('/cars', [CarController::class, 'index']);
 
 Route::post('/bookings', [BookingController::class, 'store']);
 
