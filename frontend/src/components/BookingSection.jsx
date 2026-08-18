@@ -129,9 +129,7 @@ function BookingSection() {
     }
 
     if (getCarQuantity(selectedCarData) < 1) {
-      setError(
-        "This car is currently unavailable. Please select another car.",
-      );
+      setError("This car is currently unavailable. Please select another car.");
       return;
     }
 
@@ -160,13 +158,13 @@ function BookingSection() {
      * this should come from the logged-in user's ID.
      */
     const bookingData = {
-       u_id: 1,
-       car_name: selectedCarData.name,
-       trip_type: tripType,
-       trip_datetime: tripDatetime,
-       trip_duration: tripDuration,
-       pickup: pickup,
-       destination: destination,
+      u_id: 1,
+      car_name: selectedCarData.name,
+      trip_type: tripType,
+      trip_datetime: tripDatetime,
+      trip_duration: tripDuration,
+      pickup: pickup,
+      destination: destination,
     };
 
     console.log("Sending booking:", bookingData);
@@ -178,19 +176,16 @@ function BookingSection() {
     try {
       setIsSubmitting(true);
 
-      const response = await fetch(
-        "http://127.0.0.1:8000/api/bookings",
-        {
-          method: "POST",
+      const response = await fetch("http://127.0.0.1:8000/api/bookings", {
+        method: "POST",
 
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-
-          body: JSON.stringify(bookingData),
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
-      );
+
+        body: JSON.stringify(bookingData),
+      });
 
       const responseText = await response.text();
 
@@ -209,12 +204,15 @@ function BookingSection() {
 
       if (!response.ok) {
         throw new Error(
-          data.message ||
-            `Laravel returned HTTP ${response.status}`,
+          data.message || `Laravel returned HTTP ${response.status}`,
         );
       }
 
       setSuccess("Your booking has been saved successfully!");
+
+      // -----------------------------
+      // RESET FORM AFTER SUCCESS
+      // -----------------------------
 
       setPickupDistrict("");
       setPickupThana("");
@@ -236,8 +234,7 @@ function BookingSection() {
       console.error("Booking error:", error);
 
       setError(
-        error.message ||
-          "Unable to save your booking. Please try again.",
+        error.message || "Unable to save your booking. Please try again.",
       );
     } finally {
       setIsSubmitting(false);
@@ -250,7 +247,6 @@ function BookingSection() {
         <h2>Book Your Trip</h2>
 
         <div className="booking-form">
-
           {/* PICKUP DISTRICT */}
           <div className="form-group">
             <label htmlFor="pickup-district">
@@ -289,9 +285,7 @@ function BookingSection() {
             <select
               id="pickup-thana"
               value={pickupThana}
-              onChange={(event) =>
-                setPickupThana(event.target.value)
-              }
+              onChange={(event) => setPickupThana(event.target.value)}
             >
               <option value="">Select Thana</option>
 
@@ -314,9 +308,7 @@ function BookingSection() {
               id="pickup-address"
               type="text"
               value={pickupAddress}
-              onChange={(event) =>
-                setPickupAddress(event.target.value)
-              }
+              onChange={(event) => setPickupAddress(event.target.value)}
             />
           </div>
 
@@ -358,9 +350,7 @@ function BookingSection() {
             <select
               id="destination-thana"
               value={destinationThana}
-              onChange={(event) =>
-                setDestinationThana(event.target.value)
-              }
+              onChange={(event) => setDestinationThana(event.target.value)}
             >
               <option value="">Select Thana</option>
 
@@ -383,9 +373,7 @@ function BookingSection() {
               id="destination-address"
               type="text"
               value={destinationAddress}
-              onChange={(event) =>
-                setDestinationAddress(event.target.value)
-              }
+              onChange={(event) => setDestinationAddress(event.target.value)}
             />
           </div>
 
@@ -412,17 +400,11 @@ function BookingSection() {
                 const quantity = getCarQuantity(car);
 
                 return (
-                  <option
-                    key={car.id}
-                    value={car.name}
-                    disabled={quantity < 1}
-                  >
+                  <option key={car.id} value={car.name} disabled={quantity < 1}>
                     {car.name} - {car.seats} Seat -{" "}
-                    {formatCarPrice(
-                      getCarStartingPrice(car),
-                    )}
-                    /day - {quantity}{" "}
-                    {quantity === 1 ? "Car" : "Cars"} Available
+                    {formatCarPrice(getCarStartingPrice(car))}
+                    /day - {quantity} {quantity === 1 ? "Car" : "Cars"}{" "}
+                    Available
                   </option>
                 );
               })}
@@ -431,9 +413,7 @@ function BookingSection() {
             {selectedCarData && (
               <p
                 className={`booking-availability-message ${
-                  getCarQuantity(selectedCarData) === 1
-                    ? "is-limited"
-                    : ""
+                  getCarQuantity(selectedCarData) === 1 ? "is-limited" : ""
                 }`}
               >
                 {getCarQuantity(selectedCarData) === 1
@@ -459,9 +439,7 @@ function BookingSection() {
             <select
               id="trip-type"
               value={tripType}
-              onChange={(event) =>
-                setTripType(event.target.value)
-              }
+              onChange={(event) => setTripType(event.target.value)}
             >
               <option value="One Way">One Way</option>
               <option value="Round Trip">Round Trip</option>
@@ -480,9 +458,30 @@ function BookingSection() {
               type="datetime-local"
               min={minTripDatetime}
               value={tripDatetime}
-              onChange={(event) =>
-                setTripDatetime(event.target.value)
-              }
+              onPointerDown={(event) => {
+                if (event.pointerType === "mouse" && event.button !== 0) {
+                  return;
+                }
+
+                try {
+                  if (typeof event.currentTarget.showPicker === "function") {
+                    event.currentTarget.showPicker();
+                  }
+                } catch {
+                  // Native browser fallback
+                }
+              }}
+              onChange={(event) => {
+                const input = event.currentTarget;
+
+                setTripDatetime(input.value);
+
+                if (input.value) {
+                  setTimeout(() => {
+                    input.blur();
+                  }, 0);
+                }
+              }}
             />
           </div>
 
@@ -496,30 +495,22 @@ function BookingSection() {
             <select
               id="trip-duration"
               value={tripDuration}
-              onChange={(event) =>
-                setTripDuration(event.target.value)
-              }
+              onChange={(event) => setTripDuration(event.target.value)}
             >
               <option value="1 Day">1 Day</option>
               <option value="2 Days">2 Days</option>
               <option value="3 Days">3 Days</option>
-              <option value="More Than 3 Days">
-                More Than 3 Days
-              </option>
+              <option value="4 Days">4 Days</option>
+              <option value="5 Days">5 Days</option>
+              <option value="6 Days">6 Days</option>
+              <option value="7 Days">7 Days</option>
+              <option value="More Than 7 Days">More Than 7 Days</option>
             </select>
           </div>
 
-          {error && (
-            <p className="booking-error">
-              {error}
-            </p>
-          )}
+          {error && <p className="booking-error">{error}</p>}
 
-          {success && (
-            <p className="booking-success">
-              {success}
-            </p>
-          )}
+          {success && <p className="booking-success">{success}</p>}
 
           <button
             type="button"
@@ -529,7 +520,6 @@ function BookingSection() {
           >
             {isSubmitting ? "SAVING..." : "FIND RENT"}
           </button>
-
         </div>
       </div>
     </section>
