@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Check,Flag,Trash2 } from "lucide-react";
 import "../styles/admin-dashboard.css";
 
 const navItems = [
@@ -107,6 +108,32 @@ function AdminDashboard() {
 
     fetchBookings();
   }, []);
+
+  // DELETE: Delete booking from Laravel
+  const deleteBooking = async (bookingId) => {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/bookings/${bookingId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Accept: "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete booking.");
+      }
+
+      // Remove deleted booking from React state
+      setBookings((currentBookings) =>
+        currentBookings.filter((booking) => booking.b_id !== bookingId)
+      );
+    } catch (error) {
+      console.error("Error deleting booking:", error);
+    }
+  };
 
   return (
     <div className="admin-layout">
@@ -292,39 +319,35 @@ function AdminDashboard() {
 
                         <td>
                           <div className="table-actions">
+                            {/* Pending booking actions */}
                             {booking.booking_status === "Pending" && (
                               <>
+                                {/* Confirm */}
                                 <button
                                   className="action-button approve"
-                                  title="Approve"
+                                  title="Confirm"
                                 >
-                                  ✓
+                                  <Check size={18} />
                                 </button>
 
+                                {/* Complete */}
                                 <button
                                   className="action-button reject"
-                                  title="Reject"
+                                  title="Complete"
                                 >
-                                  ×
+                                   <Flag size={18} />
                                 </button>
                               </>
                             )}
 
+                            {/* Delete */}
                             <button
-                              className="action-button"
-                              title="View"
+                              className="action-button delete"
+                              title="Delete"
+                              onClick={() => deleteBooking(booking.b_id)}
                             >
-                              ◉
+                               <Trash2 size={18} />
                             </button>
-
-                            {booking.booking_status === "Confirmed" && (
-                              <button
-                                className="action-button delete"
-                                title="Delete"
-                              >
-                                ×
-                              </button>
-                            )}
                           </div>
                         </td>
                       </tr>
