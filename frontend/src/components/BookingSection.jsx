@@ -3,8 +3,6 @@ import {
   Car,
   CalendarDays,
   Clock,
-  Mail,
-  Phone,
   BriefcaseBusiness,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -23,17 +21,26 @@ function BookingSection() {
   const location = useLocation();
 
   const [pickupDistrict, setPickupDistrict] = useState("");
+  const [pickupThana, setPickupThana] = useState("");
   const [pickupThanas, setPickupThanas] = useState([]);
 
+  const [pickupAddress, setPickupAddress] = useState("");
+
   const [destinationDistrict, setDestinationDistrict] = useState("");
+  const [destinationThana, setDestinationThana] = useState("");
   const [destinationThanas, setDestinationThanas] = useState([]);
 
-  const [email, setEmail] = useState("");
-  const [mobile, setMobile] = useState("");
+  const [destinationAddress, setDestinationAddress] = useState("");
+
   const [selectedCar, setSelectedCar] = useState("");
+
+  const [tripType, setTripType] = useState("One Way");
+  const [tripDatetime, setTripDatetime] = useState("");
+  const [tripDuration, setTripDuration] = useState("1 Day");
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const allDistricts = Object.values(locations).flatMap((division) =>
     Object.keys(division),
@@ -72,50 +79,143 @@ function BookingSection() {
     return thanas;
   };
 
-  const handleBooking = () => {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const handleBooking = async () => {
+    setError("");
+    setSuccess("");
 
-    const mobilePattern = /^01[3-9]\d{8}$/;
+    // -----------------------------
+    // FRONTEND VALIDATION
+    // -----------------------------
 
-    if (!email) {
-      setError("Please enter your email address");
-      setSuccess("");
+    if (!pickupDistrict) {
+      setError("Please select your pick-up district.");
       return;
     }
 
-    if (!emailPattern.test(email)) {
-      setError("Please enter a valid email address");
-      setSuccess("");
+    if (!pickupThana) {
+      setError("Please select your pick-up thana.");
       return;
     }
 
-    if (!mobile) {
-      setError("Please enter your mobile number");
-      setSuccess("");
+    if (!pickupAddress.trim()) {
+      setError("Please enter your pick-up address.");
       return;
     }
 
-    if (!mobilePattern.test(mobile)) {
-      setError("Please enter a valid Bangladesh mobile number");
-      setSuccess("");
+    if (!destinationDistrict) {
+      setError("Please select your destination district.");
+      return;
+    }
+
+    if (!destinationThana) {
+      setError("Please select your destination thana.");
+      return;
+    }
+
+    if (!destinationAddress.trim()) {
+      setError("Please enter your destination address.");
       return;
     }
 
     if (!selectedCarData) {
-      setError("Please select a car");
-      setSuccess("");
+      setError("Please select a car.");
       return;
     }
 
     if (getCarQuantity(selectedCarData) < 1) {
-      setError("This car is currently unavailable. Please select another car.");
-      setSuccess("");
+      setError(
+        "This car is currently unavailable. Please select another car.",
+      );
       return;
     }
 
-    setError("");
+    if (!tripDatetime) {
+      setError("Please select the trip date and time.");
+      return;
+    }
 
-    setSuccess("Your booking request has been submitted successfully!");
+    // -----------------------------
+    // CONSTRUCT DATABASE VALUES
+    // -----------------------------
+
+    const pickup = `${pickupAddress.trim()},${pickupThana},${pickupDistrict}`;
+
+    const destination = `${destinationAddress.trim()},${destinationThana},${destinationDistrict}`;
+
+    /*
+     * For now, u_id = 1 is being used as a test user.
+     *
+     * Once your authentication/user system is connected,
+     * this should come from the logged-in user's ID.
+     */
+    const bookingData = {
+       u_id: 1,
+       car_name: selectedCarData.name,
+       trip_type: tripType,
+       trip_datetime: tripDatetime,
+       trip_duration: tripDuration,
+       pickup: pickup,
+       destination: destination,
+    };
+
+    console.log("Sending booking:", bookingData);
+
+    // -----------------------------
+    // SEND TO LARAVEL
+    // -----------------------------
+
+    try {
+      setIsSubmitting(true);
+
+      const response = await fetch(
+        "http://127.0.0.1:8000/api/bookings",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+
+          body: JSON.stringify(bookingData),
+        },
+      );
+
+      const responseText = await response.text();
+
+      console.log("Laravel status:", response.status);
+      console.log("Laravel response:", responseText);
+
+      let data;
+
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        data = {
+          message: responseText,
+        };
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            `Laravel returned HTTP ${response.status}`,
+        );
+      }
+
+      setSuccess("Your booking has been saved successfully!");
+
+      console.log("Booking saved:", data);
+    } catch (error) {
+      console.error("Booking error:", error);
+
+      setError(
+        error.message ||
+          "Unable to save your booking. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -124,6 +224,8 @@ function BookingSection() {
         <h2>Book Your Trip</h2>
 
         <div className="booking-form">
+
+          {/* PICKUP DISTRICT */}
           <div className="form-group">
             <label htmlFor="pickup-district">
               <MapPin size={16} />
@@ -137,7 +239,7 @@ function BookingSection() {
                 const district = event.target.value;
 
                 setPickupDistrict(district);
-
+                setPickupThana("");
                 setPickupThanas(getThanas(district));
               }}
             >
@@ -151,13 +253,20 @@ function BookingSection() {
             </select>
           </div>
 
+          {/* PICKUP THANA */}
           <div className="form-group">
             <label htmlFor="pickup-thana">
               <MapPin size={16} />
               Select Pick-Up Thana
             </label>
 
-            <select id="pickup-thana" defaultValue="">
+            <select
+              id="pickup-thana"
+              value={pickupThana}
+              onChange={(event) =>
+                setPickupThana(event.target.value)
+              }
+            >
               <option value="">Select Thana</option>
 
               {pickupThanas.map((thana) => (
@@ -168,15 +277,24 @@ function BookingSection() {
             </select>
           </div>
 
+          {/* PICKUP ADDRESS */}
           <div className="form-group">
             <label htmlFor="pickup-address">
               <MapPin size={16} />
               Write Your Pick-Up Address
             </label>
 
-            <input id="pickup-address" type="text" />
+            <input
+              id="pickup-address"
+              type="text"
+              value={pickupAddress}
+              onChange={(event) =>
+                setPickupAddress(event.target.value)
+              }
+            />
           </div>
 
+          {/* DESTINATION DISTRICT */}
           <div className="form-group">
             <label htmlFor="destination-district">
               <MapPin size={16} />
@@ -190,7 +308,7 @@ function BookingSection() {
                 const district = event.target.value;
 
                 setDestinationDistrict(district);
-
+                setDestinationThana("");
                 setDestinationThanas(getThanas(district));
               }}
             >
@@ -204,13 +322,20 @@ function BookingSection() {
             </select>
           </div>
 
+          {/* DESTINATION THANA */}
           <div className="form-group">
             <label htmlFor="destination-thana">
               <MapPin size={16} />
               Select Destination Thana
             </label>
 
-            <select id="destination-thana" defaultValue="">
+            <select
+              id="destination-thana"
+              value={destinationThana}
+              onChange={(event) =>
+                setDestinationThana(event.target.value)
+              }
+            >
               <option value="">Select Thana</option>
 
               {destinationThanas.map((thana) => (
@@ -221,15 +346,24 @@ function BookingSection() {
             </select>
           </div>
 
+          {/* DESTINATION ADDRESS */}
           <div className="form-group">
             <label htmlFor="destination-address">
               <MapPin size={16} />
               Write Your Destination Address
             </label>
 
-            <input id="destination-address" type="text" />
+            <input
+              id="destination-address"
+              type="text"
+              value={destinationAddress}
+              onChange={(event) =>
+                setDestinationAddress(event.target.value)
+              }
+            />
           </div>
 
+          {/* CAR */}
           <div className="form-group">
             <label htmlFor="booking-car">
               <Car size={16} />
@@ -252,9 +386,16 @@ function BookingSection() {
                 const quantity = getCarQuantity(car);
 
                 return (
-                  <option key={car.id} value={car.name} disabled={quantity < 1}>
+                  <option
+                    key={car.id}
+                    value={car.name}
+                    disabled={quantity < 1}
+                  >
                     {car.name} - {car.seats} Seat -{" "}
-                    {formatCarPrice(getCarStartingPrice(car))}/day - {quantity}{" "}
+                    {formatCarPrice(
+                      getCarStartingPrice(car),
+                    )}
+                    /day - {quantity}{" "}
                     {quantity === 1 ? "Car" : "Cars"} Available
                   </option>
                 );
@@ -264,7 +405,9 @@ function BookingSection() {
             {selectedCarData && (
               <p
                 className={`booking-availability-message ${
-                  getCarQuantity(selectedCarData) === 1 ? "is-limited" : ""
+                  getCarQuantity(selectedCarData) === 1
+                    ? "is-limited"
+                    : ""
                 }`}
               >
                 {getCarQuantity(selectedCarData) === 1
@@ -280,86 +423,86 @@ function BookingSection() {
             )}
           </div>
 
+          {/* TRIP TYPE */}
           <div className="form-group">
             <label htmlFor="trip-type">
               <BriefcaseBusiness size={16} />
               Trip Type
             </label>
 
-            <select id="trip-type" defaultValue="One Way">
+            <select
+              id="trip-type"
+              value={tripType}
+              onChange={(event) =>
+                setTripType(event.target.value)
+              }
+            >
               <option value="One Way">One Way</option>
-
               <option value="Round Trip">Round Trip</option>
             </select>
           </div>
 
+          {/* DATE & TIME */}
           <div className="form-group">
             <label htmlFor="trip-date-time">
               <CalendarDays size={16} />
               Trip Date &amp; Time
             </label>
 
-            <input id="trip-date-time" type="datetime-local" />
+            <input
+              id="trip-date-time"
+              type="datetime-local"
+              value={tripDatetime}
+              onChange={(event) =>
+                setTripDatetime(event.target.value)
+              }
+            />
           </div>
 
+          {/* TRIP DURATION */}
           <div className="form-group">
             <label htmlFor="trip-duration">
               <Clock size={16} />
               Trip Duration
             </label>
 
-            <select id="trip-duration" defaultValue="1 Day">
+            <select
+              id="trip-duration"
+              value={tripDuration}
+              onChange={(event) =>
+                setTripDuration(event.target.value)
+              }
+            >
               <option value="1 Day">1 Day</option>
-
               <option value="2 Days">2 Days</option>
-
               <option value="3 Days">3 Days</option>
-
-              <option value="More Than 3 Days">More Than 3 Days</option>
+              <option value="More Than 3 Days">
+                More Than 3 Days
+              </option>
             </select>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="booking-email">
-              <Mail size={16} />
-              Your Email Address (Important)
-            </label>
+          {error && (
+            <p className="booking-error">
+              {error}
+            </p>
+          )}
 
-            <input
-              id="booking-email"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="example@gmail.com"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="booking-mobile">
-              <Phone size={16} />
-              Your Mobile Number
-            </label>
-
-            <input
-              id="booking-mobile"
-              type="text"
-              value={mobile}
-              onChange={(event) => setMobile(event.target.value)}
-              placeholder="01XXXXXXXXX"
-            />
-          </div>
-
-          {error && <p className="booking-error">{error}</p>}
-
-          {success && <p className="booking-success">{success}</p>}
+          {success && (
+            <p className="booking-success">
+              {success}
+            </p>
+          )}
 
           <button
             type="button"
             className="book-now-btn"
             onClick={handleBooking}
+            disabled={isSubmitting}
           >
-            FIND RENT
+            {isSubmitting ? "SAVING..." : "FIND RENT"}
           </button>
+
         </div>
       </div>
     </section>

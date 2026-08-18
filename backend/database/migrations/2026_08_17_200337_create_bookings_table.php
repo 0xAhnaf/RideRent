@@ -16,8 +16,7 @@ return new class extends Migration
 
         // Future foreign keys — no constraints yet
             $table->unsignedBigInteger('u_id');
-            $table->unsignedBigInteger('c_id');
-
+            $table->foreignId('c_id')->constrained('cars')->cascadeOnDelete();
             $table->string('trip_type');
             $table->dateTime('trip_datetime');
             $table->string('trip_duration');
