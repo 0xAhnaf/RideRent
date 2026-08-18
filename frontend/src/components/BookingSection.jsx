@@ -617,6 +617,12 @@ function BookingSection() {
                 setTripDuration(event.target.value)
               }
             >
+              <option value="6 Hours">
+                6 Hours
+              </option>
+              <option value="12 Hours">
+                12 Hours
+              </option>
               <option value="1 Day">
                 1 Day
               </option>
