@@ -44,4 +44,14 @@ class BookingController extends Controller
             'booking' => $booking,
         ], 201);
     }
+
+    public function index()
+    {
+        return Booking::all();
+    }
+
+    public function show($id)
+    {
+        return Booking::findOrFail($id);
+    }
 }
