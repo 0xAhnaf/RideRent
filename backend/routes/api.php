@@ -10,3 +10,6 @@ Route::post('/bookings', [BookingController::class, 'store']);
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+
+Route::get('/bookings', [BookingController::class, 'index']);
+Route::get('/bookings/{id}', [BookingController::class, 'show']);
