@@ -543,29 +543,60 @@
 }
 
 .booking-status {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
 
-  padding: 5px 9px;
+  min-width: 100px;
+  padding: 7px 12px;
 
   border-radius: 999px;
 
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
+  line-height: 1;
+
+  border: 1px solid transparent;
 }
 
+.booking-status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+/* Pending */
 .booking-status.pending {
-  background: var(--admin-surface-highest);
-  color: var(--admin-text);
+  background: #fff7e6;
+  color: #b76e00;
+  border-color: #ffd98a;
 }
 
-.booking-status.active {
-  background: rgba(255, 185, 95, 0.3);
-  color: #653e00;
+.booking-status.pending::before {
+  background: #f0a500;
 }
 
+/* Confirmed */
+.booking-status.confirmed {
+  background: #eaf4ff;
+  color: #1769aa;
+  border-color: #a9d5ff;
+}
+
+.booking-status.confirmed::before {
+  background: #2389d7;
+}
+
+/* Completed */
 .booking-status.completed {
-  background: #e5eeff;
-  color: var(--admin-muted);
+  background: #eaf8f0;
+  color: #16804b;
+  border-color: #a9e5c5;
+}
+
+.booking-status.completed::before {
+  background: #21a366;
 }
 
 .table-actions {

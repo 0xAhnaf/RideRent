@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check,Flag,Trash2 } from "lucide-react";
+import { Check, Flag, Trash2 } from "lucide-react";
 import "../styles/admin-dashboard.css";
 
 const navItems = [
@@ -119,7 +119,7 @@ function AdminDashboard() {
           headers: {
             Accept: "application/json",
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -128,10 +128,49 @@ function AdminDashboard() {
 
       // Remove deleted booking from React state
       setBookings((currentBookings) =>
-        currentBookings.filter((booking) => booking.b_id !== bookingId)
+        currentBookings.filter((booking) => booking.b_id !== bookingId),
       );
     } catch (error) {
       console.error("Error deleting booking:", error);
+    }
+  };
+
+  // UPDATE: Change booking status
+  const updateBookingStatus = async (bookingId, newStatus) => {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/bookings/${bookingId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            booking_status: newStatus,
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update booking status.");
+      }
+
+      const data = await response.json();
+
+      // Update the booking in React state
+      setBookings((currentBookings) =>
+        currentBookings.map((booking) =>
+          booking.b_id === bookingId
+            ? {
+                ...booking,
+                booking_status: data.booking.booking_status,
+              }
+            : booking,
+        ),
+      );
+    } catch (error) {
+      console.error("Error updating booking status:", error);
     }
   };
 
@@ -190,12 +229,8 @@ function AdminDashboard() {
           </div>
 
           <div className="admin-header-right">
-            <button
-              className="notification-button"
-              aria-label="Notifications"
-            >
-              ♢
-              <span>3</span>
+            <button className="notification-button" aria-label="Notifications">
+              ♢<span>3</span>
             </button>
 
             <div className="admin-profile">
@@ -212,10 +247,7 @@ function AdminDashboard() {
         {/* KPI Cards */}
         <section className="stats-grid">
           {stats.map((stat) => (
-            <article
-              key={stat.title}
-              className={`stat-card ${stat.type}`}
-            >
+            <article key={stat.title} className={`stat-card ${stat.type}`}>
               <div className="stat-top">
                 <div className="stat-icon">{stat.icon}</div>
 
@@ -291,9 +323,7 @@ function AdminDashboard() {
                     !bookingError &&
                     bookings.map((booking) => (
                       <tr key={booking.b_id}>
-                        <td className="booking-id">
-                          #BK-{booking.b_id}
-                        </td>
+                        <td className="booking-id">#BK-{booking.b_id}</td>
 
                         <td>
                           <div className="customer-cell">
@@ -305,9 +335,7 @@ function AdminDashboard() {
                           </div>
                         </td>
 
-                        <td>
-                          {booking.car?.name || "Unknown Vehicle"}
-                        </td>
+                        <td>{booking.car?.name || "Unknown Vehicle"}</td>
 
                         <td>
                           <span
@@ -326,6 +354,12 @@ function AdminDashboard() {
                                 <button
                                   className="action-button approve"
                                   title="Confirm"
+                                  onClick={() =>
+                                    updateBookingStatus(
+                                      booking.b_id,
+                                      "Confirmed",
+                                    )
+                                  }
                                 >
                                   <Check size={18} />
                                 </button>
@@ -334,8 +368,14 @@ function AdminDashboard() {
                                 <button
                                   className="action-button reject"
                                   title="Complete"
+                                  onClick={() =>
+                                    updateBookingStatus(
+                                      booking.b_id,
+                                      "Completed",
+                                    )
+                                  }
                                 >
-                                   <Flag size={18} />
+                                  <Flag size={18} />
                                 </button>
                               </>
                             )}
@@ -346,7 +386,7 @@ function AdminDashboard() {
                               title="Delete"
                               onClick={() => deleteBooking(booking.b_id)}
                             >
-                               <Trash2 size={18} />
+                              <Trash2 size={18} />
                             </button>
                           </div>
                         </td>
@@ -385,9 +425,7 @@ function AdminDashboard() {
 
                     <button
                       className={
-                        request.urgent
-                          ? "dispatch-button"
-                          : "review-button"
+                        request.urgent ? "dispatch-button" : "review-button"
                       }
                     >
                       {request.urgent ? "Dispatch Now" : "Review"}
@@ -410,10 +448,7 @@ function AdminDashboard() {
                   <span style={{ height: "60%" }} />
                   <span style={{ height: "30%" }} />
                   <span style={{ height: "80%" }} />
-                  <span
-                    className="highlight"
-                    style={{ height: "95%" }}
-                  />
+                  <span className="highlight" style={{ height: "95%" }} />
                 </div>
 
                 <p>Chart Data Loading...</p>

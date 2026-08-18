@@ -13,5 +13,5 @@ Route::get('/user', function (Request $request) {
 
 Route::get('/bookings', [BookingController::class, 'index']);
 Route::get('/bookings/{id}', [BookingController::class, 'show']);
-
+Route::put('/bookings/{id}', [BookingController::class, 'update']);
 Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);

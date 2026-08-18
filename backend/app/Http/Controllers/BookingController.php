@@ -54,6 +54,27 @@ class BookingController extends Controller
     {
         return Booking::findOrFail($id);
     }
+
+    // UPDATE: Change booking status
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'booking_status' => 'required|in:Pending,Confirmed,Completed',
+        ]);
+
+        $booking = Booking::findOrFail($id);
+
+        $booking->update([
+            'booking_status' => $request->booking_status,
+        ]);
+
+        return response()->json([
+            'message' => 'Booking status updated successfully',
+            'booking' => $booking,
+        ]);
+    }
+
+    // DELETE: Delete booking
     public function destroy($id)
     {
         $booking = Booking::findOrFail($id);
@@ -61,7 +82,7 @@ class BookingController extends Controller
         $booking->delete();
 
         return response()->json([
-        'message' => 'Booking deleted successfully',
-     ]);
+            'message' => 'Booking deleted successfully',
+        ]);
     }
 }
