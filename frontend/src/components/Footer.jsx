@@ -1,57 +1,140 @@
 import { MapPin, Phone, Mail } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import "../styles/footer.css";
 
 function Footer() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const scrollToSection = (sectionId) => {
+    if (location.pathname === "/") {
+      const targetSection = document.getElementById(sectionId);
+
+      if (targetSection) {
+        targetSection.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+
+      return;
+    }
+
+    navigate("/", {
+      state: {
+        scrollTo: sectionId,
+      },
+    });
+  };
+
+  const goToVehiclesPage = () => {
+    navigate("/vehicles");
+  };
+
   return (
     <footer className="footer-section">
       <div className="footer-container">
         {/* BRAND */}
-
         <div className="footer-brand">
           <h2>RideRent</h2>
 
           <p>
             Your trusted partner for safe, comfortable and reliable journeys.
           </p>
-
-          <div className="social-icons">
-            <a href="#">f</a>
-
-            <a href="#">in</a>
-          </div>
         </div>
 
         {/* QUICK LINKS */}
-
         <div className="footer-column">
           <h3>Quick Links</h3>
 
-          <a href="#">Home</a>
+          <a
+            href="#"
+            onClick={(event) => {
+              event.preventDefault();
+              scrollToSection("home");
+            }}
+          >
+            Home
+          </a>
 
-          <a href="#">About Us</a>
+          <a
+            href="#"
+            onClick={(event) => {
+              event.preventDefault();
+              scrollToSection("about");
+            }}
+          >
+            About Us
+          </a>
 
-          <a href="#">Vehicles</a>
+          <a
+            href="#"
+            onClick={(event) => {
+              event.preventDefault();
+              goToVehiclesPage();
+            }}
+          >
+            Vehicles
+          </a>
 
-          <a href="#">Contact</a>
+          <a
+            href="#"
+            onClick={(event) => {
+              event.preventDefault();
+              scrollToSection("contact");
+            }}
+          >
+            Contact
+          </a>
         </div>
 
         {/* SERVICES */}
-
         <div className="footer-column">
           <h3>Our Services</h3>
 
-          <a href="#">Car Rental</a>
+          <a
+            href="#"
+            onClick={(event) => {
+              event.preventDefault();
+              scrollToSection("booking");
+            }}
+          >
+            Car Rental
+          </a>
 
-          <a href="#">Ambulance Service</a>
+          <a
+            href="#"
+            onClick={(event) => {
+              event.preventDefault();
+              scrollToSection("ambulance");
+            }}
+          >
+            Ambulance Service
+          </a>
 
-          <a href="#">Driver Service</a>
+          <a
+            href="#"
+            onClick={(event) => {
+              event.preventDefault();
+              scrollToSection("booking");
+            }}
+          >
+            Driver Service
+          </a>
 
-          <a href="#">Corporate Travel</a>
+          <a
+            href="#"
+            onClick={(event) => {
+              event.preventDefault();
+              scrollToSection("booking");
+            }}
+          >
+            Corporate Travel
+          </a>
         </div>
 
         {/* CONTACT */}
-
         <div className="footer-column">
           <h3>Contact</h3>
 
@@ -62,12 +145,14 @@ function Footer() {
 
           <p>
             <Phone />
-            +8801711159101
+            <a href="tel:+8801711159101">+8801711159101</a>
           </p>
 
           <p>
             <Mail />
-            support@riderent.com
+            <a href="mailto:support@riderent.com">
+              support@riderent.com
+            </a>
           </p>
         </div>
       </div>
