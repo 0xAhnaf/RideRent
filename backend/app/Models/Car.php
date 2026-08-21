@@ -14,6 +14,7 @@ class Car extends Model
         'quantity',
         'price',
         'image_key',
+        'image_data',
         'status',
     ];
 }

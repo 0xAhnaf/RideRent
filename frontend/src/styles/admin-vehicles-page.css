@@ -1,165 +1,262 @@
-/* Base Container */
+/* =================================
+   RIDERENT ADMIN VEHICLE MANAGEMENT
+================================= */
 
-.admin-vehicle-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
-  color: #1f2937;
-}
-
-.admin-vehicle-header h1 {
-  font-size: 1.875rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
-}
-
-/* Add Car Card */
-
-.admin-vehicle-add-car-card {
-  background-color: #ffffff;
-  border: 1px solid #e5e7eb;
+.admin-vehicle-add-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 22px 24px;
+  border: 1px solid #d1dfed;
+  border-left: 4px solid var(--admin-accent);
   border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 3rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 4px 20px rgba(11, 31, 58, 0.08);
 }
 
-.admin-vehicle-card-header h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  color: #111827;
+.admin-vehicle-add-copy {
+  min-width: 0;
 }
 
-.admin-vehicle-add-car-form {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.25rem;
+.admin-vehicle-section-kicker {
+  display: block;
+  margin-bottom: 5px;
+  color: #9a6500;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
 }
 
-.admin-vehicle-form-group {
+.admin-vehicle-add-copy h3,
+.admin-vehicle-list-header h3 {
+  margin: 0;
+  color: var(--admin-text);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.admin-vehicle-add-copy p,
+.admin-vehicle-list-header p {
+  margin: 6px 0 0;
+  color: var(--admin-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.admin-vehicle-primary-button {
+  min-height: 44px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 17px;
+  border: none;
+  border-radius: 8px;
+  background: var(--admin-primary-container);
+  color: #ffffff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(11, 31, 58, 0.16);
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.admin-vehicle-primary-button:hover {
+  background: #12325c;
+  transform: translateY(-1px);
+}
+
+.admin-vehicle-list-card {
+  overflow: hidden;
+}
+
+.admin-vehicle-list-header {
+  align-items: flex-start;
+}
+
+.admin-vehicle-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.admin-vehicle-table {
+  width: 100%;
+  min-width: 1050px;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.admin-vehicle-table th {
+  padding: 13px 15px;
+  border-bottom: 1px solid #dce4ef;
+  background: var(--admin-surface-low);
+  color: var(--admin-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+.admin-vehicle-table td {
+  padding: 13px 15px;
+  border-bottom: 1px solid #e2e9f2;
+  color: var(--admin-text);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.admin-vehicle-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-vehicle-table tbody tr:hover {
+  background: #f7f9fd;
+}
+
+.admin-vehicle-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.admin-vehicle-name-cell > div:last-child {
   display: flex;
   flex-direction: column;
+  gap: 3px;
 }
 
-.admin-vehicle-form-group label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  margin-bottom: 0.375rem;
-  color: #374151;
+.admin-vehicle-name-cell strong {
+  font-size: 13px;
+  font-weight: 700;
 }
 
-.admin-vehicle-form-group input,
-.admin-vehicle-form-group select {
-  padding: 0.625rem;
-  font-size: 0.875rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  background-color: #ffffff;
-  outline: none;
+.admin-vehicle-name-cell span {
+  color: #748398;
+  font-size: 10px;
 }
 
-.admin-vehicle-form-group input:focus,
-.admin-vehicle-form-group select:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+.admin-vehicle-image-shell {
+  width: 58px;
+  height: 42px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1px solid #dce4ef;
+  border-radius: 7px;
+  background: #eef3f7;
 }
 
-.admin-vehicle-form-actions {
-  grid-column: 1 / -1;
-  margin-top: 0.5rem;
+.admin-vehicle-table-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
-.admin-vehicle-submit-btn {
-  background-color: #2563eb;
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 0.875rem;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.admin-vehicle-submit-btn:hover {
-  background-color: #1d4ed8;
-}
-
-/* Cars List Section */
-
-.admin-vehicle-section-title h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  color: #111827;
-}
-
-.admin-vehicle-cars-grid {
+.admin-vehicle-image-fallback {
+  width: 100%;
+  height: 100%;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.25rem;
+  place-items: center;
+  background: var(--admin-surface-low);
+  color: var(--admin-secondary);
 }
 
-.admin-vehicle-car-card {
-  background-color: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 1.25rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.admin-vehicle-car-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.25rem;
-}
-
-.admin-vehicle-car-card-header h3 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.admin-vehicle-status-badge {
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.25rem 0.5rem;
-  border-radius: 9999px;
+.admin-vehicle-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 78px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
   text-transform: capitalize;
 }
 
-.admin-vehicle-status-badge.available {
-  background-color: #d1fae5;
-  color: #065f46;
+.admin-vehicle-status.available {
+  background: #e6f5eb;
+  color: #146c3a;
 }
 
-.admin-vehicle-status-badge.unavailable {
-  background-color: #fee2e2;
-  color: #991b1b;
+.admin-vehicle-status.unavailable {
+  background: var(--admin-danger-light);
+  color: var(--admin-danger);
 }
 
-.admin-vehicle-car-brand {
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin: 0 0 1rem 0;
+.admin-vehicle-actions-heading {
+  text-align: right;
 }
 
-.admin-vehicle-car-details {
-  font-size: 0.875rem;
+.admin-vehicle-row-actions {
   display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
+  justify-content: flex-end;
+  gap: 7px;
 }
 
-.admin-vehicle-car-details p {
-  margin: 0;
+.admin-vehicle-action-button {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 9px;
+  border: 1px solid #d7e0ea;
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--admin-text);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.admin-vehicle-action-button.edit:hover {
+  border-color: var(--admin-secondary-container);
+  background: var(--admin-surface-highest);
+}
+
+.admin-vehicle-action-button.delete:hover {
+  border-color: #efb2ac;
+  background: var(--admin-danger-light);
+  color: var(--admin-danger);
+}
+
+.admin-vehicle-state-cell {
+  height: 180px;
+  color: var(--admin-muted) !important;
+  text-align: center;
+}
+
+.admin-vehicle-error-cell {
+  color: var(--admin-danger) !important;
+}
+
+@media (max-width: 800px) {
+  .admin-vehicle-add-section {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-vehicle-add-section {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .admin-vehicle-primary-button {
+    width: 100%;
+  }
 }

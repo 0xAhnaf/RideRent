@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Check, Flag, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import "../styles/admin-dashboard.css";
 
 const navItems = [
   { label: "Dashboard", icon: "▦" },
   { label: "Manage Users", icon: "♙" },
-  { label: "Vehicles", icon: "▱" },
+  { label: "Vehicles", icon: "▱", path: "/admin/admin-vehicle" },
   { label: "Drivers", icon: "♧" },
   { label: "Bookings", icon: "▣", active: true },
   { label: "Payments", icon: "৳" },
@@ -24,7 +25,7 @@ const stats = [
   },
   {
     title: "Total Vehicles",
-    value: "1,204",
+    value: "84",
     change: "+5%",
     icon: "▱",
     type: "normal",
@@ -38,7 +39,7 @@ const stats = [
   },
   {
     title: "Available Vehicles",
-    value: "862",
+    value: "19",
     icon: "▰",
     type: "normal",
   },
@@ -75,7 +76,16 @@ const emergencyRequests = [
 ];
 
 function AdminDashboard() {
+  const navigate = useNavigate();
   const [activeNav, setActiveNav] = useState("Dashboard");
+
+  const handleNavigation = (item) => {
+    setActiveNav(item.label);
+
+    if (item.path) {
+      navigate(item.path);
+    }
+  };
 
   // Real bookings from Laravel API
   const [bookings, setBookings] = useState([]);
@@ -126,7 +136,7 @@ function AdminDashboard() {
         throw new Error("Failed to delete booking.");
       }
 
-      // Remove deleted booking from React state
+
       setBookings((currentBookings) =>
         currentBookings.filter((booking) => booking.b_id !== bookingId),
       );
@@ -158,7 +168,6 @@ function AdminDashboard() {
 
       const data = await response.json();
 
-      // Update the booking in React state
       setBookings((currentBookings) =>
         currentBookings.map((booking) =>
           booking.b_id === bookingId
@@ -198,7 +207,7 @@ function AdminDashboard() {
               className={`admin-nav-item ${
                 activeNav === item.label ? "active" : ""
               } ${item.danger ? "danger-item" : ""}`}
-              onClick={() => setActiveNav(item.label)}
+              onClick={() => handleNavigation(item)}
             >
               <span className="nav-icon">{item.icon}</span>
               <span>{item.label}</span>
@@ -347,37 +356,30 @@ function AdminDashboard() {
 
                         <td>
                           <div className="table-actions">
-                            {/* Pending booking actions */}
+                            {/* Confirm button - only for Pending */}
                             {booking.booking_status === "Pending" && (
-                              <>
-                                {/* Confirm */}
-                                <button
-                                  className="action-button approve"
-                                  title="Confirm"
-                                  onClick={() =>
-                                    updateBookingStatus(
-                                      booking.b_id,
-                                      "Confirmed",
-                                    )
-                                  }
-                                >
-                                  <Check size={18} />
-                                </button>
+                              <button
+                                className="action-button approve"
+                                title="Confirm"
+                                onClick={() =>
+                                  updateBookingStatus(booking.b_id, "Confirmed")
+                                }
+                              >
+                                <Check size={18} />
+                              </button>
+                            )}
 
-                                {/* Complete */}
-                                <button
-                                  className="action-button reject"
-                                  title="Complete"
-                                  onClick={() =>
-                                    updateBookingStatus(
-                                      booking.b_id,
-                                      "Completed",
-                                    )
-                                  }
-                                >
-                                  <Flag size={18} />
-                                </button>
-                              </>
+                            {/* Complete button - only for Confirmed */}
+                            {booking.booking_status === "Confirmed" && (
+                              <button
+                                className="action-button reject"
+                                title="Complete"
+                                onClick={() =>
+                                  updateBookingStatus(booking.b_id, "Completed")
+                                }
+                              >
+                                <Flag size={18} />
+                              </button>
                             )}
 
                             {/* Delete */}

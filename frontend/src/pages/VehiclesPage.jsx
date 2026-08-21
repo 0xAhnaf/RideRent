@@ -44,10 +44,14 @@ const carImageLookup = Object.entries(carImageModules).reduce(
   {}
 );
 
-// CHANGE 1: Fallback for database snake_case image_key
-const getCarImage = (car) => {
+const getCarImageSources = (car) => {
   const imageKey = normalizeImageKey(car.imageKey || car.image_key);
-  return carImageLookup[imageKey] || null;
+  const localImage = carImageLookup[imageKey];
+  const databaseImage = car.image_data || car.imageData || null;
+
+  // Database images are newer admin uploads. Existing vehicles continue to
+  // use the local RideRentCars image as the automatic fallback.
+  return [...new Set([databaseImage, localImage].filter(Boolean))];
 };
 
 const getAvailabilityText = (quantity) => {
@@ -60,10 +64,19 @@ const formatCarPrice = (price) => `৳${Number(price).toLocaleString()}`;
 const PRICE_STEP = 500;
 
 function VehicleImage({ car }) {
-  const [imageError, setImageError] = useState(false);
-  const imageSource = getCarImage(car);
+  const imageSources = useMemo(
+    () => getCarImageSources(car),
+    [car.image_data, car.imageData, car.imageKey, car.image_key],
+  );
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
-  if (!imageSource || imageError) {
+  useEffect(() => {
+    setActiveImageIndex(0);
+  }, [imageSources]);
+
+  const imageSource = imageSources[activeImageIndex];
+
+  if (!imageSource) {
     return (
       <div className="vehicle-image-fallback">
         <CarFront size={58} />
@@ -77,7 +90,7 @@ function VehicleImage({ car }) {
       src={imageSource}
       alt={`${car.name} available at RideRent`}
       loading="lazy"
-      onError={() => setImageError(true)}
+      onError={() => setActiveImageIndex((current) => current + 1)}
     />
   );
 }
@@ -110,6 +123,7 @@ function VehiclesPage() {
           ...car,
           price: Number(car.price),
           imageKey: car.image_key,
+          imageData: car.image_data || car.imageData || null,
         }));
 
         setCars(formattedData);

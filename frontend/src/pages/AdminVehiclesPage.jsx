@@ -1,250 +1,324 @@
-import React, { useState } from "react";
+import { CarFront, Pencil, Plus, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import "../styles/admin-dashboard.css";
 import "../styles/admin-vehicles-page.css";
 
+const navItems = [
+  { label: "Dashboard", icon: "▦", path: "/admin" },
+  { label: "Manage Users", icon: "♙" },
+  { label: "Vehicles", icon: "▱", path: "/admin/admin-vehicle" },
+  { label: "Drivers", icon: "♧" },
+  { label: "Bookings", icon: "▣" },
+  { label: "Payments", icon: "৳" },
+  { label: "Ambulance / Emergency", icon: "✚", danger: true },
+  { label: "Reviews", icon: "☆" },
+  { label: "Reports", icon: "▥" },
+];
+
+const carImageModules = import.meta.glob("../assets/RideRentCars/*", {
+  eager: true,
+  import: "default",
+});
+
+const normalizeImageKey = (value = "") =>
+  String(value)
+    .toLowerCase()
+    .replace(/\.[^/.]+$/, "")
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]/g, "");
+
+const carImageLookup = Object.entries(carImageModules).reduce(
+  (imageMap, [imagePath, imageUrl]) => {
+    const fileName =
+      imagePath
+        .split("/")
+        .pop()
+        ?.replace(/\.[^/.]+$/, "") || "";
+
+    imageMap[normalizeImageKey(fileName)] = imageUrl;
+    return imageMap;
+  },
+  {},
+);
+
+const getCarImage = (car) => {
+  const imageKey = normalizeImageKey(car.imageKey || car.image_key);
+
+  const localImage = carImageLookup[imageKey];
+
+  if (localImage) {
+    return localImage;
+  }
+
+  return car.image_data || null;
+};
+
+function AdminVehicleImage({ car }) {
+  const [imageError, setImageError] = useState(false);
+  const imageSource = getCarImage(car);
+
+  if (!imageSource || imageError) {
+    return (
+      <div className="admin-vehicle-image-fallback" aria-label="Vehicle image unavailable">
+        <CarFront size={24} />
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={imageSource}
+      alt={car.name}
+      className="admin-vehicle-table-image"
+      onError={() => setImageError(true)}
+    />
+  );
+}
+
 function AdminVehiclesPage() {
-  const [formData, setFormData] = useState({
-    name: "",
-    brand: "",
-    category: "Sedan",
-    seats: "5",
-    quantity: "1",
-    price: "",
-    image_key: "",
-    status: "available",
-  });
+  const navigate = useNavigate();
 
-  const [cars, setCars] = useState([
-    {
-      id: 1,
-      name: "Toyota Axio",
-      brand: "Toyota",
-      category: "Sedan",
-      seats: 5,
-      quantity: 5,
-      price: 3000,
-      image_key: "Toyota Axio",
-      status: "available",
-    },
-    {
-      id: 2,
-      name: "BMW X5",
-      brand: "BMW",
-      category: "Luxury Sedan",
-      seats: 5,
-      quantity: 1,
-      price: 40000,
-      image_key: "BMW X5 M",
-      status: "available",
-    },
-  ]);
+  const [cars, setCars] = useState([]);
+  const [loadingCars, setLoadingCars] = useState(true);
+  const [carsError, setCarsError] = useState("");
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  useEffect(() => {
+    const fetchCars = async () => {
+      try {
+        setLoadingCars(true);
+        setCarsError("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+        const response = await fetch("http://localhost:8000/api/cars");
 
-    const newCar = {
-      ...formData,
-      id: Date.now(),
-      seats: Number(formData.seats),
-      quantity: Number(formData.quantity),
-      price: Number(formData.price),
+        if (!response.ok) {
+          throw new Error("Failed to fetch vehicles.");
+        }
+
+        const data = await response.json();
+        setCars(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Error fetching vehicles:", error);
+        setCarsError("Unable to load vehicles right now.");
+      } finally {
+        setLoadingCars(false);
+      }
     };
 
-    setCars([newCar, ...cars]);
+    fetchCars();
+  }, []);
 
-    setFormData({
-      name: "",
-      brand: "",
-      category: "Sedan",
-      seats: "5",
-      quantity: "1",
-      price: "",
-      image_key: "",
-      status: "available",
-    });
+  const handleNavigation = (item) => {
+    if (item.path) {
+      navigate(item.path);
+    }
   };
 
   return (
-    <div className="admin-vehicle-container">
-      <header className="admin-vehicle-header">
-        <h1>Admin Vehicle Management</h1>
-      </header>
+    <div className="admin-layout">
+      <aside className="admin-sidebar">
+        <div className="admin-brand">
+          <img
+            src="/src/assets/logo_nobg.png"
+            alt="RideRent logo"
+            className="admin-logo"
+          />
 
-      <main className="admin-vehicle-main-content">
-        {/* TOP CARD: ADD A CAR FORM */}
-        <section className="admin-vehicle-add-car-card">
-          <div className="admin-vehicle-card-header">
-            <h2>Add New Vehicle</h2>
+          <div>
+            <h1>RideRent</h1>
+            <p>Admin Portal</p>
+          </div>
+        </div>
+
+        <nav className="admin-nav">
+          {navItems.map((item) => (
+            <button
+              key={item.label}
+              type="button"
+              className={`admin-nav-item ${
+                item.label === "Vehicles" ? "active" : ""
+              } ${item.danger ? "danger-item" : ""}`}
+              onClick={() => handleNavigation(item)}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        <div className="admin-sidebar-footer">
+          <button type="button" className="admin-nav-item">
+            <span className="nav-icon">?</span>
+            <span>Support</span>
+          </button>
+
+          <button type="button" className="admin-nav-item">
+            <span className="nav-icon">↪</span>
+            <span>Logout</span>
+          </button>
+        </div>
+      </aside>
+
+      <main className="admin-main">
+        <header className="admin-header">
+          <div>
+            <h2>Vehicle Management</h2>
+            <p>Manage RideRent vehicle information and fleet availability.</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="admin-vehicle-add-car-form">
-            <div className="admin-vehicle-form-group">
-              <label htmlFor="name">Vehicle Name</label>
-              <input
-                id="name"
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="e.g. Toyota Axio"
-                required
-              />
-            </div>
+          <div className="admin-header-right">
+            <div className="admin-profile">
+              <div className="admin-avatar">A</div>
 
-            <div className="admin-vehicle-form-group">
-              <label htmlFor="brand">Brand</label>
-              <input
-                id="brand"
-                type="text"
-                name="brand"
-                value={formData.brand}
-                onChange={handleChange}
-                placeholder="e.g. Toyota"
-                required
-              />
+              <div className="admin-profile-info">
+                <strong>Admin User</strong>
+                <span>System Administrator</span>
+              </div>
             </div>
+          </div>
+        </header>
 
-            <div className="admin-vehicle-form-group">
-              <label htmlFor="category">Category</label>
-              <select
-                id="category"
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-              >
-                <option value="Sedan">Sedan</option>
-                <option value="Hatchback">Hatchback</option>
-                <option value="SUV">SUV</option>
-                <option value="Premium SUV">Premium SUV</option>
-                <option value="MPV">MPV</option>
-                <option value="Microbus">Microbus</option>
-                <option value="Bus">Bus</option>
-                <option value="Luxury Sedan">Luxury Sedan</option>
-              </select>
-            </div>
+        <section className="admin-vehicle-add-section">
+          <div className="admin-vehicle-add-copy">
+            <span className="admin-vehicle-section-kicker">Fleet Setup</span>
+            <h3>Add New Vehicle</h3>
+            <p>
+              Add a new car or other supported vehicle to the RideRent fleet.
+            </p>
+          </div>
 
-            <div className="admin-vehicle-form-group">
-              <label htmlFor="seats">Seats</label>
-              <input
-                id="seats"
-                type="number"
-                name="seats"
-                min="1"
-                value={formData.seats}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="admin-vehicle-form-group">
-              <label htmlFor="quantity">Quantity</label>
-              <input
-                id="quantity"
-                type="number"
-                name="quantity"
-                min="0"
-                value={formData.quantity}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="admin-vehicle-form-group">
-              <label htmlFor="price">Price / Day (৳)</label>
-              <input
-                id="price"
-                type="number"
-                name="price"
-                min="0"
-                value={formData.price}
-                onChange={handleChange}
-                placeholder="e.g. 3000"
-                required
-              />
-            </div>
-
-            <div className="admin-vehicle-form-group">
-              <label htmlFor="image_key">Image Key</label>
-              <input
-                id="image_key"
-                type="text"
-                name="image_key"
-                value={formData.image_key}
-                onChange={handleChange}
-                placeholder="e.g. Toyota Axio"
-              />
-            </div>
-
-            <div className="admin-vehicle-form-group">
-              <label htmlFor="status">Status</label>
-              <select
-                id="status"
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-              >
-                <option value="available">Available</option>
-                <option value="unavailable">Unavailable</option>
-              </select>
-            </div>
-
-            <div className="admin-vehicle-form-actions">
-              <button type="submit" className="admin-vehicle-submit-btn">
-                Add Vehicle
-              </button>
-            </div>
-          </form>
+          <button
+            type="button"
+            className="admin-vehicle-primary-button"
+            onClick={() => navigate("/admin/add-vehicle")}
+          >
+            <Plus size={18} />
+            Add New Vehicle
+          </button>
         </section>
 
-        {/* BOTTOM SECTION: LIST OF CARS */}
-        <section className="admin-vehicle-existing-cars-section">
-          <div className="admin-vehicle-section-title">
-            <h2>Vehicles in System ({cars.length})</h2>
+        <section className="dashboard-card admin-vehicle-list-card">
+          <div className="card-header admin-vehicle-list-header">
+            <div>
+              <span className="admin-vehicle-section-kicker">Fleet Records</span>
+              <h3>Existing Vehicles</h3>
+              <p>
+                {loadingCars
+                  ? "Loading vehicle records..."
+                  : `${cars.length} vehicle model${cars.length === 1 ? "" : "s"} in the system`}
+              </p>
+            </div>
           </div>
 
-          <div className="admin-vehicle-cars-grid">
-            {cars.map((car) => (
-              <article key={car.id} className="admin-vehicle-car-card">
-                <div className="admin-vehicle-car-card-header">
-                  <h3>{car.name}</h3>
+          <div className="admin-vehicle-table-wrapper">
+            <table className="admin-vehicle-table">
+              <thead>
+                <tr>
+                  <th>Vehicle</th>
+                  <th>Brand</th>
+                  <th>Category</th>
+                  <th>Seats</th>
+                  <th>Quantity</th>
+                  <th>Price / Day</th>
+                  <th>Status</th>
+                  <th className="admin-vehicle-actions-heading">Actions</th>
+                </tr>
+              </thead>
 
-                  <span className={`admin-vehicle-status-badge ${car.status}`}>
-                    {car.status}
-                  </span>
-                </div>
+              <tbody>
+                {loadingCars && (
+                  <tr>
+                    <td colSpan="8" className="admin-vehicle-state-cell">
+                      Loading vehicles...
+                    </td>
+                  </tr>
+                )}
 
-                <p className="admin-vehicle-car-brand">{car.brand}</p>
+                {!loadingCars && carsError && (
+                  <tr>
+                    <td
+                      colSpan="8"
+                      className="admin-vehicle-state-cell admin-vehicle-error-cell"
+                    >
+                      {carsError}
+                    </td>
+                  </tr>
+                )}
 
-                <div className="admin-vehicle-car-details">
-                  <p>
-                    <strong>Category:</strong> {car.category}
-                  </p>
+                {!loadingCars && !carsError && cars.length === 0 && (
+                  <tr>
+                    <td colSpan="8" className="admin-vehicle-state-cell">
+                      No vehicles found.
+                    </td>
+                  </tr>
+                )}
 
-                  <p>
-                    <strong>Seats:</strong> {car.seats} Seats
-                  </p>
+                {!loadingCars &&
+                  !carsError &&
+                  cars.map((car) => (
+                    <tr key={car.id}>
+                      <td>
+                        <div className="admin-vehicle-name-cell">
+                          <div className="admin-vehicle-image-shell">
+                            <AdminVehicleImage car={car} />
+                          </div>
 
-                  <p>
-                    <strong>Quantity:</strong> {car.quantity} Available
-                  </p>
+                          <div>
+                            <strong>{car.name}</strong>
+                            <span>ID #{car.id}</span>
+                          </div>
+                        </div>
+                      </td>
 
-                  <p>
-                    <strong>Price:</strong> ৳
-                    {Number(car.price).toLocaleString()} / day
-                  </p>
+                      <td>{car.brand}</td>
+                      <td>{car.category}</td>
+                      <td>{car.seats}</td>
+                      <td>{car.quantity}</td>
+                      <td>৳{Number(car.price).toLocaleString()}</td>
 
-                  {car.image_key && (
-                    <p>
-                      <strong>Image Key:</strong> {car.image_key}
-                    </p>
-                  )}
-                </div>
-              </article>
-            ))}
+                      <td>
+                        <span
+                          className={`admin-vehicle-status ${
+                            car.status === "available"
+                              ? "available"
+                              : "unavailable"
+                          }`}
+                        >
+                          {car.status}
+                        </span>
+                      </td>
+
+                      <td>
+                        <div className="admin-vehicle-row-actions">
+                          <button
+                            type="button"
+                            className="admin-vehicle-action-button edit"
+                            title="Edit vehicle"
+                            aria-label={`Edit ${car.name}`}
+                            onClick={() =>
+                              navigate(`/admin/edit-vehicle/${car.id}`)
+                            }
+                          >
+                            <Pencil size={16} />
+                            <span>Edit</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className="admin-vehicle-action-button delete"
+                            title="Delete vehicle"
+                            aria-label={`Delete ${car.name}`}
+                          >
+                            <Trash2 size={16} />
+                            <span>Delete</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
           </div>
         </section>
       </main>
