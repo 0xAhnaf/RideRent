@@ -5,6 +5,8 @@ function AuthInput({
   type = "text",
   label,
   placeholder,
+  value,
+  onChange,
 }) {
   return (
     <div className="auth-input-group">
@@ -15,6 +17,8 @@ function AuthInput({
         name={id}
         type={type}
         placeholder={placeholder}
+        value={value}
+        onChange={onChange}
       />
     </div>
   );

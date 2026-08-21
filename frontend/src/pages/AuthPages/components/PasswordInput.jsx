@@ -1,11 +1,11 @@
-// src/pages/AuthPages/components/PasswordInput.jsx
-
 import { useState } from "react";
 
 function PasswordInput({
   id,
   label,
   placeholder = "••••••••",
+  value,
+  onChange,
 }) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -19,6 +19,8 @@ function PasswordInput({
           name={id}
           type={showPassword ? "text" : "password"}
           placeholder={placeholder}
+          value={value}
+          onChange={onChange}
         />
 
         <button
