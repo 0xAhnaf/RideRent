@@ -233,6 +233,34 @@
   color: var(--admin-danger);
 }
 
+.admin-vehicle-action-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+  transform: none;
+}
+
+.admin-vehicle-action-message {
+  margin: 0 18px 16px;
+  padding: 11px 13px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.admin-vehicle-action-message.success {
+  border-color: #bfe3cc;
+  background: #e6f5eb;
+  color: #146c3a;
+}
+
+.admin-vehicle-action-message.error {
+  border-color: #efb2ac;
+  background: var(--admin-danger-light);
+  color: var(--admin-danger);
+}
+
 .admin-vehicle-state-cell {
   height: 180px;
   color: var(--admin-muted) !important;
@@ -249,6 +277,127 @@
   }
 }
 
+@media (max-width: 900px) {
+  .admin-vehicle-table-wrapper {
+    box-sizing: border-box;
+    overflow: visible;
+    padding: 0 14px 16px;
+  }
+
+  .admin-vehicle-table {
+    width: 100%;
+    min-width: 0;
+    display: block;
+  }
+
+  .admin-vehicle-table thead {
+    width: 1px;
+    height: 1px;
+    position: absolute;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .admin-vehicle-table tbody {
+    width: 100%;
+    display: grid;
+    gap: 12px;
+  }
+
+  .admin-vehicle-table tbody tr:not(.admin-vehicle-state-row) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: hidden;
+    border: 1px solid #dce4ef;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 3px 12px rgba(11, 31, 58, 0.06);
+  }
+
+  .admin-vehicle-table tbody tr:not(.admin-vehicle-state-row):hover {
+    background: #ffffff;
+  }
+
+  .admin-vehicle-table tbody tr:not(.admin-vehicle-state-row) td {
+    min-width: 0;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    border-bottom: none;
+    color: var(--admin-text);
+    white-space: normal;
+  }
+
+  .admin-vehicle-table tbody tr:not(.admin-vehicle-state-row) td::before {
+    content: attr(data-label);
+    color: var(--admin-muted);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .admin-vehicle-table .admin-vehicle-main-cell {
+    grid-column: 1 / -1;
+    padding: 12px !important;
+    border-bottom: 1px solid #e2e9f2 !important;
+    background: var(--admin-surface-low);
+  }
+
+  .admin-vehicle-table .admin-vehicle-main-cell::before {
+    display: none;
+  }
+
+  .admin-vehicle-name-cell {
+    width: 100%;
+  }
+
+  .admin-vehicle-name-cell > div:last-child {
+    min-width: 0;
+  }
+
+  .admin-vehicle-name-cell strong {
+    overflow-wrap: anywhere;
+  }
+
+  .admin-vehicle-table .admin-vehicle-actions-cell {
+    grid-column: 1 / -1;
+    padding-top: 12px !important;
+    border-top: 1px solid #e2e9f2 !important;
+  }
+
+  .admin-vehicle-row-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .admin-vehicle-action-button {
+    min-height: 38px;
+    flex: 1;
+  }
+
+  .admin-vehicle-state-row {
+    display: block;
+  }
+
+  .admin-vehicle-state-row .admin-vehicle-state-cell {
+    width: 100%;
+    min-height: 150px;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    border: 1px solid #dce4ef;
+    border-radius: 10px;
+    background: #ffffff;
+    white-space: normal;
+  }
+}
+
 @media (max-width: 600px) {
   .admin-vehicle-add-section {
     align-items: stretch;
@@ -258,5 +407,33 @@
 
   .admin-vehicle-primary-button {
     width: 100%;
+  }
+
+  .admin-vehicle-list-header {
+    padding: 16px;
+  }
+
+  .admin-vehicle-table-wrapper {
+    padding: 0 10px 12px;
+  }
+
+  .admin-vehicle-action-message {
+    margin: 0 10px 12px;
+  }
+
+  .admin-vehicle-image-shell {
+    width: 64px;
+    height: 46px;
+  }
+}
+
+@media (max-width: 340px) {
+  .admin-vehicle-table tbody tr:not(.admin-vehicle-state-row) {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-vehicle-table .admin-vehicle-main-cell,
+  .admin-vehicle-table .admin-vehicle-actions-cell {
+    grid-column: 1;
   }
 }

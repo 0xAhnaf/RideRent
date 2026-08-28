@@ -183,4 +183,44 @@ class CarController extends Controller
             ], 500);
         }
     }
+
+    public function destroy($id)
+    {
+        $vehicle = Car::find($id);
+
+        if (!$vehicle) {
+            return response()->json([
+                'message' => 'Vehicle not found.',
+            ], 404);
+        }
+
+        $imagePath = $vehicle->image_path;
+
+        try {
+            DB::transaction(function () use ($vehicle) {
+                if (!$vehicle->delete()) {
+                    throw new \RuntimeException('The vehicle record could not be deleted.');
+                }
+            });
+        } catch (Throwable $error) {
+            report($error);
+
+            return response()->json([
+                'message' => 'Unable to delete the vehicle.',
+                'error' => $error->getMessage(),
+            ], 500);
+        }
+
+        if ($imagePath) {
+            try {
+                Storage::disk('public')->delete($imagePath);
+            } catch (Throwable $error) {
+                report($error);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Vehicle deleted successfully.',
+        ]);
+    }
 }

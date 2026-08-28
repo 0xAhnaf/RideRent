@@ -49,6 +49,8 @@ function AdminVehiclesPage() {
   const [cars, setCars] = useState([]);
   const [loadingCars, setLoadingCars] = useState(true);
   const [carsError, setCarsError] = useState("");
+  const [deletingCarId, setDeletingCarId] = useState(null);
+  const [vehicleActionMessage, setVehicleActionMessage] = useState(null);
 
   useEffect(() => {
     const fetchCars = async () => {
@@ -78,6 +80,55 @@ function AdminVehiclesPage() {
   const handleNavigation = (item) => {
     if (item.path) {
       navigate(item.path);
+    }
+  };
+
+  const handleDeleteVehicle = async (car) => {
+    const confirmed = window.confirm(
+      `Delete ${car.name}? This will permanently remove the vehicle and its stored image.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setDeletingCarId(car.id);
+      setVehicleActionMessage(null);
+
+      const response = await fetch(
+        `http://localhost:8000/api/cars/${car.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Accept: "application/json",
+          },
+        },
+      );
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          result.message || "Unable to delete the vehicle.",
+        );
+      }
+
+      setCars((currentCars) =>
+        currentCars.filter((currentCar) => currentCar.id !== car.id),
+      );
+      setVehicleActionMessage({
+        type: "success",
+        text: result.message || `${car.name} was deleted successfully.`,
+      });
+    } catch (error) {
+      console.error("Error deleting vehicle:", error);
+      setVehicleActionMessage({
+        type: "error",
+        text: error.message || "Unable to delete the vehicle.",
+      });
+    } finally {
+      setDeletingCarId(null);
     }
   };
 
@@ -177,6 +228,18 @@ function AdminVehiclesPage() {
             </div>
           </div>
 
+          {vehicleActionMessage && (
+            <div
+              className={`admin-vehicle-action-message ${vehicleActionMessage.type}`}
+              role={
+                vehicleActionMessage.type === "error" ? "alert" : "status"
+              }
+              aria-live="polite"
+            >
+              {vehicleActionMessage.text}
+            </div>
+          )}
+
           <div className="admin-vehicle-table-wrapper">
             <table className="admin-vehicle-table">
               <thead>
@@ -194,7 +257,7 @@ function AdminVehiclesPage() {
 
               <tbody>
                 {loadingCars && (
-                  <tr>
+                  <tr className="admin-vehicle-state-row">
                     <td colSpan="8" className="admin-vehicle-state-cell">
                       Loading vehicles...
                     </td>
@@ -202,7 +265,7 @@ function AdminVehiclesPage() {
                 )}
 
                 {!loadingCars && carsError && (
-                  <tr>
+                  <tr className="admin-vehicle-state-row">
                     <td
                       colSpan="8"
                       className="admin-vehicle-state-cell admin-vehicle-error-cell"
@@ -213,7 +276,7 @@ function AdminVehiclesPage() {
                 )}
 
                 {!loadingCars && !carsError && cars.length === 0 && (
-                  <tr>
+                  <tr className="admin-vehicle-state-row">
                     <td colSpan="8" className="admin-vehicle-state-cell">
                       No vehicles found.
                     </td>
@@ -224,7 +287,7 @@ function AdminVehiclesPage() {
                   !carsError &&
                   cars.map((car) => (
                     <tr key={car.id}>
-                      <td>
+                      <td data-label="Vehicle" className="admin-vehicle-main-cell">
                         <div className="admin-vehicle-name-cell">
                           <div className="admin-vehicle-image-shell">
                             <AdminVehicleImage car={car} />
@@ -237,13 +300,15 @@ function AdminVehiclesPage() {
                         </div>
                       </td>
 
-                      <td>{car.brand}</td>
-                      <td>{car.category}</td>
-                      <td>{car.seats}</td>
-                      <td>{car.quantity}</td>
-                      <td>৳{Number(car.price).toLocaleString()}</td>
+                      <td data-label="Brand">{car.brand}</td>
+                      <td data-label="Category">{car.category}</td>
+                      <td data-label="Seats">{car.seats}</td>
+                      <td data-label="Quantity">{car.quantity}</td>
+                      <td data-label="Price / Day">
+                        ৳{Number(car.price).toLocaleString()}
+                      </td>
 
-                      <td>
+                      <td data-label="Status">
                         <span
                           className={`admin-vehicle-status ${
                             car.status === "available"
@@ -255,7 +320,7 @@ function AdminVehiclesPage() {
                         </span>
                       </td>
 
-                      <td>
+                      <td data-label="Actions" className="admin-vehicle-actions-cell">
                         <div className="admin-vehicle-row-actions">
                           <button
                             type="button"
@@ -275,9 +340,16 @@ function AdminVehiclesPage() {
                             className="admin-vehicle-action-button delete"
                             title="Delete vehicle"
                             aria-label={`Delete ${car.name}`}
+                            aria-busy={deletingCarId === car.id}
+                            disabled={deletingCarId !== null}
+                            onClick={() => handleDeleteVehicle(car)}
                           >
                             <Trash2 size={16} />
-                            <span>Delete</span>
+                            <span>
+                              {deletingCarId === car.id
+                                ? "Deleting..."
+                                : "Delete"}
+                            </span>
                           </button>
                         </div>
                       </td>
