@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DriverController;
+use App\Http\Controllers\PaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,6 +58,19 @@ Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);
 */
 
 Route::apiResource('drivers', DriverController::class);
+
+/*
+|--------------------------------------------------------------------------
+| Payment Routes
+|--------------------------------------------------------------------------
+|
+| These routes remain public until the admin authentication phase is added.
+|
+*/
+
+Route::get('/payments/summary', [PaymentController::class, 'summary']);
+Route::patch('/payments/{payment}/status', [PaymentController::class, 'updateStatus']);
+Route::apiResource('payments', PaymentController::class);
 
 /*
 |--------------------------------------------------------------------------

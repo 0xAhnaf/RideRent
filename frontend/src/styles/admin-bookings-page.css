@@ -163,7 +163,7 @@
 
 .admin-booking-table {
   width: 100%;
-  min-width: 1280px;
+  min-width: 1410px;
   border-collapse: collapse;
   color: var(--admin-text);
   text-align: left;
@@ -316,6 +316,75 @@
 .admin-booking-assignment-controls select:disabled {
   cursor: not-allowed;
   opacity: 0.55;
+}
+
+.admin-booking-payment-cell {
+  min-width: 130px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.admin-booking-payment-cell strong {
+  color: var(--admin-primary-container);
+  font-size: 12px;
+}
+
+.admin-booking-payment-cell small {
+  max-width: 145px;
+  overflow: hidden;
+  color: var(--admin-muted);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-booking-payment-status {
+  display: inline-flex;
+  padding: 5px 8px;
+  background: var(--admin-surface-high);
+  border: 1px solid var(--admin-secondary-container);
+  border-radius: 999px;
+  color: #2d486d;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.admin-booking-payment-status.pending {
+  background: #fff6e8;
+  border-color: var(--admin-accent-light);
+  color: #855300;
+}
+
+.admin-booking-payment-status.refunded {
+  background: var(--admin-danger-light);
+  border-color: #ffb4ab;
+  color: var(--admin-danger);
+}
+
+.admin-booking-payment-empty {
+  color: var(--admin-muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.admin-booking-payment-cell button {
+  min-height: 30px;
+  padding: 0 9px;
+  background: var(--admin-primary-container);
+  border: 1px solid var(--admin-primary-container);
+  border-radius: 6px;
+  color: white;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-booking-payment-cell button:hover {
+  background: var(--admin-primary);
 }
 
 .admin-booking-status {

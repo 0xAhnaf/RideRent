@@ -670,7 +670,7 @@ function BookingSection() {
           >
             {isSubmitting
               ? "SAVING..."
-              : "FIND RENT"}
+              : "SEND BOOKING REQUEST"}
           </button>
         </div>
       </div>

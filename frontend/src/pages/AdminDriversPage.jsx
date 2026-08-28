@@ -20,7 +20,7 @@ const navItems = [
   { label: "Vehicles", icon: "▱", path: "/admin/admin-vehicle" },
   { label: "Drivers", icon: "♧", path: "/admin/drivers" },
   { label: "Bookings", icon: "▣", path: "/admin/bookings" },
-  { label: "Payments", icon: "৳" },
+  { label: "Payments", icon: "৳", path: "/admin/payments" },
   { label: "Ambulance / Emergency", icon: "✚", danger: true },
   { label: "Reviews", icon: "☆" },
   { label: "Reports", icon: "▥" },

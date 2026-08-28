@@ -24,7 +24,7 @@ const navItems = [
   { label: "Vehicles", icon: "▱", path: "/admin/admin-vehicle" },
   { label: "Drivers", icon: "♧", path: "/admin/drivers" },
   { label: "Bookings", icon: "▣", path: "/admin/bookings" },
-  { label: "Payments", icon: "৳" },
+  { label: "Payments", icon: "৳", path: "/admin/payments" },
   { label: "Ambulance / Emergency", icon: "✚", danger: true },
   { label: "Reviews", icon: "☆" },
   { label: "Reports", icon: "▥" },
@@ -57,6 +57,12 @@ const formatTripDate = (dateValue) => {
     minute: "2-digit",
   }).format(parsedDate);
 };
+
+const formatPaymentAmount = (amount) =>
+  new Intl.NumberFormat("en-BD", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(Number(amount || 0));
 
 function AdminBookingsPage() {
   const navigate = useNavigate();
@@ -201,6 +207,8 @@ function AdminBookingsPage() {
         booking.u_id,
         booking.car?.name,
         booking.driver?.name,
+        booking.payment?.payment_status,
+        booking.payment?.transaction_reference,
         booking.pickup,
         booking.destination,
         booking.trip_type,
@@ -530,6 +538,7 @@ function AdminBookingsPage() {
                   <th>Vehicle & Trip</th>
                   <th>Route</th>
                   <th>Driver Assignment</th>
+                  <th>Payment</th>
                   <th>Status</th>
                   <th className="admin-booking-actions-heading">Actions</th>
                 </tr>
@@ -538,7 +547,7 @@ function AdminBookingsPage() {
               <tbody>
                 {loading && (
                   <tr className="admin-booking-state-row">
-                    <td colSpan="6" className="admin-booking-state-cell">
+                    <td colSpan="7" className="admin-booking-state-cell">
                       Loading bookings and drivers...
                     </td>
                   </tr>
@@ -547,7 +556,7 @@ function AdminBookingsPage() {
                 {!loading && loadError && (
                   <tr className="admin-booking-state-row">
                     <td
-                      colSpan="6"
+                      colSpan="7"
                       className="admin-booking-state-cell error"
                     >
                       {loadError}
@@ -557,7 +566,7 @@ function AdminBookingsPage() {
 
                 {!loading && !loadError && filteredBookings.length === 0 && (
                   <tr className="admin-booking-state-row">
-                    <td colSpan="6" className="admin-booking-state-cell">
+                    <td colSpan="7" className="admin-booking-state-cell">
                       {bookings.length === 0
                         ? "No bookings have been created yet."
                         : "No bookings match the current search and filter."}
@@ -648,7 +657,15 @@ function AdminBookingsPage() {
                                     )
                                   }
                                 >
-                                  <option value="">No driver</option>
+                                  <option
+                                    value=""
+                                    disabled={
+                                      booking.booking_status === "Confirmed" &&
+                                      Boolean(booking.payment)
+                                    }
+                                  >
+                                    No driver
+                                  </option>
                                   {getDriverOptions(booking).map((driver) => (
                                     <option key={driver.id} value={driver.id}>
                                       {driver.name}
@@ -673,6 +690,47 @@ function AdminBookingsPage() {
                                         : "Assign"}
                                 </button>
                               </div>
+                            )}
+                          </div>
+                        </td>
+
+                        <td data-label="Payment">
+                          <div className="admin-booking-payment-cell">
+                            {booking.payment ? (
+                              <>
+                                <span
+                                  className={`admin-booking-payment-status ${booking.payment.payment_status}`}
+                                >
+                                  {booking.payment.payment_status}
+                                </span>
+                                <strong>
+                                  ৳{formatPaymentAmount(booking.payment.amount)}
+                                </strong>
+                                <small>
+                                  {booking.payment.transaction_reference ||
+                                    "No transaction reference"}
+                                </small>
+                              </>
+                            ) : (
+                              <>
+                                <span className="admin-booking-payment-empty">
+                                  Not recorded
+                                </span>
+                                {["Confirmed", "Completed"].includes(
+                                  booking.booking_status,
+                                ) && (
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      navigate(
+                                        `/admin/payments?booking_id=${booking.b_id}`,
+                                      )
+                                    }
+                                  >
+                                    Create Payment
+                                  </button>
+                                )}
+                              </>
                             )}
                           </div>
                         </td>

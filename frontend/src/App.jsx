@@ -10,6 +10,7 @@ import AddVehiclePage from "./pages/AddVehiclePage";
 import EditVehiclePage from "./pages/EditVehiclePage";
 import AdminDriversPage from "./pages/AdminDriversPage";
 import AdminBookingsPage from "./pages/AdminBookingsPage";
+import AdminPaymentsPage from "./pages/AdminPaymentsPage";
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
         />
         <Route path="/admin/drivers" element={<AdminDriversPage />} />
         <Route path="/admin/bookings" element={<AdminBookingsPage />} />
+        <Route path="/admin/payments" element={<AdminPaymentsPage />} />
 
         {/* Keep the previous vehicle URL working */}
         <Route

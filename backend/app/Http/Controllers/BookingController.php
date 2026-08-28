@@ -46,20 +46,20 @@ class BookingController extends Controller
 
         return response()->json([
             'message' => 'Booking created successfully.',
-            'booking' => $booking->load(['car', 'driver']),
+            'booking' => $booking->load(['car', 'driver', 'payment']),
         ], 201);
     }
 
     public function index()
     {
-        return Booking::with(['car', 'driver'])
+        return Booking::with(['car', 'driver', 'payment'])
             ->orderByDesc('b_id')
             ->get();
     }
 
     public function show($id)
     {
-        return Booking::with(['car', 'driver'])->findOrFail($id);
+        return Booking::with(['car', 'driver', 'payment'])->findOrFail($id);
     }
 
     public function assignDriver(Request $request, $id)
@@ -113,7 +113,7 @@ class BookingController extends Controller
                 $this->synchronizeDriverAvailability((int) $previousDriverId);
             }
 
-            return $booking->load(['car', 'driver']);
+            return $booking->load(['car', 'driver', 'payment']);
         }, 3);
 
         return response()->json([
@@ -136,6 +136,15 @@ class BookingController extends Controller
             $previousDriverId = $booking->driver_id;
 
             if ($previousDriverId) {
+                if (
+                    $booking->booking_status === 'Confirmed'
+                    && $booking->payment()->exists()
+                ) {
+                    throw ValidationException::withMessages([
+                        'driver_id' => 'This confirmed booking has a payment record. Reassign the driver, or manage the payment before unassigning.',
+                    ]);
+                }
+
                 $booking->driver_id = null;
 
                 if ($booking->booking_status === 'Confirmed') {
@@ -146,7 +155,7 @@ class BookingController extends Controller
                 $this->synchronizeDriverAvailability((int) $previousDriverId);
             }
 
-            return $booking->load(['car', 'driver']);
+            return $booking->load(['car', 'driver', 'payment']);
         }, 3);
 
         return response()->json([
@@ -167,7 +176,7 @@ class BookingController extends Controller
             $newStatus = $validated['booking_status'];
 
             if ($currentStatus === $newStatus) {
-                return $booking->load(['car', 'driver']);
+                return $booking->load(['car', 'driver', 'payment']);
             }
 
             $allowedTransitions = [
@@ -217,6 +226,20 @@ class BookingController extends Controller
                 }
             }
 
+            if ($newStatus === 'Cancelled') {
+                $payment = $booking->payment()->lockForUpdate()->first();
+
+                if ($payment?->payment_status === 'paid') {
+                    throw ValidationException::withMessages([
+                        'booking_status' => 'Refund the paid payment before cancelling this booking.',
+                    ]);
+                }
+
+                if ($payment?->payment_status === 'pending') {
+                    $payment->delete();
+                }
+            }
+
             $booking->booking_status = $newStatus;
             $booking->save();
 
@@ -224,7 +247,7 @@ class BookingController extends Controller
                 $this->synchronizeDriverAvailability((int) $booking->driver_id);
             }
 
-            return $booking->load(['car', 'driver']);
+            return $booking->load(['car', 'driver', 'payment']);
         }, 3);
 
         return response()->json([

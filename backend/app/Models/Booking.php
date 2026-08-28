@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Car;
 use App\Models\Driver;
+use App\Models\Payment;
 use Illuminate\Database\Eloquent\Model;
 
 class Booking extends Model
@@ -34,5 +35,10 @@ class Booking extends Model
     public function driver()
     {
         return $this->belongsTo(Driver::class, 'driver_id', 'id');
+    }
+
+    public function payment()
+    {
+        return $this->hasOne(Payment::class, 'booking_id', 'b_id');
     }
 }
