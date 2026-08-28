@@ -153,9 +153,6 @@ class CarController extends Controller
 
             if ($newImagePath) {
                 $updateData['image_path'] = $newImagePath;
-
-                // Remove an old Base64 value when this record receives a file-based image.
-                $updateData['image_data'] = null;
             }
 
             DB::transaction(function () use ($vehicle, $updateData) {

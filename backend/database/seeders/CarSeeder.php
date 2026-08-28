@@ -241,7 +241,6 @@ class CarSeeder extends Seeder
             unset($car['image_file']);
 
             $car['image_path'] = $imagePath;
-            $car['image_data'] = null;
 
             Car::updateOrCreate(
                 ['name' => $car['name']],
