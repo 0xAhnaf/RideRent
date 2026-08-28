@@ -41,6 +41,8 @@ Route::delete('/cars/{id}', [CarController::class, 'destroy']);
 
 Route::post('/bookings', [BookingController::class, 'store']);
 Route::get('/bookings', [BookingController::class, 'index']);
+Route::put('/bookings/{id}/driver', [BookingController::class, 'assignDriver']);
+Route::delete('/bookings/{id}/driver', [BookingController::class, 'unassignDriver']);
 Route::get('/bookings/{id}', [BookingController::class, 'show']);
 Route::put('/bookings/{id}', [BookingController::class, 'update']);
 Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);

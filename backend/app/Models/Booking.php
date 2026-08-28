@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Car;
+use App\Models\Driver;
 use Illuminate\Database\Eloquent\Model;
 
 class Booking extends Model
@@ -16,6 +17,7 @@ class Booking extends Model
     protected $fillable = [
         'u_id',
         'c_id',
+        'driver_id',
         'trip_type',
         'trip_datetime',
         'trip_duration',
@@ -27,5 +29,10 @@ class Booking extends Model
     public function car()
     {
         return $this->belongsTo(Car::class, 'c_id', 'id');
+    }
+
+    public function driver()
+    {
+        return $this->belongsTo(Driver::class, 'driver_id', 'id');
     }
 }

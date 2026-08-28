@@ -8,7 +8,7 @@ const navItems = [
   { label: "Manage Users", icon: "♙" },
   { label: "Vehicles", icon: "▱", path: "/admin/admin-vehicle" },
   { label: "Drivers", icon: "♧", path: "/admin/drivers" },
-  { label: "Bookings", icon: "▣", active: true },
+  { label: "Bookings", icon: "▣", path: "/admin/bookings" },
   { label: "Payments", icon: "৳" },
   { label: "Ambulance / Emergency", icon: "✚", danger: true },
   { label: "Reviews", icon: "☆" },
@@ -170,12 +170,7 @@ function AdminDashboard() {
 
       setBookings((currentBookings) =>
         currentBookings.map((booking) =>
-          booking.b_id === bookingId
-            ? {
-                ...booking,
-                booking_status: data.booking.booking_status,
-              }
-            : booking,
+          booking.b_id === bookingId ? data.booking : booking,
         ),
       );
     } catch (error) {
@@ -280,7 +275,11 @@ function AdminDashboard() {
             <div className="card-header">
               <h3>Recent Bookings</h3>
 
-              <button className="view-all-button">
+              <button
+                type="button"
+                className="view-all-button"
+                onClick={() => navigate("/admin/bookings")}
+              >
                 View All <span>→</span>
               </button>
             </div>
@@ -292,6 +291,7 @@ function AdminDashboard() {
                     <th>Booking ID</th>
                     <th>Customer</th>
                     <th>Vehicle</th>
+                    <th>Driver</th>
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
@@ -301,7 +301,7 @@ function AdminDashboard() {
                   {/* Loading state */}
                   {loadingBookings && (
                     <tr>
-                      <td colSpan="5" style={{ textAlign: "center" }}>
+                      <td colSpan="6" style={{ textAlign: "center" }}>
                         Loading bookings...
                       </td>
                     </tr>
@@ -310,7 +310,7 @@ function AdminDashboard() {
                   {/* Error state */}
                   {!loadingBookings && bookingError && (
                     <tr>
-                      <td colSpan="5" style={{ textAlign: "center" }}>
+                      <td colSpan="6" style={{ textAlign: "center" }}>
                         {bookingError}
                       </td>
                     </tr>
@@ -321,7 +321,7 @@ function AdminDashboard() {
                     !bookingError &&
                     bookings.length === 0 && (
                       <tr>
-                        <td colSpan="5" style={{ textAlign: "center" }}>
+                        <td colSpan="6" style={{ textAlign: "center" }}>
                           No bookings found.
                         </td>
                       </tr>
@@ -346,6 +346,8 @@ function AdminDashboard() {
 
                         <td>{booking.car?.name || "Unknown Vehicle"}</td>
 
+                        <td>{booking.driver?.name || "Unassigned"}</td>
+
                         <td>
                           <span
                             className={`booking-status ${booking.booking_status.toLowerCase()}`}
@@ -360,7 +362,12 @@ function AdminDashboard() {
                             {booking.booking_status === "Pending" && (
                               <button
                                 className="action-button approve"
-                                title="Confirm"
+                                title={
+                                  booking.driver_id
+                                    ? "Confirm"
+                                    : "Assign a driver from the Bookings page first"
+                                }
+                                disabled={!booking.driver_id}
                                 onClick={() =>
                                   updateBookingStatus(booking.b_id, "Confirmed")
                                 }

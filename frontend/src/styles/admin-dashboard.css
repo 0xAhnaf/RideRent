@@ -599,6 +599,17 @@
   background: #21a366;
 }
 
+/* Cancelled */
+.booking-status.cancelled {
+  background: var(--admin-danger-light);
+  color: var(--admin-danger);
+  border-color: #ffb4ab;
+}
+
+.booking-status.cancelled::before {
+  background: var(--admin-danger);
+}
+
 .table-actions {
   display: flex;
   justify-content: flex-end;
@@ -628,6 +639,15 @@
 
 .action-button:hover {
   background: var(--admin-secondary-container);
+}
+
+.action-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.action-button:disabled:hover {
+  background: var(--admin-surface-highest);
 }
 
 .action-button.approve:hover {
