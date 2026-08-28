@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\DriverController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +44,17 @@ Route::get('/bookings', [BookingController::class, 'index']);
 Route::get('/bookings/{id}', [BookingController::class, 'show']);
 Route::put('/bookings/{id}', [BookingController::class, 'update']);
 Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);
+
+/*
+|--------------------------------------------------------------------------
+| Driver Routes
+|--------------------------------------------------------------------------
+|
+| These routes remain public until the admin authentication phase is added.
+|
+*/
+
+Route::apiResource('drivers', DriverController::class);
 
 /*
 |--------------------------------------------------------------------------

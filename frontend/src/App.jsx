@@ -8,6 +8,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminVehiclesPage from "./pages/AdminVehiclesPage";
 import AddVehiclePage from "./pages/AddVehiclePage";
 import EditVehiclePage from "./pages/EditVehiclePage";
+import AdminDriversPage from "./pages/AdminDriversPage";
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           path="/admin/edit-vehicle/:id"
           element={<EditVehiclePage />}
         />
+        <Route path="/admin/drivers" element={<AdminDriversPage />} />
 
         {/* Keep the previous vehicle URL working */}
         <Route
