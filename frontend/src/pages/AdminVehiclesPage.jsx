@@ -17,47 +17,13 @@ const navItems = [
   { label: "Reports", icon: "▥" },
 ];
 
-const carImageModules = import.meta.glob("../assets/RideRentCars/*", {
-  eager: true,
-  import: "default",
-});
-
-const normalizeImageKey = (value = "") =>
-  String(value)
-    .toLowerCase()
-    .replace(/\.[^/.]+$/, "")
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]/g, "");
-
-const carImageLookup = Object.entries(carImageModules).reduce(
-  (imageMap, [imagePath, imageUrl]) => {
-    const fileName =
-      imagePath
-        .split("/")
-        .pop()
-        ?.replace(/\.[^/.]+$/, "") || "";
-
-    imageMap[normalizeImageKey(fileName)] = imageUrl;
-    return imageMap;
-  },
-  {},
-);
-
-const getCarImage = (car) => {
-  const imageKey = normalizeImageKey(car.imageKey || car.image_key);
-
-  const localImage = carImageLookup[imageKey];
-
-  if (localImage) {
-    return localImage;
-  }
-
-  return car.image_data || null;
-};
-
 function AdminVehicleImage({ car }) {
   const [imageError, setImageError] = useState(false);
-  const imageSource = getCarImage(car);
+  const imageSource = car.image_url || null;
+
+  useEffect(() => {
+    setImageError(false);
+  }, [imageSource]);
 
   if (!imageSource || imageError) {
     return (

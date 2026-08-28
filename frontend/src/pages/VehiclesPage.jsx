@@ -17,43 +17,6 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import "../styles/vehicles-page.css";
 
-const carImageModules = import.meta.glob("../assets/RideRentCars/*", {
-  eager: true,
-  import: "default",
-});
-
-const normalizeImageKey = (value = "") =>
-  String(value)
-    .toLowerCase()
-    .replace(/\.[^/.]+$/, "")
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]/g, "");
-
-const carImageLookup = Object.entries(carImageModules).reduce(
-  (imageMap, [imagePath, imageUrl]) => {
-    const fileName =
-      imagePath
-        .split("/")
-        .pop()
-        ?.replace(/\.[^/.]+$/, "") || "";
-
-    imageMap[normalizeImageKey(fileName)] = imageUrl;
-
-    return imageMap;
-  },
-  {}
-);
-
-const getCarImageSources = (car) => {
-  const imageKey = normalizeImageKey(car.imageKey || car.image_key);
-  const localImage = carImageLookup[imageKey];
-  const databaseImage = car.image_data || car.imageData || null;
-
-  // Database images are newer admin uploads. Existing vehicles continue to
-  // use the local RideRentCars image as the automatic fallback.
-  return [...new Set([databaseImage, localImage].filter(Boolean))];
-};
-
 const getAvailabilityText = (quantity) => {
   if (quantity === 0) return "Not Available";
   if (quantity === 1) return "Only 1 Available";
@@ -64,19 +27,14 @@ const formatCarPrice = (price) => `৳${Number(price).toLocaleString()}`;
 const PRICE_STEP = 500;
 
 function VehicleImage({ car }) {
-  const imageSources = useMemo(
-    () => getCarImageSources(car),
-    [car.image_data, car.imageData, car.imageKey, car.image_key],
-  );
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const imageSource = car.image_url || null;
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
-    setActiveImageIndex(0);
-  }, [imageSources]);
+    setImageError(false);
+  }, [imageSource]);
 
-  const imageSource = imageSources[activeImageIndex];
-
-  if (!imageSource) {
+  if (!imageSource || imageError) {
     return (
       <div className="vehicle-image-fallback">
         <CarFront size={58} />
@@ -90,7 +48,7 @@ function VehicleImage({ car }) {
       src={imageSource}
       alt={`${car.name} available at RideRent`}
       loading="lazy"
-      onError={() => setActiveImageIndex((current) => current + 1)}
+      onError={() => setImageError(true)}
     />
   );
 }
@@ -116,14 +74,20 @@ function VehiclesPage() {
 
   // CHANGE 3: API Fetch logic from Laravel MySQL endpoint
   useEffect(() => {
-    fetch("http://localhost:8000/api/cars") // Adjust URL/port to match your backend
-      .then((res) => res.json())
+    fetch("http://127.0.0.1:8000/api/cars")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch vehicles.");
+        }
+
+        return res.json();
+      })
       .then((data) => {
-        const formattedData = data.map((car) => ({
+        const formattedData = (Array.isArray(data) ? data : []).map((car) => ({
           ...car,
           price: Number(car.price),
-          imageKey: car.image_key,
-          imageData: car.image_data || car.imageData || null,
+          quantity: Number(car.quantity),
+          seats: Number(car.seats),
         }));
 
         setCars(formattedData);

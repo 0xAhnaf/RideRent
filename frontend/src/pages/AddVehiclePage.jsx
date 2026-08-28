@@ -5,7 +5,7 @@ import {
   Image as ImageIcon,
   Upload,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import "../styles/admin-dashboard.css";
@@ -31,28 +31,14 @@ const createInitialFormData = () => ({
   seats: "",
   quantity: "",
   price: "",
-  imageKey: "",
   status: "available",
 });
 
-const getFileBaseName = (fileName = "") =>
-  fileName.replace(/\.[^/.]+$/, "").trim();
-
 const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
-
-const fileToDataUrl = (file) =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () =>
-      reject(new Error("Unable to read the selected image."));
-
-    reader.readAsDataURL(file);
-  });
 
 function AddVehiclePage() {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState(createInitialFormData);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -67,16 +53,6 @@ function AddVehiclePage() {
     formData.vehicleType === "Car" ||
     formData.vehicleType === "Others";
 
-  const selectedImageBaseName = useMemo(
-    () => getFileBaseName(selectedImage?.name || ""),
-    [selectedImage],
-  );
-
-  const imageNameMatches =
-    !selectedImage ||
-    !formData.imageKey.trim() ||
-    selectedImageBaseName === formData.imageKey.trim();
-
   useEffect(() => {
     if (!selectedImage) {
       setImagePreviewUrl("");
@@ -88,27 +64,6 @@ function AddVehiclePage() {
 
     return () => URL.revokeObjectURL(previewUrl);
   }, [selectedImage]);
-
-  useEffect(() => {
-    if (!selectedImage || !formData.imageKey.trim()) {
-      setImageMessage("");
-      return;
-    }
-
-    if (selectedImageBaseName === formData.imageKey.trim()) {
-      setImageMessage(
-        "Image filename perfectly matches the Image Key.",
-      );
-    } else {
-      setImageMessage(
-        `Image filename must be exactly "${formData.imageKey.trim()}" before the extension.`,
-      );
-    }
-  }, [
-    formData.imageKey,
-    selectedImage,
-    selectedImageBaseName,
-  ]);
 
   const handleNavigation = (item) => {
     if (item.path) {
@@ -130,6 +85,10 @@ function AddVehiclePage() {
     if (name === "vehicleType") {
       setSelectedImage(null);
       setImageMessage("");
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
@@ -170,12 +129,19 @@ function AddVehiclePage() {
     }
 
     setSelectedImage(file);
+    setImageMessage(
+      "Image is ready. RideRent will create a unique filename automatically.",
+    );
   };
 
   const resetForm = () => {
     setFormData(createInitialFormData());
     setSelectedImage(null);
     setImageMessage("");
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleSubmit = async (event) => {
@@ -195,40 +161,28 @@ function AddVehiclePage() {
       return;
     }
 
-    if (!imageNameMatches) {
-      setSubmitError(
-        "Image filename does not match the Image Key. Please rename the image and select it again.",
-      );
-      return;
-    }
-
     try {
       setSubmitting(true);
 
-      const imageBase64 = await fileToDataUrl(selectedImage);
+      const payload = new FormData();
 
-      const payload = {
-        name: formData.name.trim(),
-        brand: formData.brand.trim(),
-        category: formData.category.trim(),
-        seats: Number(formData.seats),
-        quantity: Number(formData.quantity),
-        price: Number(formData.price),
-        imageKey: formData.imageKey.trim(),
-        status: formData.status,
-        image_filename: selectedImage.name,
-        image_data: imageBase64,
-      };
+      payload.append("name", formData.name.trim());
+      payload.append("brand", formData.brand.trim());
+      payload.append("category", formData.category.trim());
+      payload.append("seats", formData.seats);
+      payload.append("quantity", formData.quantity);
+      payload.append("price", formData.price);
+      payload.append("status", formData.status);
+      payload.append("image", selectedImage);
 
       const response = await fetch(
         "http://127.0.0.1:8000/api/cars",
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
             Accept: "application/json",
           },
-          body: JSON.stringify(payload),
+          body: payload,
         },
       );
 
@@ -530,22 +484,6 @@ function AddVehiclePage() {
                   </div>
 
                   <div className="add-vehicle-field">
-                    <label htmlFor="imageKey">
-                      Image Key *
-                    </label>
-
-                    <input
-                      id="imageKey"
-                      type="text"
-                      name="imageKey"
-                      value={formData.imageKey}
-                      onChange={handleChange}
-                      placeholder="e.g. Toyota Axio"
-                      required
-                    />
-                  </div>
-
-                  <div className="add-vehicle-field">
                     <label htmlFor="status">Status *</label>
 
                     <select
@@ -573,17 +511,16 @@ function AddVehiclePage() {
 
                     <div>
                       <strong>
-                        Please rename your image before uploading.
+                        Choose a clear vehicle image.
                       </strong>
 
                       <p>
-                        Image filename MUST match the Image Key
-                        you provided.
+                        RideRent will create a unique filename and
+                        store the image in Laravel public storage.
                       </p>
 
-                      <span>Example:</span>
-                      <code>Toyota Axio.png</code>
-                      <code>BMW X5 M.png</code>
+                      <span>No manual rename is required.</span>
+                      <code>PNG, JPG, JPEG or WEBP</code>
                     </div>
                   </div>
 
@@ -608,6 +545,7 @@ function AddVehiclePage() {
                       )}
 
                       <input
+                        ref={fileInputRef}
                         id="vehicle-image"
                         type="file"
                         accept=".png,.jpg,.jpeg,.webp"
@@ -625,6 +563,10 @@ function AddVehiclePage() {
                           onClick={() => {
                             setSelectedImage(null);
                             setImageMessage("");
+
+                            if (fileInputRef.current) {
+                              fileInputRef.current.value = "";
+                            }
                           }}
                         >
                           Remove
@@ -635,12 +577,12 @@ function AddVehiclePage() {
                     {imageMessage && (
                       <div
                         className={`add-vehicle-image-message ${
-                          imageNameMatches
+                          selectedImage
                             ? "success"
                             : "error"
                         }`}
                       >
-                        {imageNameMatches ? (
+                        {selectedImage ? (
                           <CheckCircle2 size={16} />
                         ) : (
                           <AlertCircle size={16} />
@@ -651,10 +593,9 @@ function AddVehiclePage() {
                     )}
 
                     <p className="add-vehicle-runtime-note">
-                      New admin uploads are stored with the
-                      vehicle record in the database. Existing
-                      RideRentCars images still continue to work
-                      normally.
+                      The image file is stored in Laravel public
+                      storage. Only its relative path is saved in
+                      the database.
                     </p>
                   </div>
                 </div>

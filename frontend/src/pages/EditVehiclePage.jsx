@@ -5,7 +5,7 @@ import {
   Image as ImageIcon,
   Upload,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import "../styles/admin-dashboard.css";
@@ -41,60 +41,10 @@ const createInitialFormData = () => ({
   seats: "",
   quantity: "",
   price: "",
-  imageKey: "",
   status: "available",
 });
 
-const carImageModules = import.meta.glob("../assets/RideRentCars/*", {
-  eager: true,
-  import: "default",
-});
-
-const normalizeImageKey = (value = "") =>
-  String(value)
-    .toLowerCase()
-    .replace(/\.[^/.]+$/, "")
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]/g, "");
-
-const carImageLookup = Object.entries(carImageModules).reduce(
-  (imageMap, [imagePath, imageUrl]) => {
-    const fileName =
-      imagePath
-        .split("/")
-        .pop()
-        ?.replace(/\.[^/.]+$/, "") || "";
-
-    imageMap[normalizeImageKey(fileName)] = imageUrl;
-    return imageMap;
-  },
-  {},
-);
-
-const getCarImage = (car) => {
-  if (!car) {
-    return null;
-  }
-
-  const imageKey = normalizeImageKey(car.imageKey || car.image_key);
-  return carImageLookup[imageKey] || car.image_data || null;
-};
-
-const getFileBaseName = (fileName = "") =>
-  fileName.replace(/\.[^/.]+$/, "").trim();
-
 const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
-
-const fileToDataUrl = (file) =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () =>
-      reject(new Error("Unable to read the selected image."));
-
-    reader.readAsDataURL(file);
-  });
 
 function VehicleImagePreview({ source, name }) {
   const [imageError, setImageError] = useState(false);
@@ -136,20 +86,7 @@ function EditVehiclePage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const selectedImageBaseName = useMemo(
-    () => getFileBaseName(selectedImage?.name || ""),
-    [selectedImage],
-  );
-
-  const imageNameMatches =
-    !selectedImage ||
-    (Boolean(formData.imageKey.trim()) &&
-      selectedImageBaseName === formData.imageKey.trim());
-
-  const existingImageSource = useMemo(
-    () => getCarImage(vehicle),
-    [vehicle],
-  );
+  const existingImageSource = vehicle?.image_url || null;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -178,7 +115,6 @@ function EditVehiclePage() {
           seats: result.seats ?? "",
           quantity: result.quantity ?? "",
           price: result.price ?? "",
-          imageKey: result.imageKey || result.image_key || result.name || "",
           status: result.status || "available",
         });
       } catch (error) {
@@ -276,41 +212,32 @@ function EditVehiclePage() {
     setSubmitError("");
     setSuccessMessage("");
 
-    if (selectedImage && !imageNameMatches) {
-      setSubmitError(
-        "New image filename does not match the Image Key. Rename the image and select it again.",
-      );
-      return;
-    }
-
     try {
       setSubmitting(true);
 
-      const payload = {
-        name: formData.name.trim(),
-        brand: formData.brand.trim(),
-        category: formData.category,
-        seats: Number(formData.seats),
-        quantity: Number(formData.quantity),
-        price: Number(formData.price),
-        imageKey: formData.imageKey.trim(),
-        status: formData.status,
-      };
+      const payload = new FormData();
+
+      payload.append("_method", "PUT");
+      payload.append("name", formData.name.trim());
+      payload.append("brand", formData.brand.trim());
+      payload.append("category", formData.category);
+      payload.append("seats", formData.seats);
+      payload.append("quantity", formData.quantity);
+      payload.append("price", formData.price);
+      payload.append("status", formData.status);
 
       if (selectedImage) {
-        payload.image_filename = selectedImage.name;
-        payload.image_data = await fileToDataUrl(selectedImage);
+        payload.append("image", selectedImage);
       }
 
       const response = await fetch(
         `http://127.0.0.1:8000/api/cars/${id}`,
         {
-          method: "PUT",
+          method: "POST",
           headers: {
-            "Content-Type": "application/json",
             Accept: "application/json",
           },
-          body: JSON.stringify(payload),
+          body: payload,
         },
       );
 
@@ -551,18 +478,6 @@ function EditVehiclePage() {
                 </div>
 
                 <div className="edit-vehicle-field">
-                  <label htmlFor="imageKey">Image Key *</label>
-                  <input
-                    id="imageKey"
-                    type="text"
-                    name="imageKey"
-                    value={formData.imageKey}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="edit-vehicle-field">
                   <label htmlFor="status">Status *</label>
                   <select
                     id="status"
@@ -640,21 +555,11 @@ function EditVehiclePage() {
                   )}
 
                   {selectedImage && (
-                    <div
-                      className={`edit-vehicle-image-message ${
-                        imageNameMatches ? "success" : "error"
-                      }`}
-                    >
-                      {imageNameMatches ? (
-                        <CheckCircle2 size={16} />
-                      ) : (
-                        <AlertCircle size={16} />
-                      )}
-
+                    <div className="edit-vehicle-image-message success">
+                      <CheckCircle2 size={16} />
                       <span>
-                        {imageNameMatches
-                          ? "New image filename matches the Image Key."
-                          : `Filename must be exactly "${formData.imageKey.trim()}" before the extension.`}
+                        New image is ready. RideRent will store it with a
+                        unique filename.
                       </span>
                     </div>
                   )}
