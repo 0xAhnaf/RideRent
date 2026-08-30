@@ -12,7 +12,7 @@ const navItems = [
   { label: "Payments", icon: "৳", path: "/admin/payments" },
   { label: "Ambulance / Emergency", icon: "✚", danger: true },
   { label: "Reviews", icon: "☆" },
-  { label: "Reports", icon: "▥" },
+  { label: "Reports", icon: "▥", path: "/admin/reports" },
 ];
 
 const stats = [

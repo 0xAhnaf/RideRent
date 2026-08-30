@@ -7,6 +7,7 @@ use App\Http\Controllers\CarController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\AggregateReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -71,6 +72,14 @@ Route::apiResource('drivers', DriverController::class);
 Route::get('/payments/summary', [PaymentController::class, 'summary']);
 Route::patch('/payments/{payment}/status', [PaymentController::class, 'updateStatus']);
 Route::apiResource('payments', PaymentController::class);
+
+/*
+|--------------------------------------------------------------------------
+| Report Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/reports/summary', [AggregateReportController::class, 'summary']);
 
 /*
 |--------------------------------------------------------------------------

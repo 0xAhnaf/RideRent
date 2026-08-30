@@ -1,0 +1,316 @@
+.admin-report-main {
+  min-width: 0;
+}
+
+.admin-report-content {
+  display: grid;
+  gap: 24px;
+}
+
+.admin-report-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 14px;
+}
+
+.admin-report-section-heading span {
+  display: block;
+  margin-bottom: 5px;
+  color: #9a5c00;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+}
+
+.admin-report-section-heading h3 {
+  margin: 0;
+  color: var(--admin-text);
+  font-size: 21px;
+  line-height: 1.25;
+}
+
+.admin-report-section-heading p {
+  margin: 0;
+  color: var(--admin-muted);
+  font-size: 13px;
+  text-align: right;
+}
+
+.admin-report-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-report-overview-card {
+  min-width: 0;
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  border: 1px solid var(--admin-border-light);
+  border-top: 3px solid var(--admin-accent);
+  border-radius: 12px;
+  background: var(--admin-surface);
+  box-shadow: 0 8px 24px rgba(11, 31, 58, 0.06);
+}
+
+.admin-report-card-icon,
+.admin-report-payment-icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  color: #24466f;
+  background: #e3edff;
+}
+
+.admin-report-card-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+}
+
+.admin-report-overview-card > div:last-child {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-report-overview-card span,
+.admin-report-payment-card span {
+  color: var(--admin-muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.admin-report-overview-card strong {
+  margin-top: 4px;
+  color: var(--admin-text);
+  font-size: 26px;
+  line-height: 1.15;
+}
+
+.admin-report-overview-card small {
+  margin-top: 5px;
+  overflow: hidden;
+  color: var(--admin-secondary);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-report-panel {
+  overflow: hidden;
+  border: 1px solid var(--admin-border-light);
+  border-radius: 12px;
+  background: var(--admin-surface);
+  box-shadow: 0 8px 24px rgba(11, 31, 58, 0.05);
+}
+
+.admin-report-section-heading.panel-heading {
+  align-items: center;
+  margin: 0;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--admin-border-light);
+  background: linear-gradient(90deg, #ffffff 0%, #f4f7ff 100%);
+}
+
+.admin-report-payment-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.admin-report-payment-card {
+  min-width: 0;
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border-right: 1px solid var(--admin-border-light);
+}
+
+.admin-report-payment-card:last-child {
+  border-right: 0;
+}
+
+.admin-report-payment-icon {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 14px;
+  border-radius: 9px;
+}
+
+.admin-report-payment-card strong {
+  max-width: 100%;
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+  color: #0b1f3a;
+  font-size: 23px;
+}
+
+.admin-report-timeline-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 20px;
+}
+
+.admin-report-timeline-card {
+  padding: 18px;
+  border: 1px solid #d7e1ef;
+  border-left: 4px solid var(--admin-accent);
+  border-radius: 10px;
+  background: #fbfcff;
+}
+
+.admin-report-timeline-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.admin-report-timeline-top span {
+  color: var(--admin-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-report-timeline-top strong {
+  color: #17385f;
+  font-size: 14px;
+}
+
+.admin-report-timeline-card p {
+  margin: 12px 0;
+  color: var(--admin-text);
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.admin-report-timeline-card small {
+  display: inline-flex;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #e7f6ed;
+  color: #087333;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.admin-report-timeline-card small.status-cancelled {
+  background: var(--admin-danger-light);
+  color: var(--admin-danger);
+}
+
+.admin-report-timeline-card small.status-pending {
+  background: #fff1dc;
+  color: #8a5200;
+}
+
+.admin-report-message,
+.admin-report-loading {
+  border: 1px solid var(--admin-border-light);
+  border-radius: 10px;
+  background: var(--admin-surface);
+}
+
+.admin-report-message {
+  margin-bottom: 18px;
+  padding: 14px 16px;
+}
+
+.admin-report-message.error {
+  border-color: #efb2ad;
+  background: #fff5f4;
+  color: var(--admin-danger);
+}
+
+.admin-report-loading {
+  min-height: 280px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  color: var(--admin-muted);
+}
+
+.admin-report-loading p {
+  margin: 0;
+}
+
+.admin-report-spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid #dbe6f7;
+  border-top-color: #0b1f3a;
+  border-radius: 50%;
+  animation: admin-report-spin 0.8s linear infinite;
+}
+
+@keyframes admin-report-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1180px) {
+  .admin-report-overview-grid,
+  .admin-report-payment-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-report-payment-card:nth-child(2) {
+    border-right: 0;
+  }
+
+  .admin-report-payment-card:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--admin-border-light);
+  }
+}
+
+@media (max-width: 700px) {
+  .admin-report-section-heading,
+  .admin-report-section-heading.panel-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .admin-report-section-heading p {
+    text-align: left;
+  }
+
+  .admin-report-timeline-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .admin-report-overview-grid,
+  .admin-report-payment-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-report-payment-card,
+  .admin-report-payment-card:nth-child(2) {
+    border-right: 0;
+    border-bottom: 1px solid var(--admin-border-light);
+  }
+
+  .admin-report-payment-card:last-child {
+    border-bottom: 0;
+  }
+
+  .admin-report-timeline-grid {
+    padding: 14px;
+  }
+
+  .admin-report-timeline-top {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+}
