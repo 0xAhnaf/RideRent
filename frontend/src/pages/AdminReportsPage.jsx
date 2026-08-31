@@ -12,6 +12,7 @@ import {
 import { useNavigate } from "react-router-dom";
 
 import BusinessInsightsSection from "../components/reports/BusinessInsightsSection";
+import FleetOpportunitiesSection from "../components/reports/FleetOpportunitiesSection";
 import RelationshipReportsSection from "../components/reports/RelationshipReportsSection";
 import "../styles/admin-dashboard.css";
 import "../styles/admin-reports-page.css";
@@ -355,6 +356,7 @@ function AdminReportsPage() {
 
             <RelationshipReportsSection />
             <BusinessInsightsSection />
+            <FleetOpportunitiesSection />
           </div>
         )}
       </main>

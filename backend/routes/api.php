@@ -10,6 +10,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\AggregateReportController;
 use App\Http\Controllers\JoinReportController;
 use App\Http\Controllers\SingleRowSubqueryReportController;
+use App\Http\Controllers\MultipleRowSubqueryReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -84,6 +85,7 @@ Route::apiResource('payments', PaymentController::class);
 Route::get('/reports/summary', [AggregateReportController::class, 'summary']);
 Route::get('/reports/relationships', [JoinReportController::class, 'relationships']);
 Route::get('/reports/business-insights', [SingleRowSubqueryReportController::class, 'businessInsights']);
+Route::get('/reports/fleet-opportunities', [MultipleRowSubqueryReportController::class, 'fleetOpportunities']);
 
 /*
 |--------------------------------------------------------------------------
