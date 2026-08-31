@@ -9,44 +9,86 @@ class AggregateReportController extends Controller
 {
     public function summary(): JsonResponse
     {
-        $fleetSummary = DB::table('cars')
-            ->selectRaw('COUNT(*) AS vehicle_models')
-            ->selectRaw('COALESCE(SUM(quantity), 0) AS total_vehicle_units')
-            ->first();
+        $fleetSummary = DB::selectOne(<<<'SQL'
+            SELECT
+                COUNT(*) AS vehicle_models,
+                COALESCE(SUM(quantity), 0) AS total_vehicle_units
+            FROM cars
+        SQL);
 
-        $bookingSummary = DB::table('bookings')
-            ->selectRaw('COUNT(*) AS total_bookings')
-            ->first();
+        $bookingSummary = DB::selectOne(<<<'SQL'
+            SELECT COUNT(*) AS total_bookings
+            FROM bookings
+        SQL);
 
-        $driverSummary = DB::table('drivers')
-            ->selectRaw('COUNT(*) AS total_drivers')
-            ->first();
+        $driverSummary = DB::selectOne(<<<'SQL'
+            SELECT COUNT(*) AS total_drivers
+            FROM drivers
+        SQL);
 
-        $paymentSummary = DB::table('payments')
-            ->selectRaw('COUNT(*) AS total_payments')
-            ->selectRaw("SUM(CASE WHEN payment_status = 'paid' THEN 1 ELSE 0 END) AS paid_payments")
-            ->selectRaw("COALESCE(SUM(CASE WHEN payment_status = 'paid' THEN amount ELSE 0 END), 0) AS total_revenue")
-            ->selectRaw("COALESCE(AVG(CASE WHEN payment_status = 'paid' THEN amount END), 0) AS average_payment")
-            ->selectRaw("MIN(CASE WHEN payment_status = 'paid' THEN amount END) AS minimum_payment")
-            ->selectRaw("MAX(CASE WHEN payment_status = 'paid' THEN amount END) AS maximum_payment")
-            ->first();
+        $paymentSummary = DB::selectOne(<<<'SQL'
+            SELECT
+                COUNT(*) AS total_payments,
+                SUM(
+                    CASE
+                        WHEN payment_status = 'paid' THEN 1
+                        ELSE 0
+                    END
+                ) AS paid_payments,
+                COALESCE(
+                    SUM(
+                        CASE
+                            WHEN payment_status = 'paid' THEN amount
+                            ELSE 0
+                        END
+                    ),
+                    0
+                ) AS total_revenue,
+                COALESCE(
+                    AVG(
+                        CASE
+                            WHEN payment_status = 'paid' THEN amount
+                        END
+                    ),
+                    0
+                ) AS average_payment,
+                MIN(
+                    CASE
+                        WHEN payment_status = 'paid' THEN amount
+                    END
+                ) AS minimum_payment,
+                MAX(
+                    CASE
+                        WHEN payment_status = 'paid' THEN amount
+                    END
+                ) AS maximum_payment
+            FROM payments
+        SQL);
 
         /*
          * MySQL does not provide FIRST() and LAST() aggregate functions.
          * ORDER BY with LIMIT 1 is the MySQL equivalent for retrieving the
          * first and latest booking records.
          */
-        $firstBooking = DB::table('bookings')
-            ->select(['b_id', 'booking_status', 'created_at'])
-            ->orderBy('created_at')
-            ->orderBy('b_id')
-            ->first();
+        $firstBooking = DB::selectOne(<<<'SQL'
+            SELECT
+                b_id,
+                booking_status,
+                created_at
+            FROM bookings
+            ORDER BY created_at ASC, b_id ASC
+            LIMIT 1
+        SQL);
 
-        $latestBooking = DB::table('bookings')
-            ->select(['b_id', 'booking_status', 'created_at'])
-            ->orderByDesc('created_at')
-            ->orderByDesc('b_id')
-            ->first();
+        $latestBooking = DB::selectOne(<<<'SQL'
+            SELECT
+                b_id,
+                booking_status,
+                created_at
+            FROM bookings
+            ORDER BY created_at DESC, b_id DESC
+            LIMIT 1
+        SQL);
 
         return response()->json([
             'overview' => [
