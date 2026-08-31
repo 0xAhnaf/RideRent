@@ -11,7 +11,10 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+<<<<<<< HEAD
 import RelationshipReportsSection from "../components/reports/RelationshipReportsSection";
+=======
+>>>>>>> c51eb51758e03ebe2f23c3a7f54ca5bb6bad74ff
 import "../styles/admin-dashboard.css";
 import "../styles/admin-reports-page.css";
 
@@ -351,8 +354,11 @@ function AdminReportsPage() {
                 ))}
               </div>
             </section>
+<<<<<<< HEAD
 
             <RelationshipReportsSection />
+=======
+>>>>>>> c51eb51758e03ebe2f23c3a7f54ca5bb6bad74ff
           </div>
         )}
       </main>

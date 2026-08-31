@@ -11,6 +11,7 @@ import EditVehiclePage from "./pages/EditVehiclePage";
 import AdminDriversPage from "./pages/AdminDriversPage";
 import AdminBookingsPage from "./pages/AdminBookingsPage";
 import AdminPaymentsPage from "./pages/AdminPaymentsPage";
+import AdminReportsPage from "./pages/AdminReportsPage";
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
         <Route path="/admin/drivers" element={<AdminDriversPage />} />
         <Route path="/admin/bookings" element={<AdminBookingsPage />} />
         <Route path="/admin/payments" element={<AdminPaymentsPage />} />
+        <Route path="/admin/reports" element={<AdminReportsPage />} />
 
         {/* Keep the previous vehicle URL working */}
         <Route
