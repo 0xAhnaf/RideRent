@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+import BusinessInsightsSection from "../components/reports/BusinessInsightsSection";
 import RelationshipReportsSection from "../components/reports/RelationshipReportsSection";
 import "../styles/admin-dashboard.css";
 import "../styles/admin-reports-page.css";
@@ -353,6 +354,7 @@ function AdminReportsPage() {
             </section>
 
             <RelationshipReportsSection />
+            <BusinessInsightsSection />
           </div>
         )}
       </main>

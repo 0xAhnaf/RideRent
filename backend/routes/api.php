@@ -9,6 +9,7 @@ use App\Http\Controllers\DriverController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\AggregateReportController;
 use App\Http\Controllers\JoinReportController;
+use App\Http\Controllers\SingleRowSubqueryReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -82,6 +83,7 @@ Route::apiResource('payments', PaymentController::class);
 
 Route::get('/reports/summary', [AggregateReportController::class, 'summary']);
 Route::get('/reports/relationships', [JoinReportController::class, 'relationships']);
+Route::get('/reports/business-insights', [SingleRowSubqueryReportController::class, 'businessInsights']);
 
 /*
 |--------------------------------------------------------------------------
