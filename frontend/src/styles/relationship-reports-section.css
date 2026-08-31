@@ -1,0 +1,258 @@
+.relationship-report-section {
+  display: grid;
+  gap: 14px;
+}
+
+.relationship-report-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.relationship-report-heading > div > span,
+.relationship-report-card header > div > span {
+  display: block;
+  margin-bottom: 5px;
+  color: #9a5c00;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+}
+
+.relationship-report-heading h3,
+.relationship-report-card h4 {
+  margin: 0;
+  color: var(--admin-text);
+}
+
+.relationship-report-heading h3 {
+  font-size: 21px;
+}
+
+.relationship-report-heading p,
+.relationship-report-card header p {
+  margin: 0;
+  color: var(--admin-muted);
+  font-size: 13px;
+}
+
+.relationship-report-heading > p {
+  text-align: right;
+}
+
+.relationship-report-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.relationship-report-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--admin-border-light);
+  border-radius: 12px;
+  background: var(--admin-surface);
+  box-shadow: 0 8px 24px rgba(11, 31, 58, 0.05);
+}
+
+.relationship-report-card.wide-card {
+  grid-column: 1 / -1;
+}
+
+.relationship-report-card header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--admin-border-light);
+  background: linear-gradient(90deg, #ffffff 0%, #f4f7ff 100%);
+}
+
+.relationship-report-card h4 {
+  font-size: 18px;
+}
+
+.relationship-report-card header p {
+  max-width: 290px;
+  text-align: right;
+}
+
+.relationship-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.relationship-table {
+  width: 100%;
+  min-width: 780px;
+  border-collapse: collapse;
+}
+
+.relationship-table.compact-table {
+  min-width: 560px;
+}
+
+.relationship-table th,
+.relationship-table td {
+  padding: 13px 16px;
+  border-bottom: 1px solid #e3e9f1;
+  color: var(--admin-text);
+  font-size: 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.relationship-table th {
+  background: #eef3fd;
+  color: #3b4a5d;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.025em;
+}
+
+.relationship-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.relationship-table tbody tr:hover {
+  background: #fbfcff;
+}
+
+.relationship-table td strong,
+.relationship-table td small {
+  display: block;
+}
+
+.relationship-table td strong {
+  font-size: 12px;
+}
+
+.relationship-table td small {
+  margin-top: 3px;
+  color: var(--admin-secondary);
+  font-size: 10px;
+}
+
+.relationship-journey-cell {
+  min-width: 220px;
+}
+
+.relationship-status {
+  display: inline-flex;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #e7f6ed;
+  color: #087333;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+.relationship-status.status-pending,
+.relationship-status.status-no-booking,
+.relationship-status.status-not-assigned {
+  background: #fff1dc;
+  color: #8a5200;
+}
+
+.relationship-status.status-cancelled,
+.relationship-status.status-inactive,
+.relationship-status.status-no-driver {
+  background: var(--admin-danger-light);
+  color: var(--admin-danger);
+}
+
+.relationship-status.status-busy,
+.relationship-status.status-confirmed {
+  background: #e3edff;
+  color: #24466f;
+}
+
+.relationship-muted {
+  color: var(--admin-muted);
+  font-size: 11px;
+}
+
+.relationship-warning {
+  color: var(--admin-danger);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.relationship-empty-cell {
+  padding: 32px !important;
+  color: var(--admin-muted) !important;
+  text-align: center !important;
+}
+
+.relationship-report-state {
+  min-height: 160px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  border: 1px solid var(--admin-border-light);
+  border-radius: 12px;
+  background: var(--admin-surface);
+  color: var(--admin-muted);
+}
+
+.relationship-report-state p {
+  margin: 0;
+}
+
+.relationship-report-state.error {
+  min-height: auto;
+  padding: 16px;
+  border-color: #efb2ad;
+  background: #fff5f4;
+  color: var(--admin-danger);
+}
+
+.relationship-report-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #dbe6f7;
+  border-top-color: #0b1f3a;
+  border-radius: 50%;
+  animation: relationship-report-spin 0.8s linear infinite;
+}
+
+@keyframes relationship-report-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1050px) {
+  .relationship-report-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .relationship-report-card.wide-card {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .relationship-report-heading,
+  .relationship-report-card header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .relationship-report-heading > p,
+  .relationship-report-card header p {
+    max-width: none;
+    text-align: left;
+  }
+
+  .relationship-table th,
+  .relationship-table td {
+    padding: 11px 13px;
+  }
+}

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { apiFetch } from "../api";
+import { apiFetch, getCsrfCookie } from "../api";
 
 const AuthContext = createContext(null);
 
@@ -36,6 +36,8 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
+      await getCsrfCookie();
+
       const response = await apiFetch("/api/logout", {
         method: "POST",
       });

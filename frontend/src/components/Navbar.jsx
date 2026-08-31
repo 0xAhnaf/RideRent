@@ -1,18 +1,29 @@
-import { Menu, X } from "lucide-react";
+import {
+  Menu,
+  X,
+  UserCircle,
+  LogOut,
+  LayoutDashboard,
+} from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import logo from "../assets/logo.png";
+import { useAuth } from "../context/AuthContext";
 import "../styles/navbar.css";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
 
+  const { user, isAuthenticated, logout } = useAuth();
+
   const scrollToSection = (sectionId) => {
     setOpen(false);
+    setProfileOpen(false);
 
     if (location.pathname === "/") {
       const targetSection = document.getElementById(sectionId);
@@ -36,22 +47,49 @@ function Navbar() {
 
   const goToVehiclesPage = () => {
     setOpen(false);
+    setProfileOpen(false);
     navigate("/vehicles");
   };
 
   const goToLogin = () => {
     setOpen(false);
+    setProfileOpen(false);
     navigate("/login");
   };
 
   const goToSignup = () => {
     setOpen(false);
+    setProfileOpen(false);
     navigate("/signup");
+  };
+
+  const goToDashboard = () => {
+    setOpen(false);
+    setProfileOpen(false);
+    navigate("/admin");
+  };
+
+  const handleLogout = async () => {
+    setProfileOpen(false);
+    setOpen(false);
+
+    try {
+      await logout();
+      navigate("/login", { replace: true });
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   const toggleMobileMenu = () => {
     setOpen((previousOpen) => !previousOpen);
   };
+
+  const toggleProfileMenu = () => {
+    setProfileOpen((previousOpen) => !previousOpen);
+  };
+
+  const isAdmin = user?.role === "Admin";
 
   return (
     <nav className="navbar">
@@ -73,42 +111,113 @@ function Navbar() {
 
       {/* Menu */}
       <ul className={`nav-links ${open ? "active" : ""}`}>
-        <li onClick={() => scrollToSection("home")}>Home</li>
+        <li onClick={() => scrollToSection("home")}>
+          Home
+        </li>
 
-        <li onClick={() => scrollToSection("ambulance")}>Ambulance</li>
+        <li onClick={() => scrollToSection("ambulance")}>
+          Ambulance
+        </li>
 
-        <li onClick={goToVehiclesPage}>Vehicles</li>
+        <li onClick={goToVehiclesPage}>
+          Vehicles
+        </li>
 
-        <li onClick={() => scrollToSection("about")}>About Us</li>
+        <li onClick={() => scrollToSection("about")}>
+          About Us
+        </li>
 
-        <li onClick={() => scrollToSection("contact")}>Contact</li>
+        <li onClick={() => scrollToSection("contact")}>
+          Contact
+        </li>
       </ul>
 
-      {/* Buttons */}
+      {/* Buttons / User Actions */}
       <div className={`nav-actions ${open ? "active" : ""}`}>
-        <button
-          type="button"
-          className="login-btn"
-          onClick={goToLogin}
-        >
-          Login
-        </button>
+        {!isAuthenticated ? (
+          <>
+            {/* Logged Out */}
+            <button
+              type="button"
+              className="login-btn"
+              onClick={goToLogin}
+            >
+              Login
+            </button>
 
-        <button
-          type="button"
-          className="signup-btn"
-          onClick={goToSignup}
-        >
-          Sign Up
-        </button>
+            <button
+              type="button"
+              className="signup-btn"
+              onClick={goToSignup}
+            >
+              Sign Up
+            </button>
 
-        <button
-          type="button"
-          className="book-btn"
-          onClick={() => scrollToSection("booking")}
-        >
-          Find Rent
-        </button>
+            <button
+              type="button"
+              className="book-btn"
+              onClick={() => scrollToSection("booking")}
+            >
+              Find Rent
+            </button>
+          </>
+        ) : (
+          <>
+            {/* Admin Dashboard */}
+            {isAdmin && (
+              <button
+                type="button"
+                className="dashboard-btn"
+                onClick={goToDashboard}
+              >
+                <LayoutDashboard size={18} />
+                <span>Dashboard</span>
+              </button>
+            )}
+
+            {/* Profile */}
+            <div className="profile-container">
+              <button
+                type="button"
+                className="profile-btn"
+                onClick={toggleProfileMenu}
+                aria-expanded={profileOpen}
+                aria-label="Open profile menu"
+              >
+                <UserCircle size={30} />
+
+                <span className="profile-name">
+                  {user?.name}
+                </span>
+              </button>
+
+              {/* Profile Dropdown */}
+              {profileOpen && (
+                <div className="profile-dropdown">
+                  <div className="profile-info">
+                    <UserCircle size={38} />
+
+                    <div>
+                      <strong>{user?.name}</strong>
+                      <span>{user?.role}</span>
+                    </div>
+                  </div>
+
+                  <div className="profile-divider" />
+
+                  <button
+                    type="button"
+                    className="profile-logout"
+                    onClick={handleLogout}
+                  >
+                    <LogOut size={18} />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Mobile Menu */}
@@ -117,7 +226,11 @@ function Navbar() {
         onClick={toggleMobileMenu}
         role="button"
         tabIndex={0}
-        aria-label={open ? "Close navigation menu" : "Open navigation menu"}
+        aria-label={
+          open
+            ? "Close navigation menu"
+            : "Open navigation menu"
+        }
         aria-expanded={open}
         onKeyDown={(event) => {
           if (event.key === "Enter" || event.key === " ") {
