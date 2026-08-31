@@ -389,14 +389,16 @@ function AdminDashboard() {
                               </button>
                             )}
 
-                            {/* Delete */}
-                            <button
-                              className="action-button delete"
-                              title="Delete"
-                              onClick={() => deleteBooking(booking.b_id)}
-                            >
-                              <Trash2 size={18} />
-                            </button>
+                            {/* Financial-history bookings cannot be deleted. */}
+                            {!booking.payment && (
+                              <button
+                                className="action-button delete"
+                                title="Delete"
+                                onClick={() => deleteBooking(booking.b_id)}
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>

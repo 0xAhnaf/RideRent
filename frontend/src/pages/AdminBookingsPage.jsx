@@ -795,15 +795,17 @@ function AdminBookingsPage() {
                               </button>
                             )}
 
-                            <button
-                              type="button"
-                              className="danger outline"
-                              disabled={isBusy}
-                              onClick={() => deleteBooking(booking)}
-                            >
-                              <Trash2 size={15} />
-                              Delete
-                            </button>
+                            {!booking.payment && (
+                              <button
+                                type="button"
+                                className="danger outline"
+                                disabled={isBusy}
+                                onClick={() => deleteBooking(booking)}
+                              >
+                                <Trash2 size={15} />
+                                Delete
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>

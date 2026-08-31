@@ -935,15 +935,17 @@ function AdminPaymentsPage() {
                               </button>
                             )}
 
-                            <button
-                              type="button"
-                              className="delete"
-                              disabled={isBusy || isSaving}
-                              onClick={() => deletePayment(payment)}
-                            >
-                              <Trash2 size={15} />
-                              Delete
-                            </button>
+                            {payment.payment_status === "pending" && (
+                              <button
+                                type="button"
+                                className="delete"
+                                disabled={isBusy || isSaving}
+                                onClick={() => deletePayment(payment)}
+                              >
+                                <Trash2 size={15} />
+                                Delete
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>

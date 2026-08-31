@@ -287,14 +287,24 @@ class PaymentController extends Controller
 
     public function destroy($payment)
     {
-        $deletedRows = DB::delete(
-            'DELETE FROM payments WHERE id = ?',
-            [$payment],
-        );
+        DB::transaction(function () use ($payment) {
+            $lockedPayment = $this->lockPayment($payment);
 
-        if ($deletedRows !== 1) {
-            return $this->paymentNotFoundResponse();
-        }
+            if (!$lockedPayment) {
+                abort(404, 'Payment not found.');
+            }
+
+            if ($lockedPayment->payment_status !== 'pending') {
+                throw ValidationException::withMessages([
+                    'payment' => 'Paid and refunded payment records cannot be deleted because they are part of the financial history.',
+                ]);
+            }
+
+            DB::delete(
+                'DELETE FROM payments WHERE id = ?',
+                [$lockedPayment->id],
+            );
+        }, 3);
 
         return response()->json([
             'message' => 'Payment record deleted successfully.',

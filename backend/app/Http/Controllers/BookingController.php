@@ -335,6 +335,30 @@ class BookingController extends Controller
                 abort(404, 'Booking not found.');
             }
 
+            $payment = DB::selectOne(
+                <<<'SQL'
+                    SELECT id, payment_status
+                    FROM payments
+                    WHERE booking_id = ?
+                    LIMIT 1
+                    FOR UPDATE
+                SQL,
+                [$lockedBooking->b_id],
+            );
+
+            if ($payment) {
+                $message = match ($payment->payment_status) {
+                    'pending' => 'Cancel the booking, or delete its pending payment before deleting the booking.',
+                    'paid' => 'Refund the paid payment and cancel the booking instead of deleting it.',
+                    'refunded' => 'This booking has refunded payment history and cannot be deleted. Cancel it to preserve the financial record.',
+                    default => 'This booking has a payment record and cannot be deleted.',
+                };
+
+                throw ValidationException::withMessages([
+                    'booking' => $message,
+                ]);
+            }
+
             $driverId = $lockedBooking->driver_id;
 
             DB::delete(
