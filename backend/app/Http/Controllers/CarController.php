@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Car;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -13,12 +12,30 @@ class CarController extends Controller
 {
     public function index()
     {
-        return response()->json(Car::all());
+        $vehicles = DB::select(<<<'SQL'
+            SELECT
+                id,
+                name,
+                brand,
+                category,
+                seats,
+                quantity,
+                price,
+                image_key,
+                image_path,
+                status,
+                created_at,
+                updated_at
+            FROM cars
+            ORDER BY id ASC
+        SQL);
+
+        return response()->json($this->formatVehicles($vehicles));
     }
 
     public function show($id)
     {
-        $vehicle = Car::find($id);
+        $vehicle = $this->findVehicle($id);
 
         if (!$vehicle) {
             return response()->json([
@@ -26,7 +43,7 @@ class CarController extends Controller
             ], 404);
         }
 
-        return response()->json($vehicle);
+        return response()->json($this->formatVehicle($vehicle));
     }
 
     public function store(Request $request)
@@ -65,21 +82,70 @@ class CarController extends Controller
             }
 
             $vehicle = DB::transaction(function () use ($validated, $imagePath) {
-                return Car::create([
-                    'name' => trim($validated['name']),
-                    'brand' => trim($validated['brand']),
-                    'category' => trim($validated['category']),
-                    'seats' => $validated['seats'],
-                    'quantity' => $validated['quantity'],
-                    'price' => $validated['price'],
-                    'image_path' => $imagePath,
-                    'status' => $validated['status'],
-                ]);
+                $timestamp = now();
+                $inserted = DB::insert(
+                    <<<'SQL'
+                        INSERT INTO cars (
+                            name,
+                            brand,
+                            category,
+                            seats,
+                            quantity,
+                            price,
+                            image_path,
+                            status,
+                            created_at,
+                            updated_at
+                        )
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    SQL,
+                    [
+                        trim($validated['name']),
+                        trim($validated['brand']),
+                        trim($validated['category']),
+                        $validated['seats'],
+                        $validated['quantity'],
+                        $validated['price'],
+                        $imagePath,
+                        $validated['status'],
+                        $timestamp,
+                        $timestamp,
+                    ],
+                );
+
+                if (!$inserted) {
+                    throw new \RuntimeException('The vehicle record could not be created.');
+                }
+
+                $insertedVehicle = DB::selectOne(<<<'SQL'
+                    SELECT
+                        id,
+                        name,
+                        brand,
+                        category,
+                        seats,
+                        quantity,
+                        price,
+                        image_key,
+                        image_path,
+                        status,
+                        created_at,
+                        updated_at
+                    FROM cars
+                    WHERE id = LAST_INSERT_ID()
+                    LIMIT 1
+                SQL);
+
+                if (!$insertedVehicle) {
+                    throw new \RuntimeException('The created vehicle could not be retrieved.');
+                }
+
+                return $insertedVehicle;
             });
 
             return response()->json([
                 'message' => 'Vehicle and image added successfully.',
-                'vehicle' => $vehicle->fresh(),
+                'vehicle' => $this->formatVehicle($vehicle),
             ], 201);
         } catch (Throwable $error) {
             if ($imagePath) {
@@ -97,7 +163,7 @@ class CarController extends Controller
 
     public function update(Request $request, $id)
     {
-        $vehicle = Car::find($id);
+        $vehicle = $this->findVehicle($id);
 
         if (!$vehicle) {
             return response()->json([
@@ -141,22 +207,78 @@ class CarController extends Controller
                 }
             }
 
-            $updateData = [
-                'name' => trim($validated['name']),
-                'brand' => trim($validated['brand']),
-                'category' => trim($validated['category']),
-                'seats' => $validated['seats'],
-                'quantity' => $validated['quantity'],
-                'price' => $validated['price'],
-                'status' => $validated['status'],
-            ];
+            $updatedVehicle = DB::transaction(function () use (
+                $id,
+                $validated,
+                $newImagePath,
+            ) {
+                $timestamp = now();
 
-            if ($newImagePath) {
-                $updateData['image_path'] = $newImagePath;
-            }
+                if ($newImagePath) {
+                    DB::update(
+                        <<<'SQL'
+                            UPDATE cars
+                            SET
+                                name = ?,
+                                brand = ?,
+                                category = ?,
+                                seats = ?,
+                                quantity = ?,
+                                price = ?,
+                                image_path = ?,
+                                status = ?,
+                                updated_at = ?
+                            WHERE id = ?
+                        SQL,
+                        [
+                            trim($validated['name']),
+                            trim($validated['brand']),
+                            trim($validated['category']),
+                            $validated['seats'],
+                            $validated['quantity'],
+                            $validated['price'],
+                            $newImagePath,
+                            $validated['status'],
+                            $timestamp,
+                            $id,
+                        ],
+                    );
+                } else {
+                    DB::update(
+                        <<<'SQL'
+                            UPDATE cars
+                            SET
+                                name = ?,
+                                brand = ?,
+                                category = ?,
+                                seats = ?,
+                                quantity = ?,
+                                price = ?,
+                                status = ?,
+                                updated_at = ?
+                            WHERE id = ?
+                        SQL,
+                        [
+                            trim($validated['name']),
+                            trim($validated['brand']),
+                            trim($validated['category']),
+                            $validated['seats'],
+                            $validated['quantity'],
+                            $validated['price'],
+                            $validated['status'],
+                            $timestamp,
+                            $id,
+                        ],
+                    );
+                }
 
-            DB::transaction(function () use ($vehicle, $updateData) {
-                $vehicle->update($updateData);
+                $updatedVehicle = $this->findVehicle($id);
+
+                if (!$updatedVehicle) {
+                    throw new \RuntimeException('The updated vehicle could not be retrieved.');
+                }
+
+                return $updatedVehicle;
             });
 
             if ($newImagePath && $oldImagePath && $oldImagePath !== $newImagePath) {
@@ -165,7 +287,7 @@ class CarController extends Controller
 
             return response()->json([
                 'message' => 'Vehicle updated successfully.',
-                'vehicle' => $vehicle->fresh(),
+                'vehicle' => $this->formatVehicle($updatedVehicle),
             ]);
         } catch (Throwable $error) {
             if ($newImagePath) {
@@ -183,7 +305,7 @@ class CarController extends Controller
 
     public function destroy($id)
     {
-        $vehicle = Car::find($id);
+        $vehicle = $this->findVehicle($id);
 
         if (!$vehicle) {
             return response()->json([
@@ -194,8 +316,13 @@ class CarController extends Controller
         $imagePath = $vehicle->image_path;
 
         try {
-            DB::transaction(function () use ($vehicle) {
-                if (!$vehicle->delete()) {
+            DB::transaction(function () use ($id) {
+                $deletedRows = DB::delete(
+                    'DELETE FROM cars WHERE id = ?',
+                    [$id],
+                );
+
+                if ($deletedRows !== 1) {
                     throw new \RuntimeException('The vehicle record could not be deleted.');
                 }
             });
@@ -219,5 +346,59 @@ class CarController extends Controller
         return response()->json([
             'message' => 'Vehicle deleted successfully.',
         ]);
+    }
+
+    private function findVehicle($id): ?object
+    {
+        return DB::selectOne(
+            <<<'SQL'
+                SELECT
+                    id,
+                    name,
+                    brand,
+                    category,
+                    seats,
+                    quantity,
+                    price,
+                    image_key,
+                    image_path,
+                    status,
+                    created_at,
+                    updated_at
+                FROM cars
+                WHERE id = ?
+                LIMIT 1
+            SQL,
+            [$id],
+        );
+    }
+
+    private function formatVehicles(array $vehicles): array
+    {
+        return array_map(
+            fn (object $vehicle): array => $this->formatVehicle($vehicle),
+            $vehicles,
+        );
+    }
+
+    private function formatVehicle(object $vehicle): array
+    {
+        return [
+            'id' => $vehicle->id,
+            'name' => $vehicle->name,
+            'brand' => $vehicle->brand,
+            'category' => $vehicle->category,
+            'seats' => $vehicle->seats,
+            'quantity' => $vehicle->quantity,
+            'price' => $vehicle->price,
+            'image_key' => $vehicle->image_key,
+            'image_path' => $vehicle->image_path,
+            'status' => $vehicle->status,
+            'created_at' => $vehicle->created_at,
+            'updated_at' => $vehicle->updated_at,
+            'image_url' => $vehicle->image_path
+                ? Storage::disk('public')->url($vehicle->image_path)
+                : null,
+        ];
     }
 }
