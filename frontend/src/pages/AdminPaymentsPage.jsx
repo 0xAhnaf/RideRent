@@ -13,10 +13,11 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
+import { apiFetch, getCsrfCookie } from "../api";
 import "../styles/admin-dashboard.css";
 import "../styles/admin-payments-page.css";
 
-const API_BASE_URL = "http://localhost:8000/api";
+const API_BASE_URL = "/api";
 
 const navItems = [
   { label: "Dashboard", icon: "▦", path: "/admin" },
@@ -59,7 +60,13 @@ const getApiErrorMessage = (result, fallbackMessage) => {
 };
 
 const requestJson = async (url, options = {}, fallbackMessage) => {
-  const response = await fetch(url, {
+  const method = (options.method || "GET").toUpperCase();
+
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
+    await getCsrfCookie();
+  }
+
+  const response = await apiFetch(url, {
     ...options,
     headers: {
       Accept: "application/json",

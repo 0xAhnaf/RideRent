@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { CalendarClock, Car, UsersRound } from "lucide-react";
 
+import { apiFetch } from "../../api";
 import "../../styles/business-insights-section.css";
-
-const API_URL = "http://127.0.0.1:8000/api/reports/business-insights";
 
 const emptyInsights = {
   customer_favorite_vehicle: null,
@@ -66,7 +65,7 @@ function BusinessInsightsSection() {
         setLoading(true);
         setError("");
 
-        const response = await fetch(API_URL, {
+        const response = await apiFetch("/api/reports/business-insights", {
           headers: { Accept: "application/json" },
           signal: controller.signal,
         });

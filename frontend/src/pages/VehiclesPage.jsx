@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { apiFetch } from "../api";
 import "../styles/vehicles-page.css";
 
 const getAvailabilityText = (quantity) => {
@@ -74,7 +75,7 @@ function VehiclesPage() {
 
   // CHANGE 3: API Fetch logic from Laravel MySQL endpoint
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/cars")
+    apiFetch("/api/cars")
       .then((res) => {
         if (!res.ok) {
           throw new Error("Failed to fetch vehicles.");

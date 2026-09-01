@@ -10,22 +10,36 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
+#[Fillable([
+    'name',
+    'email',
+    'phone',
+    'address',
+    'password',
+    'role',
+])]
+
+#[Hidden([
+    'password',
+    'remember_token',
+])]
+
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Fields that should be automatically converted
+     * to specific PHP types.
      */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
+
+            // Laravel automatically hashes passwords
+            // when a password is assigned to the model.
             'password' => 'hashed',
         ];
     }

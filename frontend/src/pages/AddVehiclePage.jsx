@@ -8,6 +8,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { apiFetch, getCsrfCookie } from "../api";
 import "../styles/admin-dashboard.css";
 import "../styles/add-vehicle-page.css";
 
@@ -175,16 +176,15 @@ function AddVehiclePage() {
       payload.append("status", formData.status);
       payload.append("image", selectedImage);
 
-      const response = await fetch(
-        "http://127.0.0.1:8000/api/cars",
-        {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-          },
-          body: payload,
+      await getCsrfCookie();
+
+      const response = await apiFetch("/api/cars", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
         },
-      );
+        body: payload,
+      });
 
       const result = await response.json().catch(() => ({}));
 

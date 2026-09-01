@@ -2,6 +2,7 @@ import { CarFront, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { apiFetch, getCsrfCookie } from "../api";
 import "../styles/admin-dashboard.css";
 import "../styles/admin-vehicles-page.css";
 
@@ -58,7 +59,7 @@ function AdminVehiclesPage() {
         setLoadingCars(true);
         setCarsError("");
 
-        const response = await fetch("http://localhost:8000/api/cars");
+        const response = await apiFetch("/api/cars");
 
         if (!response.ok) {
           throw new Error("Failed to fetch vehicles.");
@@ -96,8 +97,10 @@ function AdminVehiclesPage() {
       setDeletingCarId(car.id);
       setVehicleActionMessage(null);
 
-      const response = await fetch(
-        `http://localhost:8000/api/cars/${car.id}`,
+      await getCsrfCookie();
+
+      const response = await apiFetch(
+        `/api/cars/${car.id}`,
         {
           method: "DELETE",
           headers: {

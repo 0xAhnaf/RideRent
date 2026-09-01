@@ -1,5 +1,3 @@
-// src/pages/AuthPages/LoginPage.jsx
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -11,8 +9,12 @@ import SubmitButton from "./components/SubmitButton";
 import SocialLogin from "./components/SocialLogin";
 import AuthFooter from "./components/AuthFooter";
 
+import { useAuth } from "../../context/AuthContext";
+
 function LoginPage() {
   const navigate = useNavigate();
+
+  const { login } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -20,63 +22,85 @@ function LoginPage() {
   });
 
   const [error, setError] = useState("");
+
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  /*
+  |--------------------------------------------------------------------------
+  | Handle Input Changes
+  |--------------------------------------------------------------------------
+  */
 
-    setFormData({
-      ...formData,
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setFormData((previousData) => ({
+      ...previousData,
       [name]: value,
-    });
+    }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  /*
+  |--------------------------------------------------------------------------
+  | Handle Login
+  |--------------------------------------------------------------------------
+  */
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
     setError("");
 
+    setLoading(true);
+
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
+      const result = await login(
+        formData.email,
+        formData.password
+      );
 
-      const data = await response.json();
+      /*
+      |--------------------------------------------------------------------------
+      | Login Failed
+      |--------------------------------------------------------------------------
+      */
 
-      console.log("Login response:", data);
+      if (!result.success) {
+        const validationErrors = result.data?.errors;
 
-      if (!response.ok) {
-  setError(data.message || "Login failed.");
-  setLoading(false);
-  return;
-}
+        if (validationErrors?.email?.length) {
+          setError(validationErrors.email[0]);
+        } else {
+          setError(
+            result.data?.message ||
+              "Invalid email or password."
+          );
+        }
 
-      // Store the Sanctum token
-      localStorage.setItem("auth_token", data.token);
+        return;
+      }
 
-      // Store user information
-      localStorage.setItem("user", JSON.stringify(data.user));
+      /*
+      |--------------------------------------------------------------------------
+      | Login Successful
+      |--------------------------------------------------------------------------
+      |
+      | The authentication session is now handled by Laravel.
+      |
+      | No localStorage.
+      |
+      */
 
-      console.log("Login successful!");
-      console.log("Token:", data.token);
-      console.log("User:", data.user);
-
-      // Redirect to home page
-      navigate("/");
+      navigate("/", { replace: true });
     } catch (error) {
-  console.error("Backend connection error:", error);
-  setError("Unable to connect to the server.");
-  setLoading(false);
-}
+      console.error("Login error:", error);
+
+      setError(
+        "Unable to connect to the server. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -85,28 +109,34 @@ function LoginPage() {
       description="Sign in to continue to RentMyRide."
     >
       <AuthCard>
-
         <div className="auth-header">
           <h2>Login</h2>
+
           <p>Welcome back! Please sign in.</p>
         </div>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
-
+        <form
+          className="auth-form"
+          onSubmit={handleSubmit}
+        >
           <AuthInput
             id="email"
+            name="email"
             type="email"
             label="Email"
             placeholder="example@email.com"
             value={formData.email}
             onChange={handleChange}
+            required
           />
 
           <PasswordInput
             id="password"
+            name="password"
             label="Password"
             value={formData.password}
             onChange={handleChange}
+            required
           />
 
           <div className="forgot-password">
@@ -121,8 +151,10 @@ function LoginPage() {
             </p>
           )}
 
-          <SubmitButton text="Login" loading={loading} />
-
+          <SubmitButton
+            text="Login"
+            loading={loading}
+          />
         </form>
 
         <SocialLogin />
@@ -132,7 +164,6 @@ function LoginPage() {
           linkText="Sign Up"
           link="/signup"
         />
-
       </AuthCard>
     </AuthLayout>
   );

@@ -14,10 +14,9 @@ import { useNavigate } from "react-router-dom";
 import BusinessInsightsSection from "../components/reports/BusinessInsightsSection";
 import FleetOpportunitiesSection from "../components/reports/FleetOpportunitiesSection";
 import RelationshipReportsSection from "../components/reports/RelationshipReportsSection";
+import { apiFetch } from "../api";
 import "../styles/admin-dashboard.css";
 import "../styles/admin-reports-page.css";
-
-const API_BASE_URL = "http://127.0.0.1:8000/api";
 
 const navItems = [
   { label: "Dashboard", icon: "◦", path: "/admin" },
@@ -96,7 +95,7 @@ function AdminReportsPage() {
         setLoading(true);
         setError("");
 
-        const response = await fetch(`${API_BASE_URL}/reports/summary`, {
+        const response = await apiFetch("/api/reports/summary", {
           headers: { Accept: "application/json" },
           signal: controller.signal,
         });

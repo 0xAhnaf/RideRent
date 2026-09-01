@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { apiFetch } from "../../api";
 import "../../styles/relationship-reports-section.css";
-
-const API_URL = "http://127.0.0.1:8000/api/reports/relationships";
 
 const emptyReports = {
   booking_vehicle_records: [],
@@ -60,7 +59,7 @@ function RelationshipReportsSection() {
         setLoading(true);
         setError("");
 
-        const response = await fetch(API_URL, {
+        const response = await apiFetch("/api/reports/relationships", {
           headers: { Accept: "application/json" },
           signal: controller.signal,
         });

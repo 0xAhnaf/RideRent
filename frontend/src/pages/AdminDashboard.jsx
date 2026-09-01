@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Check, Flag, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { apiFetch, getCsrfCookie } from "../api";
 import "../styles/admin-dashboard.css";
 
 const navItems = [
@@ -99,7 +100,7 @@ function AdminDashboard() {
         setLoadingBookings(true);
         setBookingError("");
 
-        const response = await fetch("http://127.0.0.1:8000/api/bookings");
+        const response = await apiFetch("/api/bookings");
 
         if (!response.ok) {
           throw new Error("Failed to fetch bookings.");
@@ -122,8 +123,10 @@ function AdminDashboard() {
   // DELETE: Delete booking from Laravel
   const deleteBooking = async (bookingId) => {
     try {
-      const response = await fetch(
-        `http://127.0.0.1:8000/api/bookings/${bookingId}`,
+      await getCsrfCookie();
+
+      const response = await apiFetch(
+        `/api/bookings/${bookingId}`,
         {
           method: "DELETE",
           headers: {
@@ -148,8 +151,10 @@ function AdminDashboard() {
   // UPDATE: Change booking status
   const updateBookingStatus = async (bookingId, newStatus) => {
     try {
-      const response = await fetch(
-        `http://127.0.0.1:8000/api/bookings/${bookingId}`,
+      await getCsrfCookie();
+
+      const response = await apiFetch(
+        `/api/bookings/${bookingId}`,
         {
           method: "PUT",
           headers: {

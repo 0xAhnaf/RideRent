@@ -12,9 +12,8 @@ class BookingController extends Controller
     private const ACTIVE_STATUSES = ['Pending', 'Confirmed'];
 
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'u_id' => 'required|integer',
+            {
+            $validated = $request->validate([
             'car_name' => 'required|string',
             'trip_type' => 'required|string',
             'trip_datetime' => 'required|date',
@@ -22,6 +21,8 @@ class BookingController extends Controller
             'pickup' => 'required|string',
             'destination' => 'required|string',
         ]);
+
+        $user = $request->user();
 
         $car = DB::selectOne(
             'SELECT id FROM cars WHERE name = ? LIMIT 1',
@@ -34,7 +35,7 @@ class BookingController extends Controller
             ], 404);
         }
 
-        $booking = DB::transaction(function () use ($validated, $car) {
+        $booking = DB::transaction(function () use ($validated, $car, $user) {
             DB::insert(
                 <<<'SQL'
                     INSERT INTO bookings (
@@ -52,7 +53,7 @@ class BookingController extends Controller
                     VALUES (?, ?, NULL, ?, ?, ?, ?, ?, 'Pending', CURRENT_TIMESTAMP)
                 SQL,
                 [
-                    $validated['u_id'],
+                    $user->id,
                     $car->id,
                     $validated['trip_type'],
                     $validated['trip_datetime'],

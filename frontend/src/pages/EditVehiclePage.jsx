@@ -8,6 +8,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import { apiFetch, getCsrfCookie } from "../api";
 import "../styles/admin-dashboard.css";
 import "../styles/edit-vehicle-page.css";
 
@@ -96,8 +97,8 @@ function EditVehiclePage() {
         setLoadingVehicle(true);
         setLoadError("");
 
-        const response = await fetch(
-          `http://127.0.0.1:8000/api/cars/${id}`,
+        const response = await apiFetch(
+          `/api/cars/${id}`,
           { signal: controller.signal },
         );
 
@@ -230,8 +231,10 @@ function EditVehiclePage() {
         payload.append("image", selectedImage);
       }
 
-      const response = await fetch(
-        `http://127.0.0.1:8000/api/cars/${id}`,
+      await getCsrfCookie();
+
+      const response = await apiFetch(
+        `/api/cars/${id}`,
         {
           method: "POST",
           headers: {

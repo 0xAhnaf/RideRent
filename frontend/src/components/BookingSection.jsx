@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import { locations } from "../data/locations";
+import { apiFetch, getCsrfCookie } from "../api";
 import "../styles/booking.css";
 
 function BookingSection() {
@@ -63,7 +64,7 @@ function BookingSection() {
   // -----------------------------
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/cars")
+    apiFetch("/api/cars")
       .then((response) => {
         if (!response.ok) {
           throw new Error(
@@ -199,14 +200,7 @@ function BookingSection() {
     const destination =
       `${destinationAddress.trim()},${destinationThana},${destinationDistrict}`;
 
-    /*
-     * For now, u_id = 1 is being used as a test user.
-     *
-     * Once your authentication/user system is connected,
-     * this should come from the logged-in user's ID.
-     */
     const bookingData = {
-      u_id: 1,
       car_name: selectedCarData.name,
       trip_type: tripType,
       trip_datetime: tripDatetime,
@@ -224,19 +218,18 @@ function BookingSection() {
     try {
       setIsSubmitting(true);
 
-      const response = await fetch(
-        "http://127.0.0.1:8000/api/bookings",
-        {
-          method: "POST",
+      // Initialize Sanctum CSRF protection
+      await getCsrfCookie();
 
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-
-          body: JSON.stringify(bookingData),
-        },
-      );
+      // Use the existing API helper so that:
+      // - credentials are included
+      // - the XSRF-TOKEN is read
+      // - X-XSRF-TOKEN is sent
+      // - the request uses the correct backend host
+      const response = await apiFetch("/api/bookings", {
+        method: "POST",
+        body: JSON.stringify(bookingData),
+      });
 
       const responseText = await response.text();
 
@@ -620,30 +613,39 @@ function BookingSection() {
               <option value="6 Hours">
                 6 Hours
               </option>
+
               <option value="12 Hours">
                 12 Hours
               </option>
+
               <option value="1 Day">
                 1 Day
               </option>
+
               <option value="2 Days">
                 2 Days
               </option>
+
               <option value="3 Days">
                 3 Days
               </option>
+
               <option value="4 Days">
                 4 Days
               </option>
+
               <option value="5 Days">
                 5 Days
               </option>
+
               <option value="6 Days">
                 6 Days
               </option>
+
               <option value="7 Days">
                 7 Days
               </option>
+
               <option value="More Than 7 Days">
                 More Than 7 Days
               </option>

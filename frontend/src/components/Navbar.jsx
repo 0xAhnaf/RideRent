@@ -5,28 +5,54 @@ import {
   LogOut,
   LayoutDashboard,
 } from "lucide-react";
+
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import {
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 
 import logo from "../assets/logo.png";
+
 import { useAuth } from "../context/AuthContext";
+
 import "../styles/navbar.css";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
+
+  const [profileOpen, setProfileOpen] =
+    useState(false);
 
   const navigate = useNavigate();
+
   const location = useLocation();
 
-  const { user, isAuthenticated, logout } = useAuth();
+  const {
+    user,
+    isAuthenticated,
+    logout,
+  } = useAuth();
+
+  /*
+  |--------------------------------------------------------------------------
+  | Scroll To Landing Page Section
+  |--------------------------------------------------------------------------
+  */
 
   const scrollToSection = (sectionId) => {
     setOpen(false);
     setProfileOpen(false);
 
+    /*
+    |--------------------------------------------------------------------------
+    | Already On Home Page
+    |--------------------------------------------------------------------------
+    */
+
     if (location.pathname === "/") {
-      const targetSection = document.getElementById(sectionId);
+      const targetSection =
+        document.getElementById(sectionId);
 
       if (targetSection) {
         targetSection.scrollIntoView({
@@ -38,6 +64,12 @@ function Navbar() {
       return;
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Go Home Then Scroll
+    |--------------------------------------------------------------------------
+    */
+
     navigate("/", {
       state: {
         scrollTo: sectionId,
@@ -45,29 +77,45 @@ function Navbar() {
     });
   };
 
+  /*
+  |--------------------------------------------------------------------------
+  | Navigation Functions
+  |--------------------------------------------------------------------------
+  */
+
   const goToVehiclesPage = () => {
     setOpen(false);
     setProfileOpen(false);
+
     navigate("/vehicles");
   };
 
   const goToLogin = () => {
     setOpen(false);
     setProfileOpen(false);
+
     navigate("/login");
   };
 
   const goToSignup = () => {
     setOpen(false);
     setProfileOpen(false);
+
     navigate("/signup");
   };
 
   const goToDashboard = () => {
     setOpen(false);
     setProfileOpen(false);
+
     navigate("/admin");
   };
+
+  /*
+  |--------------------------------------------------------------------------
+  | Logout
+  |--------------------------------------------------------------------------
+  */
 
   const handleLogout = async () => {
     setProfileOpen(false);
@@ -75,47 +123,107 @@ function Navbar() {
 
     try {
       await logout();
-      navigate("/login", { replace: true });
+
+      navigate("/login", {
+        replace: true,
+      });
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error(
+        "Logout error:",
+        error
+      );
     }
   };
 
+  /*
+  |--------------------------------------------------------------------------
+  | Mobile Menu
+  |--------------------------------------------------------------------------
+  */
+
   const toggleMobileMenu = () => {
-    setOpen((previousOpen) => !previousOpen);
+    setOpen(
+      (previousOpen) => !previousOpen
+    );
   };
+
+  /*
+  |--------------------------------------------------------------------------
+  | Profile Menu
+  |--------------------------------------------------------------------------
+  */
 
   const toggleProfileMenu = () => {
-    setProfileOpen((previousOpen) => !previousOpen);
+    setProfileOpen(
+      (previousOpen) => !previousOpen
+    );
   };
 
-  const isAdmin = user?.role === "Admin";
+  /*
+  |--------------------------------------------------------------------------
+  | Role Check
+  |--------------------------------------------------------------------------
+  |
+  | IMPORTANT:
+  |
+  | Backend stores "admin" in lowercase.
+  |
+  */
+
+  const isAdmin =
+    user?.role === "admin";
 
   return (
     <nav className="navbar">
-      {/* Logo */}
+      {/* ================================================================
+          LOGO
+          ================================================================= */}
+
       <div
         className="nav-logo"
-        onClick={() => scrollToSection("home")}
+        onClick={() =>
+          scrollToSection("home")
+        }
         role="button"
         tabIndex={0}
         aria-label="Go to RideRent home"
         onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
+          if (
+            event.key === "Enter" ||
+            event.key === " "
+          ) {
             scrollToSection("home");
           }
         }}
       >
-        <img src={logo} alt="RideRent Logo" />
+        <img
+          src={logo}
+          alt="RideRent Logo"
+        />
       </div>
 
-      {/* Menu */}
-      <ul className={`nav-links ${open ? "active" : ""}`}>
-        <li onClick={() => scrollToSection("home")}>
+      {/* ================================================================
+          NAVIGATION LINKS
+          ================================================================= */}
+
+      <ul
+        className={`nav-links ${
+          open ? "active" : ""
+        }`}
+      >
+        <li
+          onClick={() =>
+            scrollToSection("home")
+          }
+        >
           Home
         </li>
 
-        <li onClick={() => scrollToSection("ambulance")}>
+        <li
+          onClick={() =>
+            scrollToSection("ambulance")
+          }
+        >
           Ambulance
         </li>
 
@@ -123,20 +231,38 @@ function Navbar() {
           Vehicles
         </li>
 
-        <li onClick={() => scrollToSection("about")}>
+        <li
+          onClick={() =>
+            scrollToSection("about")
+          }
+        >
           About Us
         </li>
 
-        <li onClick={() => scrollToSection("contact")}>
+        <li
+          onClick={() =>
+            scrollToSection("contact")
+          }
+        >
           Contact
         </li>
       </ul>
 
-      {/* Buttons / User Actions */}
-      <div className={`nav-actions ${open ? "active" : ""}`}>
+      {/* ================================================================
+          USER ACTIONS
+          ================================================================= */}
+
+      <div
+        className={`nav-actions ${
+          open ? "active" : ""
+        }`}
+      >
         {!isAuthenticated ? (
           <>
-            {/* Logged Out */}
+            {/* ------------------------------------------------------------
+                Logged Out
+                ------------------------------------------------------------ */}
+
             <button
               type="button"
               className="login-btn"
@@ -156,50 +282,77 @@ function Navbar() {
             <button
               type="button"
               className="book-btn"
-              onClick={() => scrollToSection("booking")}
+              onClick={() =>
+                scrollToSection("booking")
+              }
             >
               Find Rent
             </button>
           </>
         ) : (
           <>
-            {/* Admin Dashboard */}
+            {/* ------------------------------------------------------------
+                Admin Dashboard Button
+                ------------------------------------------------------------ */}
+
             {isAdmin && (
               <button
                 type="button"
                 className="dashboard-btn"
                 onClick={goToDashboard}
               >
-                <LayoutDashboard size={18} />
-                <span>Dashboard</span>
+                <LayoutDashboard
+                  size={18}
+                />
+
+                <span>
+                  Dashboard
+                </span>
               </button>
             )}
 
-            {/* Profile */}
+            {/* ------------------------------------------------------------
+                Profile
+                ------------------------------------------------------------ */}
+
             <div className="profile-container">
               <button
                 type="button"
                 className="profile-btn"
                 onClick={toggleProfileMenu}
-                aria-expanded={profileOpen}
+                aria-expanded={
+                  profileOpen
+                }
                 aria-label="Open profile menu"
               >
-                <UserCircle size={30} />
+                <UserCircle
+                  size={30}
+                />
 
                 <span className="profile-name">
                   {user?.name}
                 </span>
               </button>
 
-              {/* Profile Dropdown */}
+              {/* ----------------------------------------------------------
+                  Profile Dropdown
+                  ---------------------------------------------------------- */}
+
               {profileOpen && (
                 <div className="profile-dropdown">
                   <div className="profile-info">
-                    <UserCircle size={38} />
+                    <UserCircle
+                      size={38}
+                    />
 
                     <div>
-                      <strong>{user?.name}</strong>
-                      <span>{user?.role}</span>
+                      <strong>
+                        {user?.name}
+                      </strong>
+
+                      <span>
+                        {user?.role}
+                      </span>
                     </div>
                   </div>
 
@@ -208,10 +361,17 @@ function Navbar() {
                   <button
                     type="button"
                     className="profile-logout"
-                    onClick={handleLogout}
+                    onClick={
+                      handleLogout
+                    }
                   >
-                    <LogOut size={18} />
-                    <span>Logout</span>
+                    <LogOut
+                      size={18}
+                    />
+
+                    <span>
+                      Logout
+                    </span>
                   </button>
                 </div>
               )}
@@ -220,10 +380,15 @@ function Navbar() {
         )}
       </div>
 
-      {/* Mobile Menu */}
+      {/* ================================================================
+          MOBILE MENU BUTTON
+          ================================================================= */}
+
       <div
         className="mobile-menu"
-        onClick={toggleMobileMenu}
+        onClick={
+          toggleMobileMenu
+        }
         role="button"
         tabIndex={0}
         aria-label={
@@ -233,12 +398,19 @@ function Navbar() {
         }
         aria-expanded={open}
         onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
+          if (
+            event.key === "Enter" ||
+            event.key === " "
+          ) {
             toggleMobileMenu();
           }
         }}
       >
-        {open ? <X size={30} /> : <Menu size={30} />}
+        {open ? (
+          <X size={30} />
+        ) : (
+          <Menu size={30} />
+        )}
       </div>
     </nav>
   );

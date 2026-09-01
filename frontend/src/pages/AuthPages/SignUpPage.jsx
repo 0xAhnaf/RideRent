@@ -1,5 +1,3 @@
-// src/pages/AuthPages/SignUpPage.jsx
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -11,35 +9,62 @@ import SubmitButton from "./components/SubmitButton";
 import SocialLogin from "./components/SocialLogin";
 import AuthFooter from "./components/AuthFooter";
 
+import { useAuth } from "../../context/AuthContext";
+
 function SignUpPage() {
   const navigate = useNavigate();
 
+  const { register } = useAuth();
+
   const [formData, setFormData] = useState({
     name: "",
+    phone: "",
     email: "",
+    address: "",
     password: "",
     confirmPassword: "",
   });
 
   const [error, setError] = useState("");
+
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  /*
+  |--------------------------------------------------------------------------
+  | Handle Input Changes
+  |--------------------------------------------------------------------------
+  */
 
-    setFormData({
-      ...formData,
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setFormData((previousData) => ({
+      ...previousData,
       [name]: value,
-    });
+    }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  /*
+  |--------------------------------------------------------------------------
+  | Handle Registration
+  |--------------------------------------------------------------------------
+  */
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
     setError("");
 
-    // Check if passwords match
-    if (formData.password !== formData.confirmPassword) {
+    /*
+    |--------------------------------------------------------------------------
+    | Check Password Confirmation
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+      formData.password !==
+      formData.confirmPassword
+    ) {
       setError("Passwords do not match.");
       return;
     }
@@ -47,47 +72,66 @@ function SignUpPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/api/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify({
-            name: formData.name,
-            email: formData.email,
-            password: formData.password,
-          }),
+      const result = await register({
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        address: formData.address,
+        password: formData.password,
+        password_confirmation:
+          formData.confirmPassword,
+      });
+
+      /*
+      |--------------------------------------------------------------------------
+      | Registration Failed
+      |--------------------------------------------------------------------------
+      */
+
+      if (!result.success) {
+        const validationErrors =
+          result.data?.errors;
+
+        if (validationErrors) {
+          const firstError = Object.values(
+            validationErrors
+          )[0]?.[0];
+
+          setError(
+            firstError ||
+              result.data?.message ||
+              "Registration failed."
+          );
+        } else {
+          setError(
+            result.data?.message ||
+              "Registration failed."
+          );
         }
-      );
 
-      const data = await response.json();
-
-      console.log("Registration response:", data);
-
-      if (!response.ok) {
-        setError(data.message || "Registration failed.");
-        setLoading(false);
         return;
       }
 
-      // Store Sanctum token
-      localStorage.setItem("auth_token", data.token);
+      /*
+      |--------------------------------------------------------------------------
+      | Registration Successful
+      |--------------------------------------------------------------------------
+      |
+      | Backend automatically authenticates the new Renter.
+      |
+      */
 
-      // Store user information
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      console.log("Registration successful!");
-      console.log("Token:", data.token);
-      console.log("User:", data.user);
-
-      // Go to home page
-      navigate("/");
+      navigate("/", { replace: true });
     } catch (error) {
-      console.error("Backend connection error:", error);
-      setError("Unable to connect to the server.");
+      console.error(
+        "Registration error:",
+        error
+      );
+
+      setError(
+        "Unable to connect to the server. Please try again."
+      );
+    } finally {
       setLoading(false);
     }
   };
@@ -98,64 +142,80 @@ function SignUpPage() {
       description="Create an account and make your next journey easier."
     >
       <AuthCard>
-
         <div className="auth-header">
           <h2>Create Account</h2>
-          <p>Enter your details to get started.</p>
+
+          <p>
+            Enter your details to get started.
+          </p>
         </div>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
-
+        <form
+          className="auth-form"
+          onSubmit={handleSubmit}
+        >
           <div className="auth-row">
-
             <AuthInput
               id="name"
+              name="name"
               label="Full Name"
               placeholder="John Doe"
               value={formData.name}
               onChange={handleChange}
+              required
             />
 
             <AuthInput
-              id="mobile"
+              id="phone"
+              name="phone"
               type="tel"
               label="Mobile Number"
-              placeholder="+880 1XXXXXXXXX"
+              placeholder="017XXXXXXXX"
+              value={formData.phone}
+              onChange={handleChange}
+              required
             />
-
           </div>
 
           <AuthInput
             id="email"
+            name="email"
             type="email"
             label="Email"
             placeholder="example@email.com"
             value={formData.email}
             onChange={handleChange}
+            required
           />
 
           <AuthInput
             id="address"
+            name="address"
             label="Residential Address"
             placeholder="Your address"
+            value={formData.address}
+            onChange={handleChange}
+            required
           />
 
           <div className="auth-row">
-
             <PasswordInput
               id="password"
+              name="password"
               label="Password"
               value={formData.password}
               onChange={handleChange}
+              required
             />
 
             <PasswordInput
               id="confirmPassword"
+              name="confirmPassword"
               label="Confirm Password"
               value={formData.confirmPassword}
               onChange={handleChange}
+              required
             />
-
           </div>
 
           {error && (
@@ -165,7 +225,10 @@ function SignUpPage() {
           )}
 
           <label className="terms">
-            <input type="checkbox" />
+            <input
+              type="checkbox"
+              required
+            />
 
             <span>
               I agree to the{" "}
@@ -179,7 +242,6 @@ function SignUpPage() {
             text="Create Account"
             loading={loading}
           />
-
         </form>
 
         <SocialLogin />
@@ -189,7 +251,6 @@ function SignUpPage() {
           linkText="Login"
           link="/login"
         />
-
       </AuthCard>
     </AuthLayout>
   );

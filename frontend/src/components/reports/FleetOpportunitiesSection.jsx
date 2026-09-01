@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { Car, Gauge, UsersRound } from "lucide-react";
 
+import { apiFetch } from "../../api";
 import "../../styles/fleet-opportunities-section.css";
-
-const API_URL = "http://127.0.0.1:8000/api/reports/fleet-opportunities";
 
 const emptyReports = {
   active_demand_fleet: [],
@@ -58,7 +57,7 @@ function FleetOpportunitiesSection() {
         setLoading(true);
         setError("");
 
-        const response = await fetch(API_URL, {
+        const response = await apiFetch("/api/reports/fleet-opportunities", {
           headers: { Accept: "application/json" },
           signal: controller.signal,
         });

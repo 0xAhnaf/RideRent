@@ -12,10 +12,10 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { apiFetch, getCsrfCookie } from "../api";
 import "../styles/admin-dashboard.css";
 import "../styles/admin-bookings-page.css";
 
-const API_BASE_URL = "http://localhost:8000/api";
 const CLOSED_STATUSES = ["Completed", "Cancelled"];
 
 const navItems = [
@@ -91,7 +91,7 @@ function AdminBookingsPage() {
   };
 
   const fetchDrivers = async () => {
-    const response = await fetch(`${API_BASE_URL}/drivers`, {
+    const response = await apiFetch("/api/drivers", {
       headers: { Accept: "application/json" },
     });
     const result = await response.json().catch(() => ({}));
@@ -113,11 +113,11 @@ function AdminBookingsPage() {
         setLoadError("");
 
         const [bookingsResponse, driversResponse] = await Promise.all([
-          fetch(`${API_BASE_URL}/bookings`, {
+          apiFetch("/api/bookings", {
             headers: { Accept: "application/json" },
             signal: controller.signal,
           }),
-          fetch(`${API_BASE_URL}/drivers`, {
+          apiFetch("/api/drivers", {
             headers: { Accept: "application/json" },
             signal: controller.signal,
           }),
@@ -246,7 +246,7 @@ function AdminBookingsPage() {
   const saveDriverAssignment = async (booking) => {
     const selectedDriverId = driverSelections[booking.b_id] || "";
     const isUnassigning = selectedDriverId === "";
-    const endpoint = `${API_BASE_URL}/bookings/${booking.b_id}/driver`;
+    const endpoint = `/api/bookings/${booking.b_id}/driver`;
 
     if (!isUnassigning && Number(selectedDriverId) === booking.driver_id) {
       return;
@@ -256,7 +256,9 @@ function AdminBookingsPage() {
       setBusyBookingId(booking.b_id);
       setActionMessage(null);
 
-      const response = await fetch(endpoint, {
+      await getCsrfCookie();
+
+      const response = await apiFetch(endpoint, {
         method: isUnassigning ? "DELETE" : "PUT",
         headers: {
           Accept: "application/json",
@@ -300,8 +302,10 @@ function AdminBookingsPage() {
       setBusyBookingId(booking.b_id);
       setActionMessage(null);
 
-      const response = await fetch(
-        `${API_BASE_URL}/bookings/${booking.b_id}`,
+      await getCsrfCookie();
+
+      const response = await apiFetch(
+        `/api/bookings/${booking.b_id}`,
         {
           method: "PUT",
           headers: {
@@ -349,8 +353,10 @@ function AdminBookingsPage() {
       setBusyBookingId(booking.b_id);
       setActionMessage(null);
 
-      const response = await fetch(
-        `${API_BASE_URL}/bookings/${booking.b_id}`,
+      await getCsrfCookie();
+
+      const response = await apiFetch(
+        `/api/bookings/${booking.b_id}`,
         {
           method: "DELETE",
           headers: { Accept: "application/json" },

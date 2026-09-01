@@ -1,9 +1,16 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+} from "react-router-dom";
 
 import LandingPage from "./pages/LandingPage";
 import VehiclesPage from "./pages/VehiclesPage";
+
 import LoginPage from "./pages/AuthPages/LoginPage";
 import SignUpPage from "./pages/AuthPages/SignUpPage";
+
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminVehiclesPage from "./pages/AdminVehiclesPage";
 import AddVehiclePage from "./pages/AddVehiclePage";
@@ -13,40 +20,121 @@ import AdminBookingsPage from "./pages/AdminBookingsPage";
 import AdminPaymentsPage from "./pages/AdminPaymentsPage";
 import AdminReportsPage from "./pages/AdminReportsPage";
 
+import AdminRoute from "./components/AdminRoute";
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
+        {/* ================================================================
+            PUBLIC PAGES
+            ================================================================= */}
 
-        <Route path="/vehicles" element={<VehiclesPage />} />
-
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignUpPage />} />
-
-        <Route path="/admin" element={<AdminDashboard />} />
         <Route
-          path="/admin/admin-vehicle"
-          element={<AdminVehiclesPage />}
+          path="/"
+          element={<LandingPage />}
         />
-        <Route path="/admin/add-vehicle" element={<AddVehiclePage />} />
-        <Route
-          path="/admin/edit-vehicle/:id"
-          element={<EditVehiclePage />}
-        />
-        <Route path="/admin/drivers" element={<AdminDriversPage />} />
-        <Route path="/admin/bookings" element={<AdminBookingsPage />} />
-        <Route path="/admin/payments" element={<AdminPaymentsPage />} />
-        <Route path="/admin/reports" element={<AdminReportsPage />} />
 
-        {/* Keep the previous vehicle URL working */}
+        <Route
+          path="/vehicles"
+          element={<VehiclesPage />}
+        />
+
+        {/* ================================================================
+            AUTHENTICATION PAGES
+            ================================================================= */}
+
+        <Route
+          path="/login"
+          element={<LoginPage />}
+        />
+
+        <Route
+          path="/signup"
+          element={<SignUpPage />}
+        />
+
+        {/* ================================================================
+            ADMIN-ONLY PAGES
+            =================================================================
+            
+            Every route inside this group requires:
+
+            1. User must be logged in.
+            2. User role must be "admin".
+
+            Future Admin pages should be added inside this group.
+            ================================================================= */}
+
+        <Route element={<AdminRoute />}>
+          <Route
+            path="/admin"
+            element={<AdminDashboard />}
+          />
+
+          <Route
+            path="/admin/admin-vehicle"
+            element={<AdminVehiclesPage />}
+          />
+
+          <Route
+            path="/admin/add-vehicle"
+            element={<AddVehiclePage />}
+          />
+
+          <Route
+            path="/admin/edit-vehicle/:id"
+            element={<EditVehiclePage />}
+          />
+
+          <Route
+            path="/admin/drivers"
+            element={<AdminDriversPage />}
+          />
+
+          <Route
+            path="/admin/bookings"
+            element={<AdminBookingsPage />}
+          />
+
+          <Route
+            path="/admin/payments"
+            element={<AdminPaymentsPage />}
+          />
+
+          <Route
+            path="/admin/reports"
+            element={<AdminReportsPage />}
+          />
+        </Route>
+
+        {/* ================================================================
+            OLD VEHICLE URL
+            ================================================================= */}
+
         <Route
           path="/admin-vehicle"
-          element={<Navigate to="/admin/admin-vehicle" replace />}
+          element={
+            <Navigate
+              to="/admin/admin-vehicle"
+              replace
+            />
+          }
         />
 
-        {/* Invalid URL → Home page */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* ================================================================
+            INVALID URL
+            ================================================================= */}
+
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to="/"
+              replace
+            />
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

@@ -9,10 +9,11 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { apiFetch, getCsrfCookie } from "../api";
 import "../styles/admin-dashboard.css";
 import "../styles/admin-drivers-page.css";
 
-const API_URL = "http://localhost:8000/api/drivers";
+const API_URL = "/api/drivers";
 
 const navItems = [
   { label: "Dashboard", icon: "▦", path: "/admin" },
@@ -72,7 +73,7 @@ function AdminDriversPage() {
         setLoadingDrivers(true);
         setLoadError("");
 
-        const response = await fetch(API_URL, {
+        const response = await apiFetch(API_URL, {
           headers: {
             Accept: "application/json",
           },
@@ -213,7 +214,9 @@ function AdminDriversPage() {
     try {
       setIsSaving(true);
 
-      const response = await fetch(requestUrl, {
+      await getCsrfCookie();
+
+      const response = await apiFetch(requestUrl, {
         method: isEditing ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
@@ -277,7 +280,9 @@ function AdminDriversPage() {
       setDeletingDriverId(driver.id);
       setActionMessage(null);
 
-      const response = await fetch(`${API_URL}/${driver.id}`, {
+      await getCsrfCookie();
+
+      const response = await apiFetch(`${API_URL}/${driver.id}`, {
         method: "DELETE",
         headers: {
           Accept: "application/json",
