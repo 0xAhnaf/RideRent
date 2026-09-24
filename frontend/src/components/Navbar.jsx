@@ -4,6 +4,8 @@ import {
   UserCircle,
   LogOut,
   LayoutDashboard,
+  ChevronDown,
+  CarFront,
 } from "lucide-react";
 
 import { useState } from "react";
@@ -20,12 +22,9 @@ import "../styles/navbar.css";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
-
-  const [profileOpen, setProfileOpen] =
-    useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const navigate = useNavigate();
-
   const location = useLocation();
 
   const {
@@ -34,25 +33,24 @@ function Navbar() {
     logout,
   } = useAuth();
 
+  const isAdmin = user?.role === "admin";
+
   /*
   |--------------------------------------------------------------------------
-  | Scroll To Landing Page Section
+  | Helpers
   |--------------------------------------------------------------------------
   */
 
-  const scrollToSection = (sectionId) => {
+  const closeMenus = () => {
     setOpen(false);
     setProfileOpen(false);
+  };
 
-    /*
-    |--------------------------------------------------------------------------
-    | Already On Home Page
-    |--------------------------------------------------------------------------
-    */
+  const scrollToSection = (sectionId) => {
+    closeMenus();
 
     if (location.pathname === "/") {
-      const targetSection =
-        document.getElementById(sectionId);
+      const targetSection = document.getElementById(sectionId);
 
       if (targetSection) {
         targetSection.scrollIntoView({
@@ -64,12 +62,6 @@ function Navbar() {
       return;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Go Home Then Scroll
-    |--------------------------------------------------------------------------
-    */
-
     navigate("/", {
       state: {
         scrollTo: sectionId,
@@ -79,35 +71,27 @@ function Navbar() {
 
   /*
   |--------------------------------------------------------------------------
-  | Navigation Functions
+  | Navigation
   |--------------------------------------------------------------------------
   */
 
   const goToVehiclesPage = () => {
-    setOpen(false);
-    setProfileOpen(false);
-
+    closeMenus();
     navigate("/vehicles");
   };
 
   const goToLogin = () => {
-    setOpen(false);
-    setProfileOpen(false);
-
+    closeMenus();
     navigate("/login");
   };
 
   const goToSignup = () => {
-    setOpen(false);
-    setProfileOpen(false);
-
+    closeMenus();
     navigate("/signup");
   };
 
   const goToDashboard = () => {
-    setOpen(false);
-    setProfileOpen(false);
-
+    closeMenus();
     navigate("/admin");
   };
 
@@ -118,8 +102,7 @@ function Navbar() {
   */
 
   const handleLogout = async () => {
-    setProfileOpen(false);
-    setOpen(false);
+    closeMenus();
 
     try {
       await logout();
@@ -128,10 +111,7 @@ function Navbar() {
         replace: true,
       });
     } catch (error) {
-      console.error(
-        "Logout error:",
-        error
-      );
+      console.error("Logout error:", error);
     }
   };
 
@@ -142,9 +122,8 @@ function Navbar() {
   */
 
   const toggleMobileMenu = () => {
-    setOpen(
-      (previousOpen) => !previousOpen
-    );
+    setOpen((previousOpen) => !previousOpen);
+    setProfileOpen(false);
   };
 
   /*
@@ -154,36 +133,37 @@ function Navbar() {
   */
 
   const toggleProfileMenu = () => {
-    setProfileOpen(
-      (previousOpen) => !previousOpen
-    );
+    setProfileOpen((previousOpen) => !previousOpen);
   };
 
   /*
   |--------------------------------------------------------------------------
-  | Role Check
+  | Active Navigation
   |--------------------------------------------------------------------------
-  |
-  | IMPORTANT:
-  |
-  | Backend stores "admin" in lowercase.
-  |
   */
 
-  const isAdmin =
-    user?.role === "admin";
+  const isHome = location.pathname === "/";
+  const isVehicles = location.pathname === "/vehicles";
+
+  /*
+  |--------------------------------------------------------------------------
+  | User Initial
+  |--------------------------------------------------------------------------
+  */
+
+  const userInitial =
+    user?.name?.charAt(0)?.toUpperCase() || "U";
 
   return (
     <nav className="navbar">
+
       {/* ================================================================
           LOGO
-          ================================================================= */}
+          ================================================================ */}
 
       <div
         className="nav-logo"
-        onClick={() =>
-          scrollToSection("home")
-        }
+        onClick={() => scrollToSection("home")}
         role="button"
         tabIndex={0}
         aria-label="Go to RideRent home"
@@ -198,13 +178,14 @@ function Navbar() {
       >
         <img
           src={logo}
-          alt="RideRent Logo"
+          alt="RideRent"
         />
       </div>
 
+
       {/* ================================================================
           NAVIGATION LINKS
-          ================================================================= */}
+          ================================================================ */}
 
       <ul
         className={`nav-links ${
@@ -212,9 +193,8 @@ function Navbar() {
         }`}
       >
         <li
-          onClick={() =>
-            scrollToSection("home")
-          }
+          className={isHome ? "active-link" : ""}
+          onClick={() => scrollToSection("home")}
         >
           Home
         </li>
@@ -227,7 +207,10 @@ function Navbar() {
           Ambulance
         </li>
 
-        <li onClick={goToVehiclesPage}>
+        <li
+          className={isVehicles ? "active-link" : ""}
+          onClick={goToVehiclesPage}
+        >
           Vehicles
         </li>
 
@@ -248,20 +231,23 @@ function Navbar() {
         </li>
       </ul>
 
+
       {/* ================================================================
-          USER ACTIONS
-          ================================================================= */}
+          RIGHT SIDE ACTIONS
+          ================================================================ */}
 
       <div
         className={`nav-actions ${
           open ? "active" : ""
         }`}
       >
+
+        {/* ==============================================================
+            LOGGED OUT
+            ============================================================== */}
+
         {!isAuthenticated ? (
           <>
-            {/* ------------------------------------------------------------
-                Logged Out
-                ------------------------------------------------------------ */}
 
             <button
               type="button"
@@ -286,14 +272,22 @@ function Navbar() {
                 scrollToSection("booking")
               }
             >
-              Find Rent
+              <CarFront size={17} />
+              <span>Find Rent</span>
             </button>
+
           </>
         ) : (
-          <>
-            {/* ------------------------------------------------------------
-                Admin Dashboard Button
-                ------------------------------------------------------------ */}
+
+          /* ==============================================================
+             LOGGED IN
+             ============================================================== */
+
+          <div className="logged-in-actions">
+
+            {/* ----------------------------------------------------------
+                ADMIN DASHBOARD
+                ---------------------------------------------------------- */}
 
             {isAdmin && (
               <button
@@ -301,9 +295,7 @@ function Navbar() {
                 className="dashboard-btn"
                 onClick={goToDashboard}
               >
-                <LayoutDashboard
-                  size={18}
-                />
+                <LayoutDashboard size={18} />
 
                 <span>
                   Dashboard
@@ -311,107 +303,142 @@ function Navbar() {
               </button>
             )}
 
-            {/* ------------------------------------------------------------
-                Profile
-                ------------------------------------------------------------ */}
+
+            {/* ----------------------------------------------------------
+                PROFILE
+                ---------------------------------------------------------- */}
 
             <div className="profile-container">
+
               <button
                 type="button"
-                className="profile-btn"
-                onClick={toggleProfileMenu}
-                aria-expanded={
+                className={`profile-btn ${
                   profileOpen
-                }
+                    ? "profile-btn-open"
+                    : ""
+                }`}
+                onClick={toggleProfileMenu}
+                aria-expanded={profileOpen}
                 aria-label="Open profile menu"
               >
-                <UserCircle
-                  size={30}
-                />
+
+                <span className="profile-avatar">
+                  {userInitial}
+                </span>
 
                 <span className="profile-name">
-                  {user?.name}
+                  {user?.name || "User"}
                 </span>
+
+                <ChevronDown
+                  size={17}
+                  className={`profile-chevron ${
+                    profileOpen
+                      ? "rotate"
+                      : ""
+                  }`}
+                />
+
               </button>
 
-              {/* ----------------------------------------------------------
-                  Profile Dropdown
-                  ---------------------------------------------------------- */}
+
+              {/* --------------------------------------------------------
+                  PROFILE DROPDOWN
+                  -------------------------------------------------------- */}
 
               {profileOpen && (
                 <div className="profile-dropdown">
-                  <div className="profile-info">
-                    <UserCircle
-                      size={38}
-                    />
 
-                    <div>
+                  <div className="profile-info">
+
+                    <div className="profile-avatar large">
+                      {userInitial}
+                    </div>
+
+                    <div className="profile-details">
+
                       <strong>
-                        {user?.name}
+                        {user?.name || "User"}
                       </strong>
 
                       <span>
-                        {user?.role}
+                        {user?.email || ""}
                       </span>
+
+                      <small>
+                        {user?.role === "admin"
+                          ? "Administrator"
+                          : "Renter"}
+                      </small>
+
                     </div>
+
                   </div>
+
 
                   <div className="profile-divider" />
 
+
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      className="dropdown-item"
+                      onClick={goToDashboard}
+                    >
+                      <LayoutDashboard size={18} />
+
+                      <span>
+                        Dashboard
+                      </span>
+                    </button>
+                  )}
+
+
                   <button
                     type="button"
-                    className="profile-logout"
-                    onClick={
-                      handleLogout
-                    }
+                    className="dropdown-item logout-item"
+                    onClick={handleLogout}
                   >
-                    <LogOut
-                      size={18}
-                    />
+                    <LogOut size={18} />
 
                     <span>
                       Logout
                     </span>
                   </button>
+
                 </div>
               )}
+
             </div>
-          </>
+
+          </div>
         )}
+
       </div>
 
-      {/* ================================================================
-          MOBILE MENU BUTTON
-          ================================================================= */}
 
-      <div
+      {/* ================================================================
+          MOBILE MENU
+          ================================================================ */}
+
+      <button
+        type="button"
         className="mobile-menu"
-        onClick={
-          toggleMobileMenu
-        }
-        role="button"
-        tabIndex={0}
+        onClick={toggleMobileMenu}
         aria-label={
           open
             ? "Close navigation menu"
             : "Open navigation menu"
         }
         aria-expanded={open}
-        onKeyDown={(event) => {
-          if (
-            event.key === "Enter" ||
-            event.key === " "
-          ) {
-            toggleMobileMenu();
-          }
-        }}
       >
         {open ? (
-          <X size={30} />
+          <X size={27} />
         ) : (
-          <Menu size={30} />
+          <Menu size={27} />
         )}
-      </div>
+      </button>
+
     </nav>
   );
 }
