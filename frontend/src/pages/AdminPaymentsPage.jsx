@@ -14,22 +14,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { apiFetch, getCsrfCookie } from "../api";
+import AdminHeader from "../components/admin/AdminHeader";
+import AdminSidebar from "../components/admin/AdminSidebar";
 import "../styles/admin-dashboard.css";
 import "../styles/admin-payments-page.css";
 
 const API_BASE_URL = "/api";
-
-const navItems = [
-  { label: "Dashboard", icon: "▦", path: "/admin" },
-  { label: "Manage Users", icon: "♙" },
-  { label: "Vehicles", icon: "▱", path: "/admin/admin-vehicle" },
-  { label: "Drivers", icon: "♧", path: "/admin/drivers" },
-  { label: "Bookings", icon: "▣", path: "/admin/bookings" },
-  { label: "Payments", icon: "৳", path: "/admin/payments" },
-  { label: "Ambulance / Emergency", icon: "✚", danger: true },
-  { label: "Reviews", icon: "☆" },
-  { label: "Reports", icon: "▥", path: "/admin/reports" },
-];
 
 const createInitialForm = () => ({
   booking_id: "",
@@ -257,7 +247,9 @@ function AdminPaymentsPage() {
       const matchesSearch =
         !normalizedSearch ||
         searchableValues.some((value) =>
-          String(value ?? "").toLowerCase().includes(normalizedSearch),
+          String(value ?? "")
+            .toLowerCase()
+            .includes(normalizedSearch),
         );
 
       return matchesStatus && matchesSearch;
@@ -485,66 +477,13 @@ function AdminPaymentsPage() {
 
   return (
     <div className="admin-layout">
-      <aside className="admin-sidebar">
-        <div className="admin-brand">
-          <img
-            src="/src/assets/logo_nobg.png"
-            alt="RideRent logo"
-            className="admin-logo"
-          />
-
-          <div>
-            <h1>RideRent</h1>
-            <p>Admin Portal</p>
-          </div>
-        </div>
-
-        <nav className="admin-nav">
-          {navItems.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              className={`admin-nav-item ${
-                item.label === "Payments" ? "active" : ""
-              } ${item.danger ? "danger-item" : ""}`}
-              onClick={() => handleNavigation(item)}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
-
-        <div className="admin-sidebar-footer">
-          <button type="button" className="admin-nav-item">
-            <span className="nav-icon">?</span>
-            <span>Support</span>
-          </button>
-
-          <button type="button" className="admin-nav-item">
-            <span className="nav-icon">↪</span>
-            <span>Logout</span>
-          </button>
-        </div>
-      </aside>
+      <AdminSidebar activeItem="Payments" />
 
       <main className="admin-main admin-payment-main">
-        <header className="admin-header">
-          <div>
-            <h2>Payment Management</h2>
-            <p>Record and track RideRent booking payments and refunds.</p>
-          </div>
-
-          <div className="admin-header-right">
-            <div className="admin-profile">
-              <div className="admin-avatar">A</div>
-              <div className="admin-profile-info">
-                <strong>Admin User</strong>
-                <span>System Administrator</span>
-              </div>
-            </div>
-          </div>
-        </header>
+        <AdminHeader
+          title="Payment Management"
+          subtitle="Record and track RideRent booking payments and refunds."
+        />
 
         <section className="admin-payment-add-section">
           <div>
@@ -698,9 +637,7 @@ function AdminPaymentsPage() {
               )}
 
               <div className="admin-payment-field reference-field">
-                <label htmlFor="payment-reference">
-                  Transaction Reference
-                </label>
+                <label htmlFor="payment-reference">Transaction Reference</label>
                 <input
                   id="payment-reference"
                   name="transaction_reference"
@@ -824,10 +761,7 @@ function AdminPaymentsPage() {
 
                 {!loading && loadError && (
                   <tr className="admin-payment-state-row">
-                    <td
-                      colSpan="7"
-                      className="admin-payment-state-cell error"
-                    >
+                    <td colSpan="7" className="admin-payment-state-cell error">
                       {loadError}
                     </td>
                   </tr>
@@ -863,16 +797,24 @@ function AdminPaymentsPage() {
 
                         <td data-label="Booking & Vehicle">
                           <div className="admin-payment-booking-cell">
-                            <strong>#BK-{booking?.b_id || payment.booking_id}</strong>
-                            <span>{booking?.car?.name || "Unknown Vehicle"}</span>
+                            <strong>
+                              #BK-{booking?.b_id || payment.booking_id}
+                            </strong>
+                            <span>
+                              {booking?.car?.name || "Unknown Vehicle"}
+                            </span>
                             <small>User #{booking?.u_id || "—"}</small>
                           </div>
                         </td>
 
                         <td data-label="Driver">
                           <div className="admin-payment-driver-cell">
-                            <strong>{booking?.driver?.name || "Unassigned"}</strong>
-                            <span>{booking?.driver?.phone || "No driver phone"}</span>
+                            <strong>
+                              {booking?.driver?.name || "Unassigned"}
+                            </strong>
+                            <span>
+                              {booking?.driver?.phone || "No driver phone"}
+                            </span>
                           </div>
                         </td>
 

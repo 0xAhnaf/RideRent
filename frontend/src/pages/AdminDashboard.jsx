@@ -2,19 +2,9 @@ import { useEffect, useState } from "react";
 import { Check, Flag, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch, getCsrfCookie } from "../api";
+import AdminHeader from "../components/admin/AdminHeader";
+import AdminSidebar from "../components/admin/AdminSidebar";
 import "../styles/admin-dashboard.css";
-
-const navItems = [
-  { label: "Dashboard", icon: "▦" },
-  { label: "Manage Users", icon: "♙" },
-  { label: "Vehicles", icon: "▱", path: "/admin/admin-vehicle" },
-  { label: "Drivers", icon: "♧", path: "/admin/drivers" },
-  { label: "Bookings", icon: "▣", path: "/admin/bookings" },
-  { label: "Payments", icon: "৳", path: "/admin/payments" },
-  { label: "Ambulance / Emergency", icon: "✚", danger: true },
-  { label: "Reviews", icon: "☆" },
-  { label: "Reports", icon: "▥", path: "/admin/reports" },
-];
 
 const stats = [
   {
@@ -125,20 +115,16 @@ function AdminDashboard() {
     try {
       await getCsrfCookie();
 
-      const response = await apiFetch(
-        `/api/bookings/${bookingId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Accept: "application/json",
-          },
+      const response = await apiFetch(`/api/bookings/${bookingId}`, {
+        method: "DELETE",
+        headers: {
+          Accept: "application/json",
         },
-      );
+      });
 
       if (!response.ok) {
         throw new Error("Failed to delete booking.");
       }
-
 
       setBookings((currentBookings) =>
         currentBookings.filter((booking) => booking.b_id !== bookingId),
@@ -153,19 +139,16 @@ function AdminDashboard() {
     try {
       await getCsrfCookie();
 
-      const response = await apiFetch(
-        `/api/bookings/${bookingId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify({
-            booking_status: newStatus,
-          }),
+      const response = await apiFetch(`/api/bookings/${bookingId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
-      );
+        body: JSON.stringify({
+          booking_status: newStatus,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to update booking status.");
@@ -186,72 +169,16 @@ function AdminDashboard() {
   return (
     <div className="admin-layout">
       {/* Sidebar */}
-      <aside className="admin-sidebar">
-        <div className="admin-brand">
-          <img
-            src="/src/assets/logo_nobg.png"
-            alt="RideRent logo"
-            className="admin-logo"
-          />
-
-          <div>
-            <h1>RideRent</h1>
-            <p>Admin Portal</p>
-          </div>
-        </div>
-
-        <nav className="admin-nav">
-          {navItems.map((item) => (
-            <button
-              key={item.label}
-              className={`admin-nav-item ${
-                activeNav === item.label ? "active" : ""
-              } ${item.danger ? "danger-item" : ""}`}
-              onClick={() => handleNavigation(item)}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
-
-        <div className="admin-sidebar-footer">
-          <button className="admin-nav-item">
-            <span className="nav-icon">?</span>
-            <span>Support</span>
-          </button>
-
-          <button className="admin-nav-item">
-            <span className="nav-icon">↪</span>
-            <span>Logout</span>
-          </button>
-        </div>
-      </aside>
+      <AdminSidebar activeItem="Dashboard" />
 
       {/* Main Content */}
       <main className="admin-main">
         {/* Header */}
-        <header className="admin-header">
-          <div>
-            <h2>Overview</h2>
-            <p>Real-time system metrics and pending actions.</p>
-          </div>
-
-          <div className="admin-header-right">
-            <button className="notification-button" aria-label="Notifications">
-              ♢<span>3</span>
-            </button>
-
-            <div className="admin-profile">
-              <div className="admin-avatar">A</div>
-
-              <div className="admin-profile-info">
-                <strong>Admin User</strong>
-                <span>System Administrator</span>
-              </div>
-            </div>
-          </div>
-        </header>
+        <AdminHeader
+          title="Overview"
+          subtitle="Real-time system metrics and pending actions."
+          showNotifications
+        />
 
         {/* KPI Cards */}
         <section className="stats-grid">

@@ -13,22 +13,12 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { apiFetch, getCsrfCookie } from "../api";
+import AdminHeader from "../components/admin/AdminHeader";
+import AdminSidebar from "../components/admin/AdminSidebar";
 import "../styles/admin-dashboard.css";
 import "../styles/admin-bookings-page.css";
 
 const CLOSED_STATUSES = ["Completed", "Cancelled"];
-
-const navItems = [
-  { label: "Dashboard", icon: "▦", path: "/admin" },
-  { label: "Manage Users", icon: "♙" },
-  { label: "Vehicles", icon: "▱", path: "/admin/admin-vehicle" },
-  { label: "Drivers", icon: "♧", path: "/admin/drivers" },
-  { label: "Bookings", icon: "▣", path: "/admin/bookings" },
-  { label: "Payments", icon: "৳", path: "/admin/payments" },
-  { label: "Ambulance / Emergency", icon: "✚", danger: true },
-  { label: "Reviews", icon: "☆" },
-  { label: "Reports", icon: "▥", path: "/admin/reports" },
-];
 
 const getApiErrorMessage = (result, fallbackMessage) => {
   const validationMessage = result?.errors
@@ -146,7 +136,9 @@ function AdminBookingsPage() {
         const driverRecords = Array.isArray(driversResult)
           ? driversResult
           : driversResult.drivers;
-        const safeBookings = Array.isArray(bookingRecords) ? bookingRecords : [];
+        const safeBookings = Array.isArray(bookingRecords)
+          ? bookingRecords
+          : [];
 
         setBookings(safeBookings);
         setDrivers(Array.isArray(driverRecords) ? driverRecords : []);
@@ -216,7 +208,9 @@ function AdminBookingsPage() {
       const matchesSearch =
         !normalizedSearch ||
         searchableValues.some((value) =>
-          String(value ?? "").toLowerCase().includes(normalizedSearch),
+          String(value ?? "")
+            .toLowerCase()
+            .includes(normalizedSearch),
         );
 
       return matchesStatus && matchesSearch;
@@ -304,17 +298,14 @@ function AdminBookingsPage() {
 
       await getCsrfCookie();
 
-      const response = await apiFetch(
-        `/api/bookings/${booking.b_id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify({ booking_status: newStatus }),
+      const response = await apiFetch(`/api/bookings/${booking.b_id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
-      );
+        body: JSON.stringify({ booking_status: newStatus }),
+      });
       const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
@@ -355,17 +346,16 @@ function AdminBookingsPage() {
 
       await getCsrfCookie();
 
-      const response = await apiFetch(
-        `/api/bookings/${booking.b_id}`,
-        {
-          method: "DELETE",
-          headers: { Accept: "application/json" },
-        },
-      );
+      const response = await apiFetch(`/api/bookings/${booking.b_id}`, {
+        method: "DELETE",
+        headers: { Accept: "application/json" },
+      });
       const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(getApiErrorMessage(result, "Unable to delete booking."));
+        throw new Error(
+          getApiErrorMessage(result, "Unable to delete booking."),
+        );
       }
 
       setBookings((currentBookings) =>
@@ -396,66 +386,13 @@ function AdminBookingsPage() {
 
   return (
     <div className="admin-layout">
-      <aside className="admin-sidebar">
-        <div className="admin-brand">
-          <img
-            src="/src/assets/logo_nobg.png"
-            alt="RideRent logo"
-            className="admin-logo"
-          />
-
-          <div>
-            <h1>RideRent</h1>
-            <p>Admin Portal</p>
-          </div>
-        </div>
-
-        <nav className="admin-nav">
-          {navItems.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              className={`admin-nav-item ${
-                item.label === "Bookings" ? "active" : ""
-              } ${item.danger ? "danger-item" : ""}`}
-              onClick={() => handleNavigation(item)}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
-
-        <div className="admin-sidebar-footer">
-          <button type="button" className="admin-nav-item">
-            <span className="nav-icon">?</span>
-            <span>Support</span>
-          </button>
-
-          <button type="button" className="admin-nav-item">
-            <span className="nav-icon">↪</span>
-            <span>Logout</span>
-          </button>
-        </div>
-      </aside>
+      <AdminSidebar activeItem="Bookings" />
 
       <main className="admin-main admin-booking-main">
-        <header className="admin-header">
-          <div>
-            <h2>Booking Management</h2>
-            <p>Assign drivers and manage every booking through its trip flow.</p>
-          </div>
-
-          <div className="admin-header-right">
-            <div className="admin-profile">
-              <div className="admin-avatar">A</div>
-              <div className="admin-profile-info">
-                <strong>Admin User</strong>
-                <span>System Administrator</span>
-              </div>
-            </div>
-          </div>
-        </header>
+        <AdminHeader
+          title="Booking Management"
+          subtitle="Assign drivers and manage every booking through its trip flow."
+        />
 
         <section className="admin-booking-summary" aria-label="Booking summary">
           <article>
@@ -561,10 +498,7 @@ function AdminBookingsPage() {
 
                 {!loading && loadError && (
                   <tr className="admin-booking-state-row">
-                    <td
-                      colSpan="7"
-                      className="admin-booking-state-cell error"
-                    >
+                    <td colSpan="7" className="admin-booking-state-cell error">
                       {loadError}
                     </td>
                   </tr>
@@ -608,7 +542,9 @@ function AdminBookingsPage() {
 
                         <td data-label="Vehicle & Trip">
                           <div className="admin-booking-trip-cell">
-                            <strong>{booking.car?.name || "Unknown Vehicle"}</strong>
+                            <strong>
+                              {booking.car?.name || "Unknown Vehicle"}
+                            </strong>
                             <span>{booking.trip_type}</span>
                             <small>{booking.trip_duration}</small>
                           </div>

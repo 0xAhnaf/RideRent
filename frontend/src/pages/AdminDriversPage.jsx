@@ -1,31 +1,14 @@
-import {
-  Pencil,
-  Plus,
-  Search,
-  Trash2,
-  UserRound,
-  X,
-} from "lucide-react";
+import { Pencil, Plus, Search, Trash2, UserRound, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { apiFetch, getCsrfCookie } from "../api";
+import AdminHeader from "../components/admin/AdminHeader";
+import AdminSidebar from "../components/admin/AdminSidebar";
 import "../styles/admin-dashboard.css";
 import "../styles/admin-drivers-page.css";
 
 const API_URL = "/api/drivers";
-
-const navItems = [
-  { label: "Dashboard", icon: "▦", path: "/admin" },
-  { label: "Manage Users", icon: "♙" },
-  { label: "Vehicles", icon: "▱", path: "/admin/admin-vehicle" },
-  { label: "Drivers", icon: "♧", path: "/admin/drivers" },
-  { label: "Bookings", icon: "▣", path: "/admin/bookings" },
-  { label: "Payments", icon: "৳", path: "/admin/payments" },
-  { label: "Ambulance / Emergency", icon: "✚", danger: true },
-  { label: "Reviews", icon: "☆" },
-  { label: "Reports", icon: "▥", path: "/admin/reports" },
-];
 
 const createInitialFormData = () => ({
   name: "",
@@ -88,9 +71,7 @@ function AdminDriversPage() {
           );
         }
 
-        const driverRecords = Array.isArray(result)
-          ? result
-          : result.drivers;
+        const driverRecords = Array.isArray(result) ? result : result.drivers;
 
         setDrivers(
           sortDrivers(Array.isArray(driverRecords) ? driverRecords : []),
@@ -118,8 +99,7 @@ function AdminDriversPage() {
       available: drivers.filter((driver) => driver.status === "available")
         .length,
       busy: drivers.filter((driver) => driver.status === "busy").length,
-      inactive: drivers.filter((driver) => driver.status === "inactive")
-        .length,
+      inactive: drivers.filter((driver) => driver.status === "inactive").length,
     }),
     [drivers],
   );
@@ -207,9 +187,7 @@ function AdminDriversPage() {
     setActionMessage(null);
 
     const isEditing = editingDriverId !== null;
-    const requestUrl = isEditing
-      ? `${API_URL}/${editingDriverId}`
-      : API_URL;
+    const requestUrl = isEditing ? `${API_URL}/${editingDriverId}` : API_URL;
 
     try {
       setIsSaving(true);
@@ -324,67 +302,13 @@ function AdminDriversPage() {
 
   return (
     <div className="admin-layout">
-      <aside className="admin-sidebar">
-        <div className="admin-brand">
-          <img
-            src="/src/assets/logo_nobg.png"
-            alt="RideRent logo"
-            className="admin-logo"
-          />
-
-          <div>
-            <h1>RideRent</h1>
-            <p>Admin Portal</p>
-          </div>
-        </div>
-
-        <nav className="admin-nav">
-          {navItems.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              className={`admin-nav-item ${
-                item.label === "Drivers" ? "active" : ""
-              } ${item.danger ? "danger-item" : ""}`}
-              onClick={() => handleNavigation(item)}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
-
-        <div className="admin-sidebar-footer">
-          <button type="button" className="admin-nav-item">
-            <span className="nav-icon">?</span>
-            <span>Support</span>
-          </button>
-
-          <button type="button" className="admin-nav-item">
-            <span className="nav-icon">↪</span>
-            <span>Logout</span>
-          </button>
-        </div>
-      </aside>
+      <AdminSidebar activeItem="Drivers" />
 
       <main className="admin-main">
-        <header className="admin-header">
-          <div>
-            <h2>Driver Management</h2>
-            <p>Manage RideRent driver records and operational availability.</p>
-          </div>
-
-          <div className="admin-header-right">
-            <div className="admin-profile">
-              <div className="admin-avatar">A</div>
-
-              <div className="admin-profile-info">
-                <strong>Admin User</strong>
-                <span>System Administrator</span>
-              </div>
-            </div>
-          </div>
-        </header>
+        <AdminHeader
+          title="Driver Management"
+          subtitle="Manage RideRent driver records and operational availability."
+        />
 
         <section className="admin-driver-add-section">
           <div className="admin-driver-add-copy">
@@ -406,7 +330,10 @@ function AdminDriversPage() {
           </button>
         </section>
 
-        <section className="admin-driver-stats-grid" aria-label="Driver summary">
+        <section
+          className="admin-driver-stats-grid"
+          aria-label="Driver summary"
+        >
           <article className="admin-driver-stat-card">
             <span>Total Drivers</span>
             <strong>{driverStats.total}</strong>
@@ -435,7 +362,9 @@ function AdminDriversPage() {
                 <span className="admin-driver-section-kicker">
                   {editingDriverId ? "Update Record" : "New Record"}
                 </span>
-                <h3>{editingDriverId ? "Edit Driver" : "Driver Information"}</h3>
+                <h3>
+                  {editingDriverId ? "Edit Driver" : "Driver Information"}
+                </h3>
               </div>
 
               <button
@@ -557,7 +486,9 @@ function AdminDriversPage() {
         <section className="dashboard-card admin-driver-list-card">
           <div className="admin-driver-list-header">
             <div>
-              <span className="admin-driver-section-kicker">Driver Records</span>
+              <span className="admin-driver-section-kicker">
+                Driver Records
+              </span>
               <h3>Existing Drivers</h3>
               <p>
                 {loadingDrivers
@@ -569,7 +500,9 @@ function AdminDriversPage() {
             <div className="admin-driver-filters">
               <label className="admin-driver-search">
                 <Search size={16} aria-hidden="true" />
-                <span className="admin-driver-visually-hidden">Search drivers</span>
+                <span className="admin-driver-visually-hidden">
+                  Search drivers
+                </span>
                 <input
                   type="search"
                   value={searchTerm}
@@ -579,7 +512,9 @@ function AdminDriversPage() {
               </label>
 
               <label>
-                <span className="admin-driver-visually-hidden">Filter by status</span>
+                <span className="admin-driver-visually-hidden">
+                  Filter by status
+                </span>
                 <select
                   value={statusFilter}
                   onChange={(event) => setStatusFilter(event.target.value)}
@@ -652,7 +587,10 @@ function AdminDriversPage() {
                   !loadError &&
                   filteredDrivers.map((driver) => (
                     <tr key={driver.id}>
-                      <td data-label="Driver" className="admin-driver-main-cell">
+                      <td
+                        data-label="Driver"
+                        className="admin-driver-main-cell"
+                      >
                         <div className="admin-driver-name-cell">
                           <span className="admin-driver-avatar">
                             <UserRound size={19} />
@@ -680,7 +618,10 @@ function AdminDriversPage() {
                           {driver.status}
                         </span>
                       </td>
-                      <td data-label="Actions" className="admin-driver-actions-cell">
+                      <td
+                        data-label="Actions"
+                        className="admin-driver-actions-cell"
+                      >
                         <div className="admin-driver-row-actions">
                           <button
                             type="button"

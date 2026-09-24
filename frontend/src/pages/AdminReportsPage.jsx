@@ -15,20 +15,10 @@ import BusinessInsightsSection from "../components/reports/BusinessInsightsSecti
 import FleetOpportunitiesSection from "../components/reports/FleetOpportunitiesSection";
 import RelationshipReportsSection from "../components/reports/RelationshipReportsSection";
 import { apiFetch } from "../api";
+import AdminHeader from "../components/admin/AdminHeader";
+import AdminSidebar from "../components/admin/AdminSidebar";
 import "../styles/admin-dashboard.css";
 import "../styles/admin-reports-page.css";
-
-const navItems = [
-  { label: "Dashboard", icon: "◦", path: "/admin" },
-  { label: "Manage Users", icon: "♙" },
-  { label: "Vehicles", icon: "▱", path: "/admin/admin-vehicle" },
-  { label: "Drivers", icon: "♧", path: "/admin/drivers" },
-  { label: "Bookings", icon: "▣", path: "/admin/bookings" },
-  { label: "Payments", icon: "৳", path: "/admin/payments" },
-  { label: "Ambulance / Emergency", icon: "✚", danger: true },
-  { label: "Reviews", icon: "☆" },
-  { label: "Reports", icon: "▥", path: "/admin/reports" },
-];
 
 const emptySummary = {
   overview: {
@@ -197,66 +187,13 @@ function AdminReportsPage() {
 
   return (
     <div className="admin-layout">
-      <aside className="admin-sidebar">
-        <div className="admin-brand">
-          <img
-            src="/src/assets/logo_nobg.png"
-            alt="RideRent logo"
-            className="admin-logo"
-          />
-
-          <div>
-            <h1>RideRent</h1>
-            <p>Admin Portal</p>
-          </div>
-        </div>
-
-        <nav className="admin-nav">
-          {navItems.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              className={`admin-nav-item ${
-                item.label === "Reports" ? "active" : ""
-              } ${item.danger ? "danger-item" : ""}`}
-              onClick={() => item.path && navigate(item.path)}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
-
-        <div className="admin-sidebar-footer">
-          <button type="button" className="admin-nav-item">
-            <span className="nav-icon">?</span>
-            <span>Support</span>
-          </button>
-
-          <button type="button" className="admin-nav-item">
-            <span className="nav-icon">↪</span>
-            <span>Logout</span>
-          </button>
-        </div>
-      </aside>
+      <AdminSidebar activeItem="Reports" dashboardIcon="◦" />
 
       <main className="admin-main admin-report-main">
-        <header className="admin-header">
-          <div>
-            <h2>Reports &amp; Analytics</h2>
-            <p>Review RideRent&apos;s fleet, booking, and payment performance.</p>
-          </div>
-
-          <div className="admin-header-right">
-            <div className="admin-profile">
-              <div className="admin-avatar">A</div>
-              <div className="admin-profile-info">
-                <strong>Admin User</strong>
-                <span>System Administrator</span>
-              </div>
-            </div>
-          </div>
-        </header>
+        <AdminHeader
+          title="Reports & Analytics"
+          subtitle="Review RideRent's fleet, booking, and payment performance."
+        />
 
         {error && (
           <div className="admin-report-message error" role="alert">
@@ -285,7 +222,10 @@ function AdminReportsPage() {
                   const Icon = card.icon;
 
                   return (
-                    <article className="admin-report-overview-card" key={card.label}>
+                    <article
+                      className="admin-report-overview-card"
+                      key={card.label}
+                    >
                       <div className="admin-report-card-icon">
                         <Icon size={22} aria-hidden="true" />
                       </div>
@@ -300,7 +240,10 @@ function AdminReportsPage() {
               </div>
             </section>
 
-            <section className="admin-report-panel" aria-labelledby="payment-overview-title">
+            <section
+              className="admin-report-panel"
+              aria-labelledby="payment-overview-title"
+            >
               <div className="admin-report-section-heading panel-heading">
                 <div>
                   <span>PAYMENT PERFORMANCE</span>
@@ -314,7 +257,10 @@ function AdminReportsPage() {
                   const Icon = card.icon;
 
                   return (
-                    <article className="admin-report-payment-card" key={card.label}>
+                    <article
+                      className="admin-report-payment-card"
+                      key={card.label}
+                    >
                       <div className="admin-report-payment-icon">
                         <Icon size={20} aria-hidden="true" />
                       </div>
@@ -326,7 +272,10 @@ function AdminReportsPage() {
               </div>
             </section>
 
-            <section className="admin-report-panel" aria-labelledby="booking-timeline-title">
+            <section
+              className="admin-report-panel"
+              aria-labelledby="booking-timeline-title"
+            >
               <div className="admin-report-section-heading panel-heading">
                 <div>
                   <span>BOOKING ACTIVITY</span>
@@ -344,7 +293,9 @@ function AdminReportsPage() {
                     </div>
                     <p>{formatBookingDate(booking)}</p>
                     {booking && (
-                      <small className={`status-${booking.booking_status?.toLowerCase()}`}>
+                      <small
+                        className={`status-${booking.booking_status?.toLowerCase()}`}
+                      >
                         {booking.booking_status}
                       </small>
                     )}

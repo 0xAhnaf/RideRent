@@ -3,20 +3,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { apiFetch, getCsrfCookie } from "../api";
+import AdminHeader from "../components/admin/AdminHeader";
+import AdminSidebar from "../components/admin/AdminSidebar";
 import "../styles/admin-dashboard.css";
 import "../styles/admin-vehicles-page.css";
-
-const navItems = [
-  { label: "Dashboard", icon: "▦", path: "/admin" },
-  { label: "Manage Users", icon: "♙" },
-  { label: "Vehicles", icon: "▱", path: "/admin/admin-vehicle" },
-  { label: "Drivers", icon: "♧", path: "/admin/drivers" },
-  { label: "Bookings", icon: "▣", path: "/admin/bookings" },
-  { label: "Payments", icon: "৳", path: "/admin/payments" },
-  { label: "Ambulance / Emergency", icon: "✚", danger: true },
-  { label: "Reviews", icon: "☆" },
-  { label: "Reports", icon: "▥", path: "/admin/reports" },
-];
 
 function AdminVehicleImage({ car }) {
   const [imageError, setImageError] = useState(false);
@@ -28,7 +18,10 @@ function AdminVehicleImage({ car }) {
 
   if (!imageSource || imageError) {
     return (
-      <div className="admin-vehicle-image-fallback" aria-label="Vehicle image unavailable">
+      <div
+        className="admin-vehicle-image-fallback"
+        aria-label="Vehicle image unavailable"
+      >
         <CarFront size={24} />
       </div>
     );
@@ -99,22 +92,17 @@ function AdminVehiclesPage() {
 
       await getCsrfCookie();
 
-      const response = await apiFetch(
-        `/api/cars/${car.id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Accept: "application/json",
-          },
+      const response = await apiFetch(`/api/cars/${car.id}`, {
+        method: "DELETE",
+        headers: {
+          Accept: "application/json",
         },
-      );
+      });
 
       const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(
-          result.message || "Unable to delete the vehicle.",
-        );
+        throw new Error(result.message || "Unable to delete the vehicle.");
       }
 
       setCars((currentCars) =>
@@ -137,67 +125,13 @@ function AdminVehiclesPage() {
 
   return (
     <div className="admin-layout">
-      <aside className="admin-sidebar">
-        <div className="admin-brand">
-          <img
-            src="/src/assets/logo_nobg.png"
-            alt="RideRent logo"
-            className="admin-logo"
-          />
-
-          <div>
-            <h1>RideRent</h1>
-            <p>Admin Portal</p>
-          </div>
-        </div>
-
-        <nav className="admin-nav">
-          {navItems.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              className={`admin-nav-item ${
-                item.label === "Vehicles" ? "active" : ""
-              } ${item.danger ? "danger-item" : ""}`}
-              onClick={() => handleNavigation(item)}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
-
-        <div className="admin-sidebar-footer">
-          <button type="button" className="admin-nav-item">
-            <span className="nav-icon">?</span>
-            <span>Support</span>
-          </button>
-
-          <button type="button" className="admin-nav-item">
-            <span className="nav-icon">↪</span>
-            <span>Logout</span>
-          </button>
-        </div>
-      </aside>
+      <AdminSidebar activeItem="Vehicles" />
 
       <main className="admin-main">
-        <header className="admin-header">
-          <div>
-            <h2>Vehicle Management</h2>
-            <p>Manage RideRent vehicle information and fleet availability.</p>
-          </div>
-
-          <div className="admin-header-right">
-            <div className="admin-profile">
-              <div className="admin-avatar">A</div>
-
-              <div className="admin-profile-info">
-                <strong>Admin User</strong>
-                <span>System Administrator</span>
-              </div>
-            </div>
-          </div>
-        </header>
+        <AdminHeader
+          title="Vehicle Management"
+          subtitle="Manage RideRent vehicle information and fleet availability."
+        />
 
         <section className="admin-vehicle-add-section">
           <div className="admin-vehicle-add-copy">
@@ -221,7 +155,9 @@ function AdminVehiclesPage() {
         <section className="dashboard-card admin-vehicle-list-card">
           <div className="card-header admin-vehicle-list-header">
             <div>
-              <span className="admin-vehicle-section-kicker">Fleet Records</span>
+              <span className="admin-vehicle-section-kicker">
+                Fleet Records
+              </span>
               <h3>Existing Vehicles</h3>
               <p>
                 {loadingCars
@@ -234,9 +170,7 @@ function AdminVehiclesPage() {
           {vehicleActionMessage && (
             <div
               className={`admin-vehicle-action-message ${vehicleActionMessage.type}`}
-              role={
-                vehicleActionMessage.type === "error" ? "alert" : "status"
-              }
+              role={vehicleActionMessage.type === "error" ? "alert" : "status"}
               aria-live="polite"
             >
               {vehicleActionMessage.text}
@@ -290,7 +224,10 @@ function AdminVehiclesPage() {
                   !carsError &&
                   cars.map((car) => (
                     <tr key={car.id}>
-                      <td data-label="Vehicle" className="admin-vehicle-main-cell">
+                      <td
+                        data-label="Vehicle"
+                        className="admin-vehicle-main-cell"
+                      >
                         <div className="admin-vehicle-name-cell">
                           <div className="admin-vehicle-image-shell">
                             <AdminVehicleImage car={car} />
@@ -323,7 +260,10 @@ function AdminVehiclesPage() {
                         </span>
                       </td>
 
-                      <td data-label="Actions" className="admin-vehicle-actions-cell">
+                      <td
+                        data-label="Actions"
+                        className="admin-vehicle-actions-cell"
+                      >
                         <div className="admin-vehicle-row-actions">
                           <button
                             type="button"
