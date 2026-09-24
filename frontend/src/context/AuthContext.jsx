@@ -88,9 +88,9 @@ export function AuthProvider({ children }) {
 
       const data = await response.json();
 
-      setUser(data);
+      setUser(data.user);
 
-      return data;
+      return data.user;
     } catch (error) {
       console.error(
         "Unable to fetch authenticated user:",

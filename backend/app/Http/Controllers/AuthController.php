@@ -239,7 +239,7 @@ class AuthController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        Auth::logout();
+        Auth::guard('web')->logout();
 
 
         /*

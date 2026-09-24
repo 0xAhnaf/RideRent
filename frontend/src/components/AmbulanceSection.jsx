@@ -1,6 +1,7 @@
 import { MapPin, Phone, Ambulance } from "lucide-react";
 import { useState } from "react";
 import { locations } from "../data/locations";
+import { apiFetch } from "../api";
 import ambulanceOne from "../assets/ambulance.png";
 import ambulanceTwo from "../assets/ambulance2.png";
 import "../styles/ambulance.css";
@@ -76,36 +77,22 @@ function AmbulanceSection() {
       return;
     }
 
-    const token = localStorage.getItem("riderent_token");
-
-    if (!token) {
-      setMessage("Please login before booking an ambulance.");
-      return;
-    }
-
     setLoading(true);
 
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/api/ambulance-bookings",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            pickup_district: pickupDistrict,
-            pickup_thana: pickupThana,
-            pickup_address: pickupAddress,
-            destination_district: destinationDistrict,
-            destination_thana: destinationThana,
-            destination_address: destinationAddress,
-            emergency_contact: emergencyContact,
-          }),
-        },
-      );
+      const response = await apiFetch("/api/ambulance-bookings", {
+        method: "POST",
+
+        body: JSON.stringify({
+          pickup_district: pickupDistrict,
+          pickup_thana: pickupThana,
+          pickup_address: pickupAddress,
+          destination_district: destinationDistrict,
+          destination_thana: destinationThana,
+          destination_address: destinationAddress,
+          emergency_contact: emergencyContact,
+        }),
+      });
 
       const data = await response.json();
 

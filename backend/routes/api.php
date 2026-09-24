@@ -12,7 +12,7 @@ use App\Http\Controllers\AggregateReportController;
 use App\Http\Controllers\JoinReportController;
 use App\Http\Controllers\SingleRowSubqueryReportController;
 use App\Http\Controllers\MultipleRowSubqueryReportController;
-
+use App\Http\Controllers\AmbulanceBookingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -106,6 +106,19 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);
 
+    /*
+        |--------------------------------------------------------------------------
+        | AMBULANCE BOOKING MANAGEMENT
+        |--------------------------------------------------------------------------
+        |
+        | 
+        |
+        */
+
+        Route::post('/ambulance-bookings', [AmbulanceBookingController::class, 'store']);
+        Route::get('/ambulance-bookings', [AmbulanceBookingController::class, 'index']);
+        Route::get('/ambulance-bookings/{ambulanceBooking}', [AmbulanceBookingController::class, 'show']);
+
 
 
     /*
@@ -160,19 +173,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/admin/vehicles', [CarController::class, 'store']);
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | AMBULANCE BOOKING MANAGEMENT
-        |--------------------------------------------------------------------------
-        |
-        | 
-        |
-        */
-
-        Route::post('/ambulance-bookings', [AmbulanceBookingController::class, 'store']);
-        Route::get('/ambulance-bookings', [AmbulanceBookingController::class, 'index']);
-        Route::get('/ambulance-bookings/{ambulanceBooking}', [AmbulanceBookingController::class, 'show']);
-
+        
         /*
         |--------------------------------------------------------------------------
         | DRIVER MANAGEMENT
