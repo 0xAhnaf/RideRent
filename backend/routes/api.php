@@ -13,6 +13,8 @@ use App\Http\Controllers\JoinReportController;
 use App\Http\Controllers\SingleRowSubqueryReportController;
 use App\Http\Controllers\MultipleRowSubqueryReportController;
 use App\Http\Controllers\AmbulanceBookingController;
+use App\Http\Controllers\RenterProfileController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -72,7 +74,7 @@ Route::middleware('auth:sanctum')->group(function () {
     */
 
     Route::get('/user', [AuthController::class, 'user']);
-
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
 
     /*
     |--------------------------------------------------------------------------
@@ -81,6 +83,12 @@ Route::middleware('auth:sanctum')->group(function () {
     */
 
     Route::post('/logout', [AuthController::class, 'logout']);
+
+
+    Route::get('/renter/profile', [RenterProfileController::class, 'profile']);
+    Route::get('/renter/profile/statistics', [RenterProfileController::class, 'bookingStatistics']);
+    Route::get('/renter/profile/vehicle-bookings', [RenterProfileController::class, 'vehicleBookings']);
+    Route::get('/renter/profile/ambulance-bookings', [RenterProfileController::class, 'ambulanceBookings']);
 
 
     /*

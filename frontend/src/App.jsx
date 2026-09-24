@@ -19,8 +19,10 @@ import AdminDriversPage from "./pages/AdminDriversPage";
 import AdminBookingsPage from "./pages/AdminBookingsPage";
 import AdminPaymentsPage from "./pages/AdminPaymentsPage";
 import AdminReportsPage from "./pages/AdminReportsPage";
+import RenterProfile from "./pages/RenterProfile";
 
 import AdminRoute from "./components/AdminRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -55,11 +57,28 @@ function App() {
         />
 
         {/* ================================================================
+            AUTHENTICATED USER-ONLY PAGES
+            =================================================================
+            
+            Every route inside this group requires:
+            1. User must be logged in.
+
+            Future user-only pages (e.g. My Bookings, Settings) 
+            should be added inside this group.
+            ================================================================= */}
+
+        <Route element={<ProtectedRoute />}>
+          <Route
+            path="/renter-profile"
+            element={<RenterProfile />}
+          />
+        </Route>
+
+        {/* ================================================================
             ADMIN-ONLY PAGES
             =================================================================
             
             Every route inside this group requires:
-
             1. User must be logged in.
             2. User role must be "admin".
 

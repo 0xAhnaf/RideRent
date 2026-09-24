@@ -220,6 +220,42 @@ class AuthController extends Controller
             'user' => $request->user(),
         ]);
     }
+    public function updateProfile(Request $request)
+{
+    $user = $request->user();
+
+    $validated = $request->validate([
+        'name' => [
+            'required',
+            'string',
+            'max:255',
+        ],
+
+        'phone' => [
+            'required',
+            'string',
+            'max:20',
+            'unique:users,phone,' . $user->id,
+        ],
+
+        'address' => [
+            'nullable',
+            'string',
+            'max:1000',
+        ],
+    ]);
+
+    $user->update([
+        'name' => $validated['name'],
+        'phone' => $validated['phone'],
+        'address' => $validated['address'] ?? null,
+    ]);
+
+    return response()->json([
+        'message' => 'Profile updated successfully.',
+        'user' => $user->fresh(),
+    ]);
+}
 
 
     /*

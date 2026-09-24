@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   ChevronDown,
   CarFront,
+  User,
 } from "lucide-react";
 
 import { useState } from "react";
@@ -93,6 +94,11 @@ function Navbar() {
   const goToDashboard = () => {
     closeMenus();
     navigate("/admin");
+  };
+
+  const goToProfile = () => {
+    closeMenus();
+    navigate("/renter-profile");
   };
 
   /*
@@ -280,8 +286,8 @@ function Navbar() {
         ) : (
 
           /* ==============================================================
-             LOGGED IN
-             ============================================================== */
+              LOGGED IN
+              ============================================================== */
 
           <div className="logged-in-actions">
 
@@ -349,7 +355,7 @@ function Navbar() {
               {profileOpen && (
                 <div className="profile-dropdown">
 
-                  <div className="profile-info">
+                  <div className="profile-info" onClick={goToProfile} style={{ cursor: "pointer" }}>
 
                     <div className="profile-avatar large">
                       {userInitial}
@@ -377,6 +383,19 @@ function Navbar() {
 
 
                   <div className="profile-divider" />
+
+
+                  <button
+                    type="button"
+                    className="dropdown-item"
+                    onClick={goToProfile}
+                  >
+                    <User size={18} />
+
+                    <span>
+                      My Profile
+                    </span>
+                  </button>
 
 
                   {isAdmin && (
