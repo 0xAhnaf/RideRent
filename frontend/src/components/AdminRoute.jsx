@@ -1,5 +1,5 @@
+import { useEffect } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-
 import { useAuth } from "../context/AuthContext";
 
 /*
@@ -22,6 +22,19 @@ function AdminRoute() {
     isAuthenticated,
   } = useAuth();
 
+  useEffect(() => {
+    const handlePageShow = (event) => {
+      if (event.persisted) {
+        window.location.reload();
+      }
+    };
+
+    window.addEventListener("pageshow", handlePageShow);
+
+    return () => {
+      window.removeEventListener("pageshow", handlePageShow);
+    };
+  }, []);
   /*
   |--------------------------------------------------------------------------
   | Wait Until Authentication Is Checked

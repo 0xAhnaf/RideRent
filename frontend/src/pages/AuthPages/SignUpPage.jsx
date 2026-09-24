@@ -6,7 +6,6 @@ import AuthCard from "./components/AuthCard";
 import AuthInput from "./components/AuthInput";
 import PasswordInput from "./components/PasswordInput";
 import SubmitButton from "./components/SubmitButton";
-import SocialLogin from "./components/SocialLogin";
 import AuthFooter from "./components/AuthFooter";
 
 import { useAuth } from "../../context/AuthContext";
@@ -244,7 +243,7 @@ function SignUpPage() {
           />
         </form>
 
-        <SocialLogin />
+       
 
         <AuthFooter
           text="Already have an account?"
