@@ -54,4 +54,16 @@ class RenterProfileController extends Controller
 
         return response()->json($result);
     }
+
+    public function completedVehicleTrips(Request $request)
+{
+    $userId = $request->user()->id;
+
+    $result = DB::select(
+        'CALL GetRenterCompletedVehicleTrips(?)',
+        [$userId]
+    );
+
+    return response()->json($result);
+}
 }

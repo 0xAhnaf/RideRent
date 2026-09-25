@@ -114,7 +114,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::delete('/bookings/{id}', [BookingController::class, 'destroy']);
 
-    /*
+
+
+    Route::get(
+    '/renter/profile/completed-vehicle-trips',
+    [RenterProfileController::class, 'completedVehicleTrips']
+    );
+
+        /*
         |--------------------------------------------------------------------------
         | AMBULANCE BOOKING MANAGEMENT
         |--------------------------------------------------------------------------
