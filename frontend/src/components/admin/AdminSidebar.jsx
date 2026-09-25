@@ -7,7 +7,7 @@ const navItems = [
   { label: "Drivers", icon: "♧", path: "/admin/drivers" },
   { label: "Bookings", icon: "▣", path: "/admin/bookings" },
   { label: "Payments", icon: "৳", path: "/admin/payments" },
-  { label: "Ambulance / Emergency", icon: "✚", danger: true },
+  { label: "Ambulance", icon: "✚", path: "/admin/ambulance" },
   { label: "Reviews", icon: "☆" },
   { label: "Reports", icon: "▥", path: "/admin/reports" },
 ];

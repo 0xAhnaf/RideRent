@@ -14,6 +14,9 @@ use App\Http\Controllers\JoinReportController;
 use App\Http\Controllers\SingleRowSubqueryReportController;
 use App\Http\Controllers\MultipleRowSubqueryReportController;
 use App\Http\Controllers\AmbulanceBookingController;
+use App\Http\Controllers\AdminAmbulanceBookingController;
+use App\Http\Controllers\AmbulanceDriverController;
+use App\Http\Controllers\AmbulancePaymentController;
 use App\Http\Controllers\RenterProfileController;
 
 
@@ -157,6 +160,18 @@ Route::middleware('auth:sanctum')->group(function () {
     */
 
     Route::middleware('admin')->group(function () {
+
+        Route::prefix('admin/ambulance')->where(['id' => '[0-9]+'])->group(function () {
+            Route::apiResource('drivers', AmbulanceDriverController::class)->parameters(['drivers' => 'id'])->names('admin.ambulance.drivers');
+            Route::get('/bookings', [AdminAmbulanceBookingController::class, 'index']);
+            Route::get('/bookings/{id}', [AdminAmbulanceBookingController::class, 'show']);
+            Route::patch('/bookings/{id}/status', [AdminAmbulanceBookingController::class, 'updateStatus']);
+            Route::put('/bookings/{id}/driver', [AdminAmbulanceBookingController::class, 'assignDriver']);
+            Route::delete('/bookings/{id}/driver', [AdminAmbulanceBookingController::class, 'unassignDriver']);
+            Route::get('/payments-summary', [AmbulancePaymentController::class, 'summary']);
+            Route::patch('/payments/{id}/status', [AmbulancePaymentController::class, 'updateStatus']);
+            Route::apiResource('payments', AmbulancePaymentController::class)->parameters(['payments' => 'id'])->names('admin.ambulance.payments');
+        });
 
 
         /*

@@ -1,7 +1,7 @@
 import { MapPin, Phone, Ambulance } from "lucide-react";
 import { useState } from "react";
 import { locations } from "../data/locations";
-import { apiFetch } from "../api";
+import { apiFetch, getCsrfCookie } from "../api";
 import ambulanceOne from "../assets/ambulance.png";
 import ambulanceTwo from "../assets/ambulance2.png";
 import "../styles/ambulance.css";
@@ -80,6 +80,7 @@ function AmbulanceSection() {
     setLoading(true);
 
     try {
+      await getCsrfCookie();
       const response = await apiFetch("/api/ambulance-bookings", {
         method: "POST",
 

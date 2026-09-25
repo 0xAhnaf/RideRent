@@ -8,8 +8,6 @@ import AdminSidebar from "../components/admin/AdminSidebar";
 import "../styles/admin-dashboard.css";
 import "../styles/admin-drivers-page.css";
 
-const API_URL = "/api/drivers";
-
 const createInitialFormData = () => ({
   name: "",
   phone: "",
@@ -31,7 +29,9 @@ const getApiErrorMessage = (result, fallbackMessage) => {
   return validationMessage || result?.message || fallbackMessage;
 };
 
-function AdminDriversPage() {
+function AdminDriversPage({ apiUrl = "/api/drivers", embedded = false, onChanged }) {
+  const API_URL = apiUrl;
+  const Content = embedded ? "div" : "main";
   const navigate = useNavigate();
   const formSectionRef = useRef(null);
 
@@ -91,7 +91,7 @@ function AdminDriversPage() {
     fetchDrivers();
 
     return () => controller.abort();
-  }, []);
+  }, [API_URL]);
 
   const driverStats = useMemo(
     () => ({
@@ -237,6 +237,7 @@ function AdminDriversPage() {
       setShowForm(false);
       setEditingDriverId(null);
       setFormData(createInitialFormData());
+      onChanged?.(result.message);
     } catch (error) {
       console.error("Error saving driver:", error);
       setFormError(error.message || "Unable to save the driver.");
@@ -289,6 +290,7 @@ function AdminDriversPage() {
         type: "success",
         text: result.message || "Driver deleted successfully.",
       });
+      onChanged?.(result.message);
     } catch (error) {
       console.error("Error deleting driver:", error);
       setActionMessage({
@@ -301,14 +303,16 @@ function AdminDriversPage() {
   };
 
   return (
-    <div className="admin-layout">
-      <AdminSidebar activeItem="Drivers" />
+    <div className={embedded ? "ambulance-drivers-section" : "admin-layout"}>
+      {!embedded && <AdminSidebar activeItem="Drivers" />}
 
-      <main className="admin-main">
-        <AdminHeader
-          title="Driver Management"
-          subtitle="Manage RideRent driver records and operational availability."
-        />
+      <Content className={embedded ? undefined : "admin-main"}>
+        {!embedded && (
+          <AdminHeader
+            title="Driver Management"
+            subtitle="Manage RideRent driver records and operational availability."
+          />
+        )}
 
         <section className="admin-driver-add-section">
           <div className="admin-driver-add-copy">
@@ -656,7 +660,7 @@ function AdminDriversPage() {
             </table>
           </div>
         </section>
-      </main>
+      </Content>
     </div>
   );
 }

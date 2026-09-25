@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AmbulanceBooking;
+use App\Services\AmbulanceRecords;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AmbulanceBookingController extends Controller
 {
@@ -25,21 +26,24 @@ class AmbulanceBookingController extends Controller
             ],
         ]);
 
-        $booking = AmbulanceBooking::create([
-            'user_id' => $request->user()->id,
+        $booking = DB::transaction(function () use ($request, $validated) {
+            DB::insert(<<<'SQL'
+                INSERT INTO ambulance_bookings (
+                    user_id, pickup_district, pickup_thana, pickup_address,
+                    destination_district, destination_thana, destination_address,
+                    emergency_contact, status, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            SQL, [
+                $request->user()->id,
+                $validated['pickup_district'], $validated['pickup_thana'], $validated['pickup_address'],
+                $validated['destination_district'], $validated['destination_thana'], $validated['destination_address'],
+                $validated['emergency_contact'],
+            ]);
 
-            'pickup_district' => $validated['pickup_district'],
-            'pickup_thana' => $validated['pickup_thana'],
-            'pickup_address' => $validated['pickup_address'],
-
-            'destination_district' => $validated['destination_district'],
-            'destination_thana' => $validated['destination_thana'],
-            'destination_address' => $validated['destination_address'],
-
-            'emergency_contact' => $validated['emergency_contact'],
-
-            'status' => 'pending',
-        ]);
+            return (new AmbulanceRecords)->renterBooking(
+                DB::selectOne('SELECT * FROM ambulance_bookings WHERE id = LAST_INSERT_ID()'),
+            );
+        });
 
         return response()->json([
             'message' => 'Ambulance booking created successfully.',
@@ -49,28 +53,32 @@ class AmbulanceBookingController extends Controller
 
     public function index(Request $request)
     {
-        $bookings = AmbulanceBooking::where(
-            'user_id',
-            $request->user()->id
-        )
-            ->latest()
-            ->get();
+        $bookings = DB::select(
+            'SELECT * FROM ambulance_bookings WHERE user_id = ? ORDER BY created_at DESC, id DESC',
+            [$request->user()->id],
+        );
 
         return response()->json([
-            'bookings' => $bookings,
+            'bookings' => array_map(fn (object $booking) => (new AmbulanceRecords)->renterBooking($booking), $bookings),
         ]);
     }
 
-    public function show(Request $request, AmbulanceBooking $ambulanceBooking)
+    public function show(Request $request, $ambulanceBooking)
     {
-        if ($ambulanceBooking->user_id !== $request->user()->id) {
+        $booking = DB::selectOne('SELECT * FROM ambulance_bookings WHERE id = ?', [$ambulanceBooking]);
+
+        if (! $booking) {
+            abort(404, 'Ambulance booking not found.');
+        }
+
+        if ((int) $booking->user_id !== (int) $request->user()->id) {
             return response()->json([
                 'message' => 'Unauthorized.',
             ], 403);
         }
 
         return response()->json([
-            'booking' => $ambulanceBooking,
+            'booking' => (new AmbulanceRecords)->renterBooking($booking),
         ]);
     }
 }
