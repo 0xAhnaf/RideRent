@@ -1,9 +1,4 @@
-import {
-  BrowserRouter,
-  Navigate,
-  Route,
-  Routes,
-} from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import LandingPage from "./pages/LandingPage";
 import VehiclesPage from "./pages/VehiclesPage";
@@ -16,6 +11,7 @@ import AdminVehiclesPage from "./pages/AdminVehiclesPage";
 import AddVehiclePage from "./pages/AddVehiclePage";
 import EditVehiclePage from "./pages/EditVehiclePage";
 import AdminDriversPage from "./pages/AdminDriversPage";
+import AdminUsersPage from "./pages/AdminUsersPage";
 import AdminBookingsPage from "./pages/AdminBookingsPage";
 import AdminPaymentsPage from "./pages/AdminPaymentsPage";
 import AdminReportsPage from "./pages/AdminReportsPage";
@@ -32,29 +28,17 @@ function App() {
             PUBLIC PAGES
             ================================================================= */}
 
-        <Route
-          path="/"
-          element={<LandingPage />}
-        />
+        <Route path="/" element={<LandingPage />} />
 
-        <Route
-          path="/vehicles"
-          element={<VehiclesPage />}
-        />
+        <Route path="/vehicles" element={<VehiclesPage />} />
 
         {/* ================================================================
             AUTHENTICATION PAGES
             ================================================================= */}
 
-        <Route
-          path="/login"
-          element={<LoginPage />}
-        />
+        <Route path="/login" element={<LoginPage />} />
 
-        <Route
-          path="/signup"
-          element={<SignUpPage />}
-        />
+        <Route path="/signup" element={<SignUpPage />} />
 
         {/* ================================================================
             AUTHENTICATED USER-ONLY PAGES
@@ -68,10 +52,7 @@ function App() {
             ================================================================= */}
 
         <Route element={<ProtectedRoute />}>
-          <Route
-            path="/renter-profile"
-            element={<RenterProfile />}
-          />
+          <Route path="/renter-profile" element={<RenterProfile />} />
         </Route>
 
         {/* ================================================================
@@ -86,45 +67,23 @@ function App() {
             ================================================================= */}
 
         <Route element={<AdminRoute />}>
-          <Route
-            path="/admin"
-            element={<AdminDashboard />}
-          />
+          <Route path="/admin" element={<AdminDashboard />} />
 
-          <Route
-            path="/admin/admin-vehicle"
-            element={<AdminVehiclesPage />}
-          />
+          <Route path="/admin/admin-vehicle" element={<AdminVehiclesPage />} />
 
-          <Route
-            path="/admin/add-vehicle"
-            element={<AddVehiclePage />}
-          />
+          <Route path="/admin/add-vehicle" element={<AddVehiclePage />} />
 
-          <Route
-            path="/admin/edit-vehicle/:id"
-            element={<EditVehiclePage />}
-          />
+          <Route path="/admin/edit-vehicle/:id" element={<EditVehiclePage />} />
 
-          <Route
-            path="/admin/drivers"
-            element={<AdminDriversPage />}
-          />
+          <Route path="/admin/users" element={<AdminUsersPage />} />
 
-          <Route
-            path="/admin/bookings"
-            element={<AdminBookingsPage />}
-          />
+          <Route path="/admin/drivers" element={<AdminDriversPage />} />
 
-          <Route
-            path="/admin/payments"
-            element={<AdminPaymentsPage />}
-          />
+          <Route path="/admin/bookings" element={<AdminBookingsPage />} />
 
-          <Route
-            path="/admin/reports"
-            element={<AdminReportsPage />}
-          />
+          <Route path="/admin/payments" element={<AdminPaymentsPage />} />
+
+          <Route path="/admin/reports" element={<AdminReportsPage />} />
         </Route>
 
         {/* ================================================================
@@ -133,27 +92,14 @@ function App() {
 
         <Route
           path="/admin-vehicle"
-          element={
-            <Navigate
-              to="/admin/admin-vehicle"
-              replace
-            />
-          }
+          element={<Navigate to="/admin/admin-vehicle" replace />}
         />
 
         {/* ================================================================
             INVALID URL
             ================================================================= */}
 
-        <Route
-          path="*"
-          element={
-            <Navigate
-              to="/"
-              replace
-            />
-          }
-        />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

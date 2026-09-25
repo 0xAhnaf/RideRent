@@ -7,6 +7,7 @@ use App\Http\Controllers\CarController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\UserController;
 
 use App\Http\Controllers\AggregateReportController;
 use App\Http\Controllers\JoinReportController;
@@ -187,6 +188,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('/admin/vehicles', [CarController::class, 'store']);
 
+        /*
+        |--------------------------------------------------------------------------
+        | USER MANAGEMENT
+        |--------------------------------------------------------------------------
+        |
+        | Admin can view, create, edit and delete both Renter and
+        | Admin accounts from the "Manage Users" dashboard page.
+        |
+        */
+
+        Route::apiResource('users', UserController::class);
 
         
         /*

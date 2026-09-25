@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 
 const navItems = [
   { label: "Dashboard", icon: "▦", path: "/admin" },
-  { label: "Manage Users", icon: "♙" },
+  { label: "Manage Users", icon: "♙", path: "/admin/users" },
   { label: "Vehicles", icon: "▱", path: "/admin/admin-vehicle" },
   { label: "Drivers", icon: "♧", path: "/admin/drivers" },
   { label: "Bookings", icon: "▣", path: "/admin/bookings" },
@@ -22,9 +22,7 @@ function AdminSidebar({ activeItem, dashboardIcon = "▦" }) {
   };
 
   const items = navItems.map((item) =>
-    item.label === "Dashboard"
-      ? { ...item, icon: dashboardIcon }
-      : item
+    item.label === "Dashboard" ? { ...item, icon: dashboardIcon } : item,
   );
 
   return (
