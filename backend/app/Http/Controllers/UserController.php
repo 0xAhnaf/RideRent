@@ -13,14 +13,15 @@ class UserController extends Controller
     | LIST USERS
     |--------------------------------------------------------------------------
     |
-    | Returns every account (Admins and Renters) for the Admin
-    | "Manage Users" dashboard page.
+    | Returns ONLY Renter accounts for the Admin "Manage Users"
+    | dashboard page. Admin accounts are never returned.
     |
     */
 
     public function index()
     {
-        $users = User::orderBy('name')->orderBy('id')->get();
+        $users = User::where('role', 'renter')
+            ->orderBy('name')->orderBy('id')->get();
 
         return response()->json([
             'users' => $users,
@@ -33,8 +34,8 @@ class UserController extends Controller
     | CREATE USER
     |--------------------------------------------------------------------------
     |
-    | Admin can create either a Renter or another Admin account
-    | directly from the dashboard.
+    | Admin can create Renter accounts from the dashboard.
+    | The role is always "renter" and is never read from the request.
     |
     */
 
@@ -50,8 +51,6 @@ class UserController extends Controller
             'address' => ['nullable', 'string', 'max:1000'],
 
             'password' => ['required', 'string', 'min:8'],
-
-            'role' => ['required', Rule::in(['admin', 'renter'])],
         ]);
 
         $user = User::create([
@@ -60,7 +59,7 @@ class UserController extends Controller
             'phone' => trim($validated['phone']),
             'address' => $validated['address'] ?? null,
             'password' => $validated['password'],
-            'role' => $validated['role'],
+            'role' => 'renter',
         ]);
 
         return response()->json([
@@ -77,7 +76,7 @@ class UserController extends Controller
 
     public function show($id)
     {
-        $user = User::find($id);
+        $user = User::where('role', 'renter')->find($id);
 
         if (!$user) {
             return $this->notFoundResponse();
@@ -100,7 +99,7 @@ class UserController extends Controller
 
     public function update(Request $request, $id)
     {
-        $user = User::find($id);
+        $user = User::where('role', 'renter')->find($id);
 
         if (!$user) {
             return $this->notFoundResponse();
@@ -126,8 +125,6 @@ class UserController extends Controller
             'address' => ['nullable', 'string', 'max:1000'],
 
             'password' => ['nullable', 'string', 'min:8'],
-
-            'role' => ['required', Rule::in(['admin', 'renter'])],
         ]);
 
         $updateData = [
@@ -135,7 +132,6 @@ class UserController extends Controller
             'email' => $validated['email'],
             'phone' => trim($validated['phone']),
             'address' => $validated['address'] ?? null,
-            'role' => $validated['role'],
         ];
 
         if (!empty($validated['password'])) {
@@ -155,23 +151,18 @@ class UserController extends Controller
     | DELETE USER
     |--------------------------------------------------------------------------
     |
-    | An Admin cannot delete their own account through this endpoint.
+    | Only Renter accounts can be deleted here.
     |
     */
 
-    public function destroy(Request $request, $id)
+    public function destroy($id)
     {
-        $user = User::find($id);
+        $user = User::where('role', 'renter')->find($id);
 
         if (!$user) {
             return $this->notFoundResponse();
         }
 
-        if ($request->user() && (int) $request->user()->id === (int) $user->id) {
-            return response()->json([
-                'message' => 'You cannot delete your own account while logged in.',
-            ], 422);
-        }
 
         $user->delete();
 

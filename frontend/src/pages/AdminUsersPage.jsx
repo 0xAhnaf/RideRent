@@ -325,38 +325,6 @@ function AdminUsersPage() {
           subtitle="Manage RideRent customer and admin accounts."
         />
 
-        <section className="admin-user-add-section">
-          <div className="admin-user-add-copy">
-            <span className="admin-user-section-kicker">User Setup</span>
-            <h3>Add New User</h3>
-            <p>Create and maintain verified accounts for renters and admins.</p>
-          </div>
-
-          <button
-            type="button"
-            className="admin-user-primary-button"
-            onClick={openAddForm}
-          >
-            <Plus size={18} />
-            Add New User
-          </button>
-        </section>
-
-        <section className="admin-user-stats-grid" aria-label="User summary">
-          <article className="admin-user-stat-card">
-            <span>Total Users</span>
-            <strong>{userStats.total}</strong>
-          </article>
-          <article className="admin-user-stat-card admin">
-            <span>Admins</span>
-            <strong>{userStats.admins}</strong>
-          </article>
-          <article className="admin-user-stat-card renter">
-            <span>Renters</span>
-            <strong>{userStats.renters}</strong>
-          </article>
-        </section>
-
         {showForm && (
           <section
             ref={formSectionRef}
@@ -525,20 +493,6 @@ function AdminUsersPage() {
                   placeholder="Search users..."
                   onChange={(event) => setSearchTerm(event.target.value)}
                 />
-              </label>
-
-              <label>
-                <span className="admin-user-visually-hidden">
-                  Filter by role
-                </span>
-                <select
-                  value={roleFilter}
-                  onChange={(event) => setRoleFilter(event.target.value)}
-                >
-                  <option value="all">All roles</option>
-                  <option value="admin">Admin</option>
-                  <option value="renter">Renter</option>
-                </select>
               </label>
             </div>
           </div>
