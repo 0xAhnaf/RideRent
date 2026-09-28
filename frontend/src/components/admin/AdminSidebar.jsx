@@ -8,7 +8,7 @@ const navItems = [
   { label: "Bookings", icon: "▣", path: "/admin/bookings" },
   { label: "Payments", icon: "৳", path: "/admin/payments" },
   { label: "Ambulance", icon: "✚", path: "/admin/ambulance" },
-  { label: "Reviews", icon: "☆" },
+  { label: "Reviews", icon: "☆", path: "/reviews" },
   { label: "Reports", icon: "▥", path: "/admin/reports" },
 ];
 
@@ -72,3 +72,4 @@ function AdminSidebar({ activeItem, dashboardIcon = "▦" }) {
 }
 
 export default AdminSidebar;
+

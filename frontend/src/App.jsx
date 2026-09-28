@@ -22,6 +22,7 @@ import RenterProfile from "./pages/RenterProfile";
 
 import AdminRoute from "./components/AdminRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ReviewsPage from "./pages/ReviewsPage";
 
 function GuestOnlyRoute({ children }) {
   const { user, loading } = useAuth();
@@ -44,6 +45,7 @@ function App() {
         {/* Public pages */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/vehicles" element={<VehiclesPage />} />
+        <Route path="/reviews" element={<ReviewsPage />} />
 
         {/* Login and signup: logged-in users return to Landing Page */}
         <Route
