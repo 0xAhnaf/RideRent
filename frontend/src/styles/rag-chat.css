@@ -1,0 +1,472 @@
+/* =========================================================
+   RIDE RENT AI ASSISTANT
+   Matches the site's navy / gold visual language.
+   ========================================================= */
+
+.rag-floating-button {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 3000;
+
+  min-width: 58px;
+  height: 58px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  padding: 0 18px;
+
+  border-radius: 999px;
+
+  background: #102a43;
+  color: #ffffff;
+
+  box-shadow:
+    0 12px 30px rgba(16, 42, 67, 0.24),
+    0 3px 10px rgba(15, 23, 42, 0.08);
+
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.rag-floating-button:hover {
+  background: #0b1f3a;
+  transform: translateY(-3px);
+  box-shadow:
+    0 16px 34px rgba(16, 42, 67, 0.28),
+    0 4px 12px rgba(15, 23, 42, 0.1);
+}
+
+.rag-floating-button.is-open {
+  width: 52px;
+  min-width: 52px;
+  height: 52px;
+  right: 32px;
+  bottom: 31px;
+
+  background: #d4a017;
+}
+
+.rag-floating-label {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1px;
+}
+
+/* =========================================================
+   CHAT WINDOW
+   ========================================================= */
+
+.rag-chat-panel {
+  position: fixed;
+  right: 28px;
+  bottom: 98px;
+  z-index: 2999;
+
+  width: min(390px, calc(100vw - 32px));
+  height: min(620px, calc(100vh - 130px));
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+
+  box-shadow:
+    0 24px 70px rgba(15, 23, 42, 0.18),
+    0 8px 25px rgba(15, 23, 42, 0.08);
+
+  animation: ragPanelIn 0.22s ease-out;
+}
+
+@keyframes ragPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.rag-chat-header {
+  min-height: 72px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 12px 14px 12px 16px;
+
+  background: #102a43;
+  color: #ffffff;
+}
+
+.rag-chat-title {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.rag-chat-avatar {
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: #d4a017;
+  color: #ffffff;
+}
+
+.rag-chat-title strong {
+  display: block;
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.rag-chat-title span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  margin-top: 3px;
+
+  color: #cbd5e1;
+  font-size: 11px;
+}
+
+.rag-online-dot {
+  width: 7px;
+  height: 7px;
+
+  display: inline-block !important;
+
+  margin: 0 !important;
+
+  border-radius: 50%;
+  background: #6ee7b7;
+}
+
+.rag-header-button {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+
+  transition: background 0.2s ease;
+}
+
+.rag-header-button:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+/* =========================================================
+   BODY
+   ========================================================= */
+
+.rag-chat-body {
+  min-height: 0;
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #f8fafc;
+}
+
+.rag-welcome {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  margin: 14px 14px 2px;
+  padding: 10px 11px;
+
+  border: 1px solid #e7edf4;
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  color: #64748b;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.rag-welcome svg {
+  flex-shrink: 0;
+  color: #d4a017;
+}
+
+.rag-messages {
+  min-height: 0;
+  flex: 1;
+
+  overflow-y: auto;
+
+  padding: 13px 13px 18px;
+
+  scrollbar-width: thin;
+}
+
+.rag-message-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+
+  margin: 10px 0;
+}
+
+.rag-message-row.user {
+  justify-content: flex-end;
+}
+
+.rag-mini-avatar {
+  width: 26px;
+  height: 26px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 2px;
+
+  border-radius: 8px;
+
+  background: #e9eff5;
+  color: #102a43;
+}
+
+.rag-message {
+  max-width: 82%;
+
+  padding: 10px 12px;
+
+  border: 1px solid #e4eaf0;
+  border-radius: 13px 13px 13px 4px;
+
+  background: #ffffff;
+
+  color: #243b53;
+
+  font-size: 13px;
+  line-height: 1.55;
+
+  overflow-wrap: anywhere;
+}
+
+.rag-message-row.user .rag-message {
+  border-color: #102a43;
+  border-radius: 13px 13px 4px 13px;
+
+  background: #102a43;
+  color: #ffffff;
+}
+
+.rag-message-error {
+  border-color: #fecaca;
+  background: #fff7f7;
+  color: #b91c1c;
+}
+
+.rag-message-text {
+  white-space: pre-wrap;
+}
+
+.rag-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+
+  margin-top: 9px;
+  padding-top: 8px;
+
+  border-top: 1px solid #edf1f5;
+
+  font-size: 10px;
+}
+
+.rag-sources > span:first-child {
+  width: 100%;
+
+  color: #64748b;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.rag-source {
+  padding: 3px 6px;
+
+  border-radius: 5px;
+
+  background: #f1f5f9;
+
+  color: #475569;
+}
+
+.rag-typing {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  color: #64748b;
+}
+
+.rag-spinner {
+  animation: ragSpin 0.9s linear infinite;
+}
+
+@keyframes ragSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================================
+   INPUT
+   ========================================================= */
+
+.rag-chat-input-area {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+
+  padding: 11px 12px;
+
+  border-top: 1px solid #e7edf4;
+
+  background: #ffffff;
+}
+
+.rag-chat-input-area textarea {
+  min-height: 43px;
+  max-height: 100px;
+
+  flex: 1;
+
+  resize: none;
+
+  padding: 12px 12px;
+
+  border: 1px solid #d9e1e8;
+  border-radius: 11px;
+
+  outline: none;
+
+  background: #f8fafc;
+
+  color: #243b53;
+
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.rag-chat-input-area textarea:focus {
+  border-color: #102a43;
+  box-shadow: 0 0 0 3px rgba(16, 42, 67, 0.08);
+}
+
+.rag-chat-input-area textarea::placeholder {
+  color: #94a3b8;
+}
+
+.rag-send-button {
+  width: 43px;
+  height: 43px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+
+  background: #d4a017;
+  color: #ffffff;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.rag-send-button:hover:not(:disabled) {
+  background: #f2b705;
+  transform: translateY(-1px);
+}
+
+.rag-send-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.rag-chat-footer {
+  padding: 0 13px 10px;
+
+  background: #ffffff;
+
+  color: #94a3b8;
+
+  font-size: 9px;
+  text-align: center;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+  .rag-floating-button {
+    right: 18px;
+    bottom: 18px;
+  }
+
+  .rag-floating-button.is-open {
+    right: 21px;
+    bottom: 21px;
+  }
+
+  .rag-chat-panel {
+    right: 10px;
+    bottom: 88px;
+
+    width: calc(100vw - 20px);
+    height: min(600px, calc(100vh - 110px));
+
+    border-radius: 16px;
+  }
+}

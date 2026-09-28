@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+langgraph
+langchain-core
+langchain-openai
+langchain-text-splitters
+pypdf
+rank-bm25

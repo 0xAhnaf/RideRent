@@ -15,11 +15,13 @@ import AdminUsersPage from "./pages/AdminUsersPage";
 import AdminBookingsPage from "./pages/AdminBookingsPage";
 import AdminPaymentsPage from "./pages/AdminPaymentsPage";
 import AdminReportsPage from "./pages/AdminReportsPage";
+
 import RenterProfile from "./pages/RenterProfile";
 
 import AdminRoute from "./components/AdminRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+import RagChatWidget from "./components/RagChatWidget";
 function App() {
   return (
     <BrowserRouter>
@@ -84,6 +86,7 @@ function App() {
           <Route path="/admin/payments" element={<AdminPaymentsPage />} />
 
           <Route path="/admin/reports" element={<AdminReportsPage />} />
+          <Route path="/admin/ambulance" element={<AdminAmbulancePage />} />
         </Route>
 
         {/* ================================================================
@@ -101,6 +104,8 @@ function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+
+      <RagChatWidget />
     </BrowserRouter>
   );
 }
