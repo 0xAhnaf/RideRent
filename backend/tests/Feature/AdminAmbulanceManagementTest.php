@@ -18,12 +18,9 @@ class AdminAmbulanceManagementTest extends AmbulanceMySqlTestCase
         $this->signIn(1002);
         DB::insert('INSERT INTO cars (name, brand, category, seats, quantity, price, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
             ['Customer Test Car', 'Test', 'Sedan', 4, 1, 1000, 'available']);
-        $booking = $this->postJson('/api/bookings', [
-            'car_name' => 'Customer Test Car', 'trip_type' => 'Round Trip',
-            'trip_datetime' => '2027-01-01 12:00:00', 'trip_duration' => '2 Days',
-            'pickup' => 'House 1, Mohammadpur, Dhaka',
-            'destination' => 'House 2, Feni Sadar, Feni',
-        ])->assertCreated()->json('booking.b_id');
+        $carId = (int) DB::selectOne('SELECT id FROM cars WHERE name = ?', ['Customer Test Car'])->id;
+        $booking = $this->postJson('/api/bookings', $this->quotedBookingData($carId))->assertCreated()->json('booking.b_id');
+        $savedFare = DB::selectOne('SELECT total_fare FROM booking_fares WHERE booking_id = ?', [$booking])->total_fare;
 
         $this->getJson('/api/admin/bookings')->assertForbidden();
         $this->getJson('/api/admin/bookings/'.$booking)->assertForbidden();
@@ -55,7 +52,7 @@ class AdminAmbulanceManagementTest extends AmbulanceMySqlTestCase
         $driver = $this->postJson('/api/drivers', $this->driverData())->assertCreated()->json('driver.id');
         $this->putJson("/api/bookings/{$booking}/driver", ['driver_id' => $driver])->assertOk();
         $this->putJson('/api/bookings/'.$booking, ['booking_status' => 'Confirmed'])->assertOk();
-        $payment = $this->postJson('/api/payments', ['booking_id' => $booking, 'amount' => 1000, 'payment_method' => 'cash'])
+        $payment = $this->postJson('/api/payments', ['booking_id' => $booking, 'amount' => $savedFare, 'payment_method' => 'cash'])
             ->assertCreated()->json('payment.id');
         $this->patchJson("/api/payments/{$payment}/status", ['payment_status' => 'paid'])->assertOk();
         $this->putJson('/api/bookings/'.$booking, ['booking_status' => 'Completed'])->assertOk();
@@ -242,16 +239,16 @@ class AdminAmbulanceManagementTest extends AmbulanceMySqlTestCase
         $driver = $this->postJson('/api/drivers', $this->driverData())->assertCreated()->json('driver.id');
         $this->putJson('/api/drivers/'.$driver, [...$this->driverData(), 'name' => 'Updated Driver'])->assertOk();
         $this->postJson('/api/drivers', $this->driverData())->assertUnprocessable();
-        $booking = $this->postJson('/api/bookings', ['car_name' => 'Test Car', 'trip_type' => 'One Way',
-            'trip_datetime' => '2027-01-01 12:00:00', 'trip_duration' => '1', 'pickup' => 'Dhaka', 'destination' => 'Mirpur'])
-            ->assertCreated()->json('booking.b_id');
+        $carId = (int) DB::selectOne('SELECT id FROM cars WHERE name = ?', ['Test Car'])->id;
+        $booking = $this->postJson('/api/bookings', $this->quotedBookingData($carId))->assertCreated()->json('booking.b_id');
+        $savedFare = DB::selectOne('SELECT total_fare FROM booking_fares WHERE booking_id = ?', [$booking])->total_fare;
         $this->getJson('/api/bookings')->assertOk()->assertJsonCount(1);
         $this->getJson('/api/bookings/'.$booking)->assertOk();
         $this->putJson("/api/bookings/{$booking}/driver", ['driver_id' => $driver])->assertOk();
         $this->putJson('/api/bookings/'.$booking, ['booking_status' => 'Confirmed'])->assertOk();
-        $payment = $this->postJson('/api/payments', ['booking_id' => $booking, 'amount' => 1000, 'payment_method' => 'cash'])->assertCreated()->json('payment.id');
+        $payment = $this->postJson('/api/payments', ['booking_id' => $booking, 'amount' => $savedFare, 'payment_method' => 'cash'])->assertCreated()->json('payment.id');
         $this->getJson('/api/payments')->assertOk()->assertJsonCount(1);
-        $this->putJson('/api/payments/'.$payment, ['amount' => 1100, 'payment_method' => 'cash'])->assertOk();
+        $this->putJson('/api/payments/'.$payment, ['amount' => $savedFare, 'payment_method' => 'cash'])->assertOk();
         $this->patchJson("/api/payments/{$payment}/status", ['payment_status' => 'paid'])->assertOk();
         $this->putJson('/api/bookings/'.$booking, ['booking_status' => 'Completed'])->assertOk();
         $this->getJson('/api/drivers/'.$driver)->assertJsonPath('driver.status', 'available');

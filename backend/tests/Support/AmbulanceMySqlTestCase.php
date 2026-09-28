@@ -53,6 +53,8 @@ abstract class AmbulanceMySqlTestCase extends TestCase
                 'migrations/2026_09_28_000001_add_customer_fields_to_booking_details_view.php',
             );
             $customerViewMigration->up();
+            $fareMigration = require database_path('migrations/2026_09_29_000001_add_booking_fare_snapshots.php');
+            $fareMigration->up();
 
             fwrite(STDOUT, "\nIsolated MySQL test schema: ".self::$testDatabase." (automatic cleanup enabled)\n");
         }
@@ -66,6 +68,21 @@ abstract class AmbulanceMySqlTestCase extends TestCase
             DB::insert('INSERT INTO users (id, name, email, phone, password, role) VALUES (?, ?, ?, ?, ?, ?)',
                 [$id, 'Test User '.$id, 'test'.$id.'@example.test', '0190000'.$id, 'unused-test-value', $role]);
         }
+    }
+
+    protected function quotedBookingData(int $carId, array $overrides = []): array
+    {
+        $input = array_merge([
+            'car_id' => $carId, 'pickup_district' => 'Dhaka', 'pickup_thana' => 'Mohammadpur',
+            'destination_district' => 'Feni', 'destination_thana' => 'Feni Sadar',
+            'trip_type' => 'Round Trip', 'trip_duration' => '2 Days',
+        ], $overrides);
+        $quote = $this->getJson('/api/booking-fare?'.http_build_query($input))->assertOk()->json();
+        return array_merge($input, [
+            'trip_datetime' => now()->addDays(2)->format('Y-m-d H:i:s'),
+            'pickup_address' => 'House 1', 'destination_address' => 'House 2',
+            'quote_token' => $quote['quote_token'],
+        ]);
     }
 
     protected function tearDown(): void

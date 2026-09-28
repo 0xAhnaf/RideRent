@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\BookingFareController;
 use App\Http\Controllers\AdminBookingController;
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\PaymentController;
@@ -39,6 +40,8 @@ use App\Http\Controllers\RenterProfileController;
 | Anyone can register or attempt to log in.
 |
 */
+
+Route::get('/booking-fare', [BookingFareController::class, 'show']);
 
 Route::post('/register', [AuthController::class, 'register']);
 

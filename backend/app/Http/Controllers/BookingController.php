@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Services\BookingFareService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -11,69 +12,41 @@ class BookingController extends Controller
 {
     private const ACTIVE_STATUSES = ['Pending', 'Confirmed'];
 
-    public function store(Request $request)
-            {
-            $validated = $request->validate([
-            'car_name' => 'required|string',
-            'trip_type' => 'required|string',
-            'trip_datetime' => 'required|date',
-            'trip_duration' => 'required|string',
-            'pickup' => 'required|string',
-            'destination' => 'required|string',
-        ]);
-
+    public function store(Request $request, BookingFareService $fareService)
+    {
+        $validated = $request->validate(array_merge(BookingFareService::rules(), [
+            'trip_datetime' => ['required', 'date', 'after:now'],
+            'pickup_address' => ['required', 'string', 'max:200'],
+            'destination_address' => ['required', 'string', 'max:200'],
+            'quote_token' => ['required', 'string', 'size:64'],
+        ]));
         $user = $request->user();
-
-        $car = DB::selectOne(
-            'SELECT id FROM cars WHERE name = ? LIMIT 1',
-            [$validated['car_name']],
-        );
-
-        if (!$car) {
-            return response()->json([
-                'message' => 'Selected car was not found.',
-            ], 404);
-        }
-
-        $booking = DB::transaction(function () use ($validated, $car, $user) {
+        $booking = DB::transaction(function () use ($validated, $fareService, $user) {
+            $quote = $fareService->quote($validated, true);
+            if (!hash_equals($quote['quote_token'], $validated['quote_token'])) {
+                throw ValidationException::withMessages([
+                    'quote_token' => 'The fare changed. Refresh the estimate and review it before booking.',
+                ]);
+            }
+            $fare = $quote['fare'];
+            $duration = $validated['trip_duration'] === 'More Than 7 Days'
+                ? $fare['charged_days'].' Days' : $validated['trip_duration'];
+            $pickup = trim($validated['pickup_address']).', '.$validated['pickup_thana'].', '.$validated['pickup_district'];
+            $destination = trim($validated['destination_address']).', '.$validated['destination_thana'].', '.$validated['destination_district'];
+            if (mb_strlen($pickup) > 255 || mb_strlen($destination) > 255) {
+                throw ValidationException::withMessages(['address' => 'Address including district and thana must be at most 255 characters.']);
+            }
             DB::insert(
-                <<<'SQL'
-                    INSERT INTO bookings (
-                        u_id,
-                        c_id,
-                        driver_id,
-                        trip_type,
-                        trip_datetime,
-                        trip_duration,
-                        pickup,
-                        destination,
-                        booking_status,
-                        created_at
-                    )
-                    VALUES (?, ?, NULL, ?, ?, ?, ?, ?, 'Pending', CURRENT_TIMESTAMP)
-                SQL,
-                [
-                    $user->id,
-                    $car->id,
-                    $validated['trip_type'],
-                    $validated['trip_datetime'],
-                    $validated['trip_duration'],
-                    $validated['pickup'],
-                    $validated['destination'],
-                ],
+                "INSERT INTO bookings (u_id, c_id, driver_id, trip_type, trip_datetime, trip_duration, pickup, destination, booking_status, created_at)
+                 VALUES (?, ?, NULL, ?, ?, ?, ?, ?, 'Pending', CURRENT_TIMESTAMP)",
+                [$user->id, $fare['car_id'], $validated['trip_type'], $validated['trip_datetime'], $duration, $pickup, $destination],
             );
-
-            $insertedBooking = DB::selectOne(
-                'SELECT LAST_INSERT_ID() AS booking_id',
-            );
-
-            return $this->findBooking((int) $insertedBooking->booking_id);
+            $id = (int) DB::selectOne('SELECT LAST_INSERT_ID() AS booking_id')->booking_id;
+            DB::insert('INSERT INTO booking_fares (booking_id, total_fare, fare_json) VALUES (?, ?, ?)',
+                [$id, $fare['total_fare'], json_encode($fare, JSON_THROW_ON_ERROR)]);
+            return $this->findBooking($id);
         }, 3);
-
-        return response()->json([
-            'message' => 'Booking created successfully.',
-            'booking' => $booking,
-        ], 201);
+        return response()->json(['message' => 'Booking created successfully.', 'booking' => $booking], 201);
     }
 
     public function index()
@@ -483,6 +456,8 @@ class BookingController extends Controller
     protected function formatBooking(object $row): array
     {
         return [
+            'fare' => isset($row->booking_fare_json) ? json_decode($row->booking_fare_json, true, 512, JSON_THROW_ON_ERROR) : null,
+            'total_fare' => isset($row->booking_total_fare) ? number_format((float) $row->booking_total_fare, 2, '.', '') : null,
             'b_id' => (int) $row->booking_id,
             'u_id' => (int) $row->booking_user_id,
             'c_id' => (int) $row->booking_car_id,

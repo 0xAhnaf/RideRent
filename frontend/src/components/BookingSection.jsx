@@ -8,6 +8,8 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 
+import useBookingFare from "../hooks/useBookingFare";
+import BookingFareSummary from "./BookingFareSummary";
 import { locations } from "../data/locations";
 import { apiFetch, getCsrfCookie } from "../api";
 import "../styles/booking.css";
@@ -39,6 +41,7 @@ function BookingSection() {
   const [tripType, setTripType] = useState("One Way");
   const [tripDatetime, setTripDatetime] = useState("");
   const [tripDuration, setTripDuration] = useState("1 Day");
+  const [customDays, setCustomDays] = useState(8);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -98,7 +101,7 @@ function BookingSection() {
   );
 
   const selectedCarData = useMemo(
-    () => cars.find((car) => car.name === selectedCar) || null,
+    () => cars.find((car) => String(car.id) === selectedCar) || null,
     [cars, selectedCar],
   );
 
@@ -109,16 +112,25 @@ function BookingSection() {
       return;
     }
 
-    const carExists = cars.some(
+    const carExists = cars.find(
       (car) => car.name === requestedCar,
     );
 
     if (carExists) {
-      setSelectedCar(requestedCar);
+      setSelectedCar(String(carExists.id));
       setError("");
       setSuccess("");
     }
   }, [location.state, cars]);
+
+  const fareInput = {
+    car_id: selectedCarData?.id || "",
+    pickup_district: pickupDistrict, pickup_thana: pickupThana,
+    destination_district: destinationDistrict, destination_thana: destinationThana,
+    trip_type: tripType, trip_duration: tripDuration,
+    custom_days: tripDuration === "More Than 7 Days" ? customDays : "",
+  };
+  const { quote, loading: fareLoading, error: fareError, refresh: refreshFare } = useBookingFare(fareInput);
 
   const getThanas = (district) => {
     let thanas = [];
@@ -203,19 +215,16 @@ function BookingSection() {
     // CONSTRUCT DATABASE VALUES
     // -----------------------------
 
-    const pickup =
-      `${pickupAddress.trim()},${pickupThana},${pickupDistrict}`;
-
-    const destination =
-      `${destinationAddress.trim()},${destinationThana},${destinationDistrict}`;
-
+    if (!quote) {
+      setError("Please wait for a valid fare estimate before booking.");
+      return;
+    }
     const bookingData = {
-      car_name: selectedCarData.name,
-      trip_type: tripType,
+      ...fareInput,
       trip_datetime: tripDatetime,
-      trip_duration: tripDuration,
-      pickup: pickup,
-      destination: destination,
+      pickup_address: pickupAddress.trim(),
+      destination_address: destinationAddress.trim(),
+      quote_token: quote.quote_token,
     };
 
     console.log("Sending booking:", bookingData);
@@ -251,8 +260,9 @@ function BookingSection() {
       }
 
       if (!response.ok) {
+        if (data.errors?.quote_token) refreshFare();
         throw new Error(
-          data.message ||
+          Object.values(data.errors || {}).flat()[0] || data.message ||
             `Laravel returned HTTP ${response.status}`,
         );
       }
@@ -309,7 +319,7 @@ function BookingSection() {
             <select
               id="pickup-district"
               value={pickupDistrict}
-              disabled={isAdmin}
+              disabled={isAdmin || isSubmitting}
               onChange={(event) => {
                 const district = event.target.value;
 
@@ -341,7 +351,7 @@ function BookingSection() {
             <select
               id="pickup-thana"
               value={pickupThana}
-              disabled={isAdmin}
+              disabled={isAdmin || isSubmitting}
               onChange={(event) =>
                 setPickupThana(event.target.value)
               }
@@ -370,7 +380,7 @@ function BookingSection() {
               id="pickup-address"
               type="text"
               value={pickupAddress}
-              disabled={isAdmin}
+              disabled={isAdmin || isSubmitting}
               onChange={(event) =>
                 setPickupAddress(event.target.value)
               }
@@ -387,7 +397,7 @@ function BookingSection() {
             <select
               id="destination-district"
               value={destinationDistrict}
-              disabled={isAdmin}
+              disabled={isAdmin || isSubmitting}
               onChange={(event) => {
                 const district = event.target.value;
 
@@ -423,7 +433,7 @@ function BookingSection() {
             <select
               id="destination-thana"
               value={destinationThana}
-              disabled={isAdmin}
+              disabled={isAdmin || isSubmitting}
               onChange={(event) =>
                 setDestinationThana(
                   event.target.value,
@@ -454,7 +464,7 @@ function BookingSection() {
               id="destination-address"
               type="text"
               value={destinationAddress}
-              disabled={isAdmin}
+              disabled={isAdmin || isSubmitting}
               onChange={(event) =>
                 setDestinationAddress(
                   event.target.value,
@@ -473,7 +483,7 @@ function BookingSection() {
             <select
               id="booking-car"
               value={selectedCar}
-              disabled={isAdmin}
+              disabled={isAdmin || isSubmitting}
               onChange={(event) => {
                 setSelectedCar(event.target.value);
 
@@ -492,7 +502,7 @@ function BookingSection() {
                 return (
                   <option
                     key={car.id}
-                    value={car.name}
+                    value={String(car.id)}
                     disabled={quantity < 1}
                   >
                     {car.name} - {car.seats} Seat -{" "}
@@ -548,7 +558,7 @@ function BookingSection() {
             <select
               id="trip-type"
               value={tripType}
-              disabled={isAdmin}
+              disabled={isAdmin || isSubmitting}
               onChange={(event) =>
                 setTripType(event.target.value)
               }
@@ -574,7 +584,7 @@ function BookingSection() {
               type="datetime-local"
               min={minTripDatetime}
               value={tripDatetime}
-              disabled={isAdmin}
+              disabled={isAdmin || isSubmitting}
               onPointerDown={(event) => {
                 if (isAdmin) return;
                 if (
@@ -620,7 +630,7 @@ function BookingSection() {
             <select
               id="trip-duration"
               value={tripDuration}
-              disabled={isAdmin}
+              disabled={isAdmin || isSubmitting}
               onChange={(event) =>
                 setTripDuration(event.target.value)
               }
@@ -667,6 +677,16 @@ function BookingSection() {
             </select>
           </div>
 
+          {tripDuration === "More Than 7 Days" && (
+            <div className="form-group">
+              <label htmlFor="custom-trip-days">Number of days (8–365)</label>
+              <input id="custom-trip-days" type="number" min="8" max="365" step="1"
+                value={customDays} disabled={isAdmin || isSubmitting}
+                onChange={(event) => setCustomDays(event.target.value)} />
+            </div>
+          )}
+          <BookingFareSummary fare={quote?.fare} loading={fareLoading} error={fareError} onRefresh={refreshFare} />
+
           {error && (
             <p className="booking-error">
               {error}
@@ -683,7 +703,7 @@ function BookingSection() {
             type="button"
             className="book-now-btn"
             onClick={handleBooking}
-            disabled={isSubmitting || isAdmin}
+            disabled={isSubmitting || isAdmin || !quote}
           >
             {isSubmitting
               ? "SAVING..."
