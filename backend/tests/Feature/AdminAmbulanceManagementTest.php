@@ -9,6 +9,62 @@ use Tests\Support\AmbulanceMySqlTestCase;
 
 class AdminAmbulanceManagementTest extends AmbulanceMySqlTestCase
 {
+
+    public function test_normal_booking_customer_details_are_admin_only(): void
+    {
+        $this->getJson('/api/admin/bookings')->assertUnauthorized();
+        $this->getJson('/api/admin/bookings/1')->assertUnauthorized();
+
+        $this->signIn(1002);
+        DB::insert('INSERT INTO cars (name, brand, category, seats, quantity, price, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            ['Customer Test Car', 'Test', 'Sedan', 4, 1, 1000, 'available']);
+        $booking = $this->postJson('/api/bookings', [
+            'car_name' => 'Customer Test Car', 'trip_type' => 'Round Trip',
+            'trip_datetime' => '2027-01-01 12:00:00', 'trip_duration' => '2 Days',
+            'pickup' => 'House 1, Mohammadpur, Dhaka',
+            'destination' => 'House 2, Feni Sadar, Feni',
+        ])->assertCreated()->json('booking.b_id');
+
+        $this->getJson('/api/admin/bookings')->assertForbidden();
+        $this->getJson('/api/admin/bookings/'.$booking)->assertForbidden();
+        $this->getJson('/api/bookings/'.$booking)->assertOk()
+            ->assertJsonMissingPath('customer_name')->assertJsonMissingPath('customer_phone');
+
+        $this->signIn();
+        $this->getJson('/api/admin/bookings')->assertOk()->assertJsonCount(1)
+            ->assertJsonPath('0.customer_name', 'Test User 1002')
+            ->assertJsonPath('0.customer_phone', '01900001002');
+
+        $this->getJson('/api/admin/bookings/'.$booking)->assertOk()
+            ->assertJsonPath('b_id', $booking)
+            ->assertJsonPath('customer_name', 'Test User 1002')
+            ->assertJsonPath('pickup', 'House 1, Mohammadpur, Dhaka')
+            ->assertJsonPath('destination', 'House 2, Feni Sadar, Feni')
+            ->assertJsonPath('trip_type', 'Round Trip')
+            ->assertJsonPath('trip_duration', '2 Days')
+            ->assertJsonPath('car.name', 'Customer Test Car')
+            ->assertJsonPath('driver', null)->assertJsonPath('payment', null);
+        $this->getJson('/api/admin/bookings/999999')->assertNotFound();
+
+        DB::update('UPDATE users SET name = ?, phone = ? WHERE id = ?',
+            ['Updated Customer', '01812345678', 1002]);
+        $this->getJson('/api/admin/bookings/'.$booking)->assertOk()
+            ->assertJsonPath('customer_name', 'Updated Customer')
+            ->assertJsonPath('customer_phone', '01812345678');
+
+        $driver = $this->postJson('/api/drivers', $this->driverData())->assertCreated()->json('driver.id');
+        $this->putJson("/api/bookings/{$booking}/driver", ['driver_id' => $driver])->assertOk();
+        $this->putJson('/api/bookings/'.$booking, ['booking_status' => 'Confirmed'])->assertOk();
+        $payment = $this->postJson('/api/payments', ['booking_id' => $booking, 'amount' => 1000, 'payment_method' => 'cash'])
+            ->assertCreated()->json('payment.id');
+        $this->patchJson("/api/payments/{$payment}/status", ['payment_status' => 'paid'])->assertOk();
+        $this->putJson('/api/bookings/'.$booking, ['booking_status' => 'Completed'])->assertOk();
+        $this->getJson('/api/admin/bookings/'.$booking)->assertOk()
+            ->assertJsonPath('booking_status', 'Completed')
+            ->assertJsonPath('customer_name', 'Updated Customer')
+            ->assertJsonPath('driver.id', $driver)
+            ->assertJsonPath('payment.payment_status', 'paid');
+    }
     public function test_database_constraints_and_existing_renter_procedure(): void
     {
         $this->signIn();

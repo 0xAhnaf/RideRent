@@ -17,10 +17,11 @@ import { useAuth } from "../context/AuthContext";
 |
 */
 
-function ProtectedRoute() {
+function ProtectedRoute({ renterOnly = false }) {
   const {
     isAuthenticated,
     loading,
+    user,
   } = useAuth();
 
   const location = useLocation();
@@ -62,6 +63,20 @@ function ProtectedRoute() {
 
   /*
   |--------------------------------------------------------------------------
+  | Renter Only Route
+  |--------------------------------------------------------------------------
+  |
+  | Some authenticated pages are only available to renters.
+  | Admins are redirected to the admin dashboard.
+  |
+  */
+
+  if (renterOnly && user?.role === "admin") {
+    return <Navigate to="/admin" replace />;
+  }
+
+  /*
+  |--------------------------------------------------------------------------
   | Authenticated
   |--------------------------------------------------------------------------
   */
@@ -70,3 +85,4 @@ function ProtectedRoute() {
 }
 
 export default ProtectedRoute;
+

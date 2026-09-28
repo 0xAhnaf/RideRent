@@ -11,8 +11,12 @@ import { useLocation } from "react-router-dom";
 import { locations } from "../data/locations";
 import { apiFetch, getCsrfCookie } from "../api";
 import "../styles/booking.css";
+import { useAuth } from "../context/AuthContext";
 
 function BookingSection() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+
   const location = useLocation();
 
   const [pickupDistrict, setPickupDistrict] = useState("");
@@ -132,6 +136,11 @@ function BookingSection() {
     setError("");
     setSuccess("");
 
+    if (isAdmin) {
+      setError("Admins cannot create a booking request.");
+      return;
+    }
+
     // -----------------------------
     // FRONTEND VALIDATION
     // -----------------------------
@@ -221,11 +230,6 @@ function BookingSection() {
       // Initialize Sanctum CSRF protection
       await getCsrfCookie();
 
-      // Use the existing API helper so that:
-      // - credentials are included
-      // - the XSRF-TOKEN is read
-      // - X-XSRF-TOKEN is sent
-      // - the request uses the correct backend host
       const response = await apiFetch("/api/bookings", {
         method: "POST",
         body: JSON.stringify(bookingData),
@@ -305,6 +309,7 @@ function BookingSection() {
             <select
               id="pickup-district"
               value={pickupDistrict}
+              disabled={isAdmin}
               onChange={(event) => {
                 const district = event.target.value;
 
@@ -336,6 +341,7 @@ function BookingSection() {
             <select
               id="pickup-thana"
               value={pickupThana}
+              disabled={isAdmin}
               onChange={(event) =>
                 setPickupThana(event.target.value)
               }
@@ -364,6 +370,7 @@ function BookingSection() {
               id="pickup-address"
               type="text"
               value={pickupAddress}
+              disabled={isAdmin}
               onChange={(event) =>
                 setPickupAddress(event.target.value)
               }
@@ -380,6 +387,7 @@ function BookingSection() {
             <select
               id="destination-district"
               value={destinationDistrict}
+              disabled={isAdmin}
               onChange={(event) => {
                 const district = event.target.value;
 
@@ -415,6 +423,7 @@ function BookingSection() {
             <select
               id="destination-thana"
               value={destinationThana}
+              disabled={isAdmin}
               onChange={(event) =>
                 setDestinationThana(
                   event.target.value,
@@ -445,6 +454,7 @@ function BookingSection() {
               id="destination-address"
               type="text"
               value={destinationAddress}
+              disabled={isAdmin}
               onChange={(event) =>
                 setDestinationAddress(
                   event.target.value,
@@ -463,6 +473,7 @@ function BookingSection() {
             <select
               id="booking-car"
               value={selectedCar}
+              disabled={isAdmin}
               onChange={(event) => {
                 setSelectedCar(event.target.value);
 
@@ -537,6 +548,7 @@ function BookingSection() {
             <select
               id="trip-type"
               value={tripType}
+              disabled={isAdmin}
               onChange={(event) =>
                 setTripType(event.target.value)
               }
@@ -562,7 +574,9 @@ function BookingSection() {
               type="datetime-local"
               min={minTripDatetime}
               value={tripDatetime}
+              disabled={isAdmin}
               onPointerDown={(event) => {
+                if (isAdmin) return;
                 if (
                   event.pointerType === "mouse" &&
                   event.button !== 0
@@ -606,6 +620,7 @@ function BookingSection() {
             <select
               id="trip-duration"
               value={tripDuration}
+              disabled={isAdmin}
               onChange={(event) =>
                 setTripDuration(event.target.value)
               }
@@ -668,7 +683,7 @@ function BookingSection() {
             type="button"
             className="book-now-btn"
             onClick={handleBooking}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isAdmin}
           >
             {isSubmitting
               ? "SAVING..."

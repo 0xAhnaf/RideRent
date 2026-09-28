@@ -1,215 +1,62 @@
 import React from "react";
 
-export default function RentalActivity({
-  bookingStatistics,
-  vehicleBookings,
-  completedVehicleTrips,
-  ambulanceBookings,
-}) {
-  return (
-    <>
-      <h1>Rental Activity</h1>
+const text = (value) => value === null || value === undefined || value === "" ? "—" : String(value);
+const money = (value) => `৳${Number.isFinite(Number(value)) ? Number(value).toLocaleString("en-BD", { maximumFractionDigits: 2 }) : "0"}`;
+function StatusBadge({ value }) {
+  const status = String(value || "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+  const tone = ["completed", "paid", "success", "successful"].includes(status) ? "success" :
+    ["pending", "unpaid", "not_paid", "requested", "awaiting_payment"].includes(status) ? "pending" :
+    ["cancelled", "canceled", "failed", "rejected"].includes(status) ? "danger" :
+    ["confirmed", "accepted", "ongoing", "in_progress"].includes(status) ? "info" : "neutral";
+  return <span className={`status-badge ${tone}`}>{status ? String(value).replace(/_/g, " ") : "Not available"}</span>;
+}
 
-      {/* BOOKING STATISTICS */}
 
-      <div className="statistics-grid">
+function PaymentAmount({ amount, status }) {
+  const normalized = String(status ?? "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+  if (normalized === "paid") {
+    if (amount === null || amount === undefined || String(amount).trim() === "" || !Number.isFinite(Number(amount))) {
+      return <span>Amount unavailable</span>;
+    }
+    return <span>{money(amount)}</span>;
+  }
+  if (["", "pending", "unpaid", "not_paid", "requested", "awaiting_payment"].includes(normalized)) {
+    return <StatusBadge value="Unpaid" />;
+  }
+  return <StatusBadge value={status} />;
+}
 
-        <div className="stat-card">
-          <h3>Total Bookings</h3>
-          <p>
-            {bookingStatistics?.total_bookings ?? 0}
-          </p>
-        </div>
+const vehicleColumns = [
+  ["booking_id", "Booking ID"], ["vehicle_name", "Vehicle"], ["vehicle_brand", "Brand"],
+  ["vehicle_category", "Category"], ["trip_type", "Trip Type"], ["trip_datetime", "Trip Date"],
+  ["trip_duration", "Duration"], ["pickup", "Pickup"], ["destination", "Destination"],
+];
+const ambulanceColumns = [
+  ["booking_id", "Booking ID"], ["pickup_district", "Pickup District"], ["pickup_thana", "Pickup Thana"],
+  ["pickup_address", "Pickup Address"], ["destination_district", "Destination District"],
+  ["destination_thana", "Destination Thana"], ["destination_address", "Destination Address"],
+  ["emergency_contact", "Emergency Contact"], ["status", "Status", "status"], ["created_at", "Created At"],
+];
 
-        <div className="stat-card">
-          <h3>Completed Rentals</h3>
-          <p>
-            {bookingStatistics?.completed_bookings ?? 0}
-          </p>
-        </div>
+function HistoryCard({ id, title, description, rows, columns, empty }) {
+  return <section className="history-card" aria-labelledby={id}>
+    <div className="renter-card-heading"><div><h2 id={id}>{title}</h2><p>{description}</p></div><span className="renter-count">{rows.length} {rows.length === 1 ? "record" : "records"}</span></div>
+    {rows.length === 0 ? <div className="renter-empty"><span aria-hidden="true">—</span><p>{empty}</p></div> :
+      <div className="table-container" role="region" aria-labelledby={id} tabIndex={0}><table className="rental-table"><thead><tr>{columns.map(([key, label]) => <th key={key} scope="col">{label}</th>)}</tr></thead>
+        <tbody>{rows.map((row, index) => <tr key={row.booking_id ?? index}>{columns.map(([key, label, type]) => <td key={key} data-label={label} className={type === "money" || type === "payment" ? "renter-amount" : undefined}>{type === "status" ? <StatusBadge value={row[key]} /> : type === "payment" ? <PaymentAmount amount={row[key]} status={row.payment_status} /> : type === "money" ? money(row[key] ?? 0) : text(row[key])}</td>)}</tr>)}</tbody>
+      </table></div>}
+  </section>;
+}
 
-        <div className="stat-card">
-          <h3>Cancelled Rentals</h3>
-          <p>
-            {bookingStatistics?.cancelled_bookings ?? 0}
-          </p>
-        </div>
-
-        <div className="stat-card">
-          <h3>Total Spent</h3>
-          <p>
-            ৳{bookingStatistics?.total_spent ?? 0}
-          </p>
-        </div>
-
-      </div>
-
-      {/* VEHICLE BOOKINGS */}
-
-      <div className="history-card">
-        <h2>Vehicle Bookings</h2>
-
-        {vehicleBookings.length === 0 ? (
-          <p>No vehicle booking history yet.</p>
-        ) : (
-          <div className="table-container">
-            <table className="rental-table">
-              <thead>
-                <tr>
-                  <th>Booking ID</th>
-                  <th>Vehicle</th>
-                  <th>Brand</th>
-                  <th>Category</th>
-                  <th>Trip Type</th>
-                  <th>Trip Date</th>
-                  <th>Duration</th>
-                  <th>Pickup</th>
-                  <th>Destination</th>
-                  <th>Amount</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {vehicleBookings.map((booking) => (
-                  <tr key={booking.booking_id}>
-                    <td>{booking.booking_id}</td>
-                    <td>{booking.vehicle_name}</td>
-                    <td>{booking.vehicle_brand}</td>
-                    <td>{booking.vehicle_category}</td>
-                    <td>{booking.trip_type}</td>
-                    <td>{booking.trip_datetime}</td>
-                    <td>{booking.trip_duration}</td>
-                    <td>{booking.pickup}</td>
-                    <td>{booking.destination}</td>
-                    <td>৳{booking.total_amount ?? 0}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* COMPLETED VEHICLE TRIPS */}
-
-      <div className="history-card">
-        <h2>Completed Vehicle Trips</h2>
-
-        {completedVehicleTrips.length === 0 ? (
-          <p>No completed vehicle trips yet.</p>
-        ) : (
-          <div className="table-container">
-            <table className="rental-table">
-              <thead>
-                <tr>
-                  <th>Booking ID</th>
-                  <th>Vehicle</th>
-                  <th>Brand</th>
-                  <th>Category</th>
-                  <th>Trip Type</th>
-                  <th>Trip Date</th>
-                  <th>Duration</th>
-                  <th>Pickup</th>
-                  <th>Destination</th>
-                  <th>Payment Method</th>
-                  <th>Payment Status</th>
-                  <th>Amount</th>
-                 
-                </tr>
-              </thead>
-
-              <tbody>
-                {completedVehicleTrips.map((trip) => (
-                  <tr key={trip.booking_id}>
-                    <td>{trip.booking_id}</td>
-                    <td>{trip.vehicle_name}</td>
-                    <td>{trip.vehicle_brand}</td>
-                    <td>{trip.vehicle_category}</td>
-                    <td>{trip.trip_type}</td>
-                    <td>{trip.trip_datetime}</td>
-                    <td>{trip.trip_duration}</td>
-                    <td>{trip.pickup}</td>
-                    <td>{trip.destination}</td>
-                    <td>{trip.payment_method}</td>
-                    <td>
-  <span
-    className={`status-badge ${
-      trip.payment_status?.toLowerCase() === "paid"
-        ? "completed"
-        : "pending"
-    }`}
-  >
-    {trip.payment_status}
-  </span>
-</td>
-                    <td>৳{trip.payment_amount ?? 0}</td>
-                   
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* AMBULANCE BOOKINGS */}
-
-      <div className="history-card">
-        <h2>Ambulance Bookings</h2>
-
-        {ambulanceBookings.length === 0 ? (
-          <p>No ambulance booking history yet.</p>
-        ) : (
-          <div className="table-container">
-            <table className="rental-table">
-              <thead>
-                <tr>
-                  <th>Booking ID</th>
-                  <th>Pickup District</th>
-                  <th>Pickup Thana</th>
-                  <th>Pickup Address</th>
-                  <th>Destination District</th>
-                  <th>Destination Thana</th>
-                  <th>Destination Address</th>
-                  <th>Emergency Contact</th>
-                  <th>Status</th>
-                  <th>Created At</th>
-                  
-                </tr>
-              </thead>
-
-              <tbody>
-                {ambulanceBookings.map((booking) => (
-                  <tr key={booking.booking_id}>
-                    <td>{booking.booking_id}</td>
-                    <td>{booking.pickup_district}</td>
-                    <td>{booking.pickup_thana}</td>
-                    <td>{booking.pickup_address}</td>
-                    <td>{booking.destination_district}</td>
-                    <td>{booking.destination_thana}</td>
-                    <td>{booking.destination_address}</td>
-                    <td>{booking.emergency_contact}</td>
-                    <td>
-  <span
-    className={`status-badge ${
-      booking.status?.toLowerCase() === "completed"
-        ? "completed"
-        : booking.status?.toLowerCase() === "cancelled"
-        ? "cancelled"
-        : "pending"
-    }`}
-  >
-    {booking.status}
-  </span>
-</td>
-                    <td>{booking.created_at}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    </>
-  );
+export default function RentalActivity({ bookingStatistics, vehicleBookings = [], completedVehicleTrips = [], ambulanceBookings = [], loading, error }) {
+  const stats = [["Total Bookings", bookingStatistics?.total_bookings ?? 0, "gold"], ["Completed Rentals", bookingStatistics?.completed_bookings ?? 0, ""], ["Cancelled Rentals", bookingStatistics?.cancelled_bookings ?? 0, ""], ["Total Spent", money(bookingStatistics?.total_spent ?? 0), "gold"]];
+  return <>
+    <header className="renter-page-heading"><span className="renter-eyebrow">YOUR JOURNEYS</span><h1>Rental Activity</h1><p>Review your bookings, completed trips and payment history.</p></header>
+    {loading ? <div className="renter-notice" role="status">Loading rental activity...</div> : error ? <div className="renter-notice error" role="alert">{error}</div> : <>
+      <div className="statistics-grid">{stats.map(([label, value, tone]) => <article className={`stat-card ${tone}`} key={label}><h3>{label}</h3><p>{value}</p></article>)}</div>
+      <HistoryCard id="vehicle-history" title="Vehicle Bookings" description="Your vehicle reservations and trip details." rows={vehicleBookings} columns={[...vehicleColumns, ["booking_status", "Booking Status", "status"], ["total_amount", "Amount Paid", "payment"]]} empty="No vehicle booking history yet." />
+      <HistoryCard id="completed-history" title="Completed Vehicle Trips" description="Completed journeys and their payment details." rows={completedVehicleTrips} columns={[...vehicleColumns, ["payment_method", "Payment Method"], ["payment_status", "Payment Status", "status"], ["payment_amount", "Amount", "money"]]} empty="No completed vehicle trips yet." />
+      <HistoryCard id="ambulance-history" title="Ambulance Bookings" description="Your ambulance requests and booking status." rows={ambulanceBookings} columns={ambulanceColumns} empty="No ambulance booking history yet." />
+    </>}
+  </>;
 }

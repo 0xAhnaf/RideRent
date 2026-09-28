@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\AdminBookingController;
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserController;
@@ -164,6 +165,10 @@ Route::middleware('auth:sanctum')->group(function () {
     */
 
     Route::middleware('admin')->group(function () {
+
+        Route::get('/admin/bookings', [AdminBookingController::class, 'index']);
+        Route::get('/admin/bookings/{id}', [AdminBookingController::class, 'show'])
+            ->whereNumber('id');
 
         Route::prefix('admin/ambulance')->where(['id' => '[0-9]+'])->group(function () {
             Route::apiResource('drivers', AmbulanceDriverController::class)->parameters(['drivers' => 'id'])->names('admin.ambulance.drivers');

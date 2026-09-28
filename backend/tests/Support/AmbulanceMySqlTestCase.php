@@ -49,6 +49,11 @@ abstract class AmbulanceMySqlTestCase extends TestCase
             );
             $viewMigration->up();
 
+            $customerViewMigration = require database_path(
+                'migrations/2026_09_28_000001_add_customer_fields_to_booking_details_view.php',
+            );
+            $customerViewMigration->up();
+
             fwrite(STDOUT, "\nIsolated MySQL test schema: ".self::$testDatabase." (automatic cleanup enabled)\n");
         }
 

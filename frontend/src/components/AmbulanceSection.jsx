@@ -5,8 +5,12 @@ import { apiFetch, getCsrfCookie } from "../api";
 import ambulanceOne from "../assets/ambulance.png";
 import ambulanceTwo from "../assets/ambulance2.png";
 import "../styles/ambulance.css";
+import { useAuth } from "../context/AuthContext";
 
 function AmbulanceSection() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+
   const [pickupDistrict, setPickupDistrict] = useState("");
   const [pickupThana, setPickupThana] = useState("");
   const [pickupThanas, setPickupThanas] = useState([]);
@@ -23,7 +27,7 @@ function AmbulanceSection() {
   const [message, setMessage] = useState("");
 
   const allDistricts = Object.values(locations).flatMap((division) =>
-    Object.keys(division),
+    Object.keys(division)
   );
 
   const getThanas = (district) => {
@@ -57,6 +61,11 @@ function AmbulanceSection() {
   const handleBooking = async (e) => {
     e.preventDefault();
 
+    if (isAdmin) {
+      setMessage("Admins cannot book an ambulance.");
+      return;
+    }
+
     setMessage("");
 
     if (
@@ -83,7 +92,6 @@ function AmbulanceSection() {
       await getCsrfCookie();
       const response = await apiFetch("/api/ambulance-bookings", {
         method: "POST",
-
         body: JSON.stringify({
           pickup_district: pickupDistrict,
           pickup_thana: pickupThana,
@@ -152,6 +160,7 @@ function AmbulanceSection() {
               <select
                 value={pickupDistrict}
                 onChange={handlePickupDistrictChange}
+                disabled={isAdmin}
               >
                 <option value="">Select District</option>
 
@@ -172,6 +181,7 @@ function AmbulanceSection() {
               <select
                 value={pickupThana}
                 onChange={(e) => setPickupThana(e.target.value)}
+                disabled={isAdmin}
               >
                 <option value="">Select Thana</option>
 
@@ -194,6 +204,7 @@ function AmbulanceSection() {
                 value={pickupAddress}
                 onChange={(e) => setPickupAddress(e.target.value)}
                 placeholder="Enter pickup address"
+                disabled={isAdmin}
               />
             </div>
 
@@ -206,6 +217,7 @@ function AmbulanceSection() {
               <select
                 value={destinationDistrict}
                 onChange={handleDestinationDistrictChange}
+                disabled={isAdmin}
               >
                 <option value="">Select District</option>
 
@@ -226,6 +238,7 @@ function AmbulanceSection() {
               <select
                 value={destinationThana}
                 onChange={(e) => setDestinationThana(e.target.value)}
+                disabled={isAdmin}
               >
                 <option value="">Select Thana</option>
 
@@ -248,6 +261,7 @@ function AmbulanceSection() {
                 value={destinationAddress}
                 onChange={(e) => setDestinationAddress(e.target.value)}
                 placeholder="Enter destination address"
+                disabled={isAdmin}
               />
             </div>
 
@@ -263,6 +277,7 @@ function AmbulanceSection() {
                 onChange={(e) => setEmergencyContact(e.target.value)}
                 placeholder="01XXXXXXXXX"
                 maxLength={11}
+                disabled={isAdmin}
               />
             </div>
 
@@ -275,7 +290,7 @@ function AmbulanceSection() {
             <button
               type="submit"
               className="ambulance-btn"
-              disabled={loading}
+              disabled={loading || isAdmin}
             >
               <Ambulance size={18} />
 
