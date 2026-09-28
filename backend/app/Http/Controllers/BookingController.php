@@ -480,7 +480,7 @@ class BookingController extends Controller
         );
     }
 
-    private function formatBooking(object $row): array
+    protected function formatBooking(object $row): array
     {
         return [
             'b_id' => (int) $row->booking_id,

@@ -13,6 +13,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { apiFetch, getCsrfCookie } from "../api";
+import BookingDetailsPanel from "../components/admin/BookingDetailsPanel";
 import AdminHeader from "../components/admin/AdminHeader";
 import AdminSidebar from "../components/admin/AdminSidebar";
 import "../styles/admin-dashboard.css";
@@ -65,11 +66,42 @@ function AdminBookingsPage() {
   const [loadError, setLoadError] = useState("");
   const [busyBookingId, setBusyBookingId] = useState(null);
   const [actionMessage, setActionMessage] = useState(null);
+  const [detailsId, setDetailsId] = useState(null);
+  const [details, setDetails] = useState(null);
+  const [detailsError, setDetailsError] = useState("");
+  const [detailsLoading, setDetailsLoading] = useState(false);
+
+  useEffect(() => {
+    if (detailsId === null) return;
+    const controller = new AbortController();
+    let active = true;
+    (async () => {
+      setDetails(null);
+      setDetailsError("");
+      setDetailsLoading(true);
+      try {
+        const response = await apiFetch(`/api/admin/bookings/${detailsId}`, {
+          signal: controller.signal,
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(getApiErrorMessage(result, "Unable to load booking details."));
+        if (active) setDetails(result);
+      } catch (error) {
+        if (active && error.name !== "AbortError") setDetailsError(error.message);
+      } finally {
+        if (active) setDetailsLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [detailsId, bookings]);
 
   const replaceBooking = (updatedBooking) => {
     setBookings((currentBookings) =>
       currentBookings.map((booking) =>
-        booking.b_id === updatedBooking.b_id ? updatedBooking : booking,
+        booking.b_id === updatedBooking.b_id ? { ...booking, ...updatedBooking } : booking,
       ),
     );
     setDriverSelections((currentSelections) => ({
@@ -103,7 +135,7 @@ function AdminBookingsPage() {
         setLoadError("");
 
         const [bookingsResponse, driversResponse] = await Promise.all([
-          apiFetch("/api/bookings", {
+          apiFetch("/api/admin/bookings", {
             headers: { Accept: "application/json" },
             signal: controller.signal,
           }),
@@ -197,6 +229,8 @@ function AdminBookingsPage() {
       const searchableValues = [
         booking.b_id,
         booking.u_id,
+        booking.customer_name,
+        booking.customer_phone,
         booking.car?.name,
         booking.driver?.name,
         booking.payment?.payment_status,
@@ -216,12 +250,6 @@ function AdminBookingsPage() {
       return matchesStatus && matchesSearch;
     });
   }, [bookings, searchTerm, statusFilter]);
-
-  const handleNavigation = (item) => {
-    if (item.path) {
-      navigate(item.path);
-    }
-  };
 
   const handleDriverSelection = (bookingId, driverId) => {
     setDriverSelections((currentSelections) => ({
@@ -363,6 +391,7 @@ function AdminBookingsPage() {
           (currentBooking) => currentBooking.b_id !== booking.b_id,
         ),
       );
+      if (detailsId === booking.b_id) setDetailsId(null);
       setDriverSelections((currentSelections) => {
         const nextSelections = { ...currentSelections };
         delete nextSelections[booking.b_id];
@@ -440,7 +469,7 @@ function AdminBookingsPage() {
                 <input
                   type="search"
                   value={searchTerm}
-                  placeholder="Search booking, route, driver..."
+                  placeholder="Search customer, phone, route..."
                   onChange={(event) => setSearchTerm(event.target.value)}
                 />
               </label>
@@ -473,16 +502,22 @@ function AdminBookingsPage() {
             </div>
           )}
 
+          {detailsId !== null && (
+            <BookingDetailsPanel
+              bookingId={detailsId} booking={details} loading={detailsLoading} error={detailsError}
+              formatDate={formatTripDate} formatAmount={formatPaymentAmount}
+              onClose={() => setDetailsId(null)}
+            />
+          )}
+
           <div className="admin-booking-table-wrapper">
             <table className="admin-booking-table">
               <thead>
                 <tr>
-                  <th>Booking</th>
+                  <th>Booking / Customer</th>
                   <th>Vehicle & Trip</th>
-                  <th>Route</th>
                   <th>Driver Assignment</th>
-                  <th>Payment</th>
-                  <th>Status</th>
+                  <th>Status / Payment</th>
                   <th className="admin-booking-actions-heading">Actions</th>
                 </tr>
               </thead>
@@ -490,7 +525,7 @@ function AdminBookingsPage() {
               <tbody>
                 {loading && (
                   <tr className="admin-booking-state-row">
-                    <td colSpan="7" className="admin-booking-state-cell">
+                    <td colSpan="5" className="admin-booking-state-cell">
                       Loading bookings and drivers...
                     </td>
                   </tr>
@@ -498,7 +533,7 @@ function AdminBookingsPage() {
 
                 {!loading && loadError && (
                   <tr className="admin-booking-state-row">
-                    <td colSpan="7" className="admin-booking-state-cell error">
+                    <td colSpan="5" className="admin-booking-state-cell error">
                       {loadError}
                     </td>
                   </tr>
@@ -506,7 +541,7 @@ function AdminBookingsPage() {
 
                 {!loading && !loadError && filteredBookings.length === 0 && (
                   <tr className="admin-booking-state-row">
-                    <td colSpan="7" className="admin-booking-state-cell">
+                    <td colSpan="5" className="admin-booking-state-cell">
                       {bookings.length === 0
                         ? "No bookings have been created yet."
                         : "No bookings match the current search and filter."}
@@ -529,10 +564,11 @@ function AdminBookingsPage() {
 
                     return (
                       <tr key={booking.b_id}>
-                        <td data-label="Booking">
+                        <td data-label="Booking / Customer">
                           <div className="admin-booking-id-cell">
                             <strong>#BK-{booking.b_id}</strong>
-                            <span>User #{booking.u_id}</span>
+                            <span>{booking.customer_name || "Customer unavailable"}</span>
+                            <span>{booking.customer_phone || "Phone unavailable"}</span>
                             <small>
                               <CalendarClock size={13} />
                               {formatTripDate(booking.trip_datetime)}
@@ -547,20 +583,8 @@ function AdminBookingsPage() {
                             </strong>
                             <span>{booking.trip_type}</span>
                             <small>{booking.trip_duration}</small>
-                          </div>
-                        </td>
-
-                        <td data-label="Route">
-                          <div className="admin-booking-route-cell">
-                            <span>
-                              <MapPin size={14} />
-                              {booking.pickup}
-                            </span>
-                            <span className="route-line" aria-hidden="true" />
-                            <span>
-                              <Flag size={14} />
-                              {booking.destination}
-                            </span>
+                            <span className="admin-booking-route-preview"><MapPin size={14} />{booking.pickup}</span>
+                            <span className="admin-booking-route-preview"><Flag size={14} />{booking.destination}</span>
                           </div>
                         </td>
 
@@ -636,8 +660,11 @@ function AdminBookingsPage() {
                           </div>
                         </td>
 
-                        <td data-label="Payment">
+                        <td data-label="Status / Payment">
                           <div className="admin-booking-payment-cell">
+                            <span className={`admin-booking-status ${booking.booking_status.toLowerCase()}`}>
+                              {booking.booking_status}
+                            </span>
                             {booking.payment ? (
                               <>
                                 <span
@@ -677,19 +704,16 @@ function AdminBookingsPage() {
                           </div>
                         </td>
 
-                        <td data-label="Status">
-                          <span
-                            className={`admin-booking-status ${booking.booking_status.toLowerCase()}`}
-                          >
-                            {booking.booking_status}
-                          </span>
-                        </td>
-
                         <td
                           data-label="Actions"
                           className="admin-booking-actions-cell"
                         >
                           <div className="admin-booking-row-actions">
+                            <button type="button" disabled={isBusy} aria-expanded={detailsId === booking.b_id}
+                              aria-controls="normal-booking-details"
+                              onClick={() => setDetailsId(booking.b_id)}>
+                              Details
+                            </button>
                             {booking.booking_status === "Pending" && (
                               <button
                                 type="button"
