@@ -40,6 +40,15 @@ abstract class AmbulanceMySqlTestCase extends TestCase
                 $definition = DB::connection('ambulance_source')->selectOne('SHOW CREATE TABLE `'.$table.'`');
                 DB::connection('ambulance_test')->statement($definition->{'Create Table'});
             }
+
+            config(['database.default' => 'ambulance_test']);
+            DB::purge('ambulance_test');
+
+            $viewMigration = require database_path(
+                'migrations/2026_09_26_000004_create_booking_details_view.php',
+            );
+            $viewMigration->up();
+
             fwrite(STDOUT, "\nIsolated MySQL test schema: ".self::$testDatabase." (automatic cleanup enabled)\n");
         }
 
