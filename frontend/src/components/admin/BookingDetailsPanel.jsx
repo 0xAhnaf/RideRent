@@ -10,6 +10,12 @@ function BookingDetailsPanel({ bookingId, booking, loading, error, onClose, form
     ["Trip type", booking.trip_type],
     ["Trip duration", booking.trip_duration],
     ["Booking status", booking.booking_status],
+    ["Saved total fare", booking.total_fare != null ? `BDT ${formatAmount(booking.total_fare)}` : "Legacy booking — fare not recorded"],
+    ...(booking.fare ? [
+      ["Body rent", `BDT ${formatAmount(booking.fare.daily_rent)} × ${booking.fare.charged_days} day(s) = BDT ${formatAmount(booking.fare.body_rent)}`],
+      ["Estimated distance", booking.fare.same_thana ? "Same thana — fixed charge" : `${booking.fare.charged_km} km including any return leg`],
+      ["Route charge", `BDT ${formatAmount(booking.fare.route_charge)}`],
+    ] : []),
     ["Driver", booking.driver?.name || "Unassigned"],
     ["Driver phone", booking.driver?.phone || "Unavailable"],
     ["Payment status", booking.payment?.payment_status || "Not recorded"],

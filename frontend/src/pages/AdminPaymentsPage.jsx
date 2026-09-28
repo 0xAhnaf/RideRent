@@ -195,9 +195,7 @@ function AdminPaymentsPage() {
           setFormData({
             ...createInitialForm(),
             booking_id: String(requestedBooking.b_id),
-            amount: requestedBooking.car?.price
-              ? String(requestedBooking.car.price)
-              : "",
+            amount: String(requestedBooking.total_fare ?? requestedBooking.car?.price ?? ""),
           });
           setShowForm(true);
         }
@@ -324,14 +322,12 @@ function AdminPaymentsPage() {
     setFormData((currentForm) => {
       const nextForm = { ...currentForm, [name]: value };
 
-      if (name === "booking_id" && value) {
+      if (name === "booking_id") {
         const selectedBooking = eligibleBookings.find(
           (booking) => booking.b_id === Number(value),
         );
 
-        if (selectedBooking?.car?.price) {
-          nextForm.amount = String(selectedBooking.car.price);
-        }
+        nextForm.amount = String(selectedBooking?.total_fare ?? selectedBooking?.car?.price ?? "");
       }
 
       return nextForm;
@@ -592,6 +588,8 @@ function AdminPaymentsPage() {
               <div className="admin-payment-field">
                 <label htmlFor="payment-amount">Amount (BDT) *</label>
                 <input
+                  readOnly={bookings.some((booking) => booking.b_id === Number(formData.booking_id) && booking.total_fare != null)}
+                  title="New bookings use their saved total fare."
                   id="payment-amount"
                   name="amount"
                   type="number"
