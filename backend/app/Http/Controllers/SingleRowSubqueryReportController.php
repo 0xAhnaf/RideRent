@@ -9,10 +9,7 @@ class SingleRowSubqueryReportController extends Controller
 {
     public function businessInsights(): JsonResponse
     {
-        /*
-         * The inner query returns one vehicle ID: the vehicle with the
-         * highest booking count. The outer query then returns its profile.
-         */
+
         $customerFavoriteVehicle = DB::selectOne(<<<'SQL'
             SELECT
                 c.id AS vehicle_id,
@@ -37,10 +34,7 @@ class SingleRowSubqueryReportController extends Controller
             )
         SQL);
 
-        /*
-         * The inner query returns one completed booking ID. Vehicle and
-         * driver names are retrieved through scalar correlated subqueries.
-         */
+
         $latestCompletedJourney = DB::selectOne(<<<'SQL'
             SELECT
                 b.b_id AS booking_id,
@@ -78,10 +72,7 @@ class SingleRowSubqueryReportController extends Controller
             )
         SQL);
 
-        /*
-         * The inner query returns one available driver ID, prioritising
-         * experience and using the lowest ID as a stable tie-breaker.
-         */
+
         $experiencedDriverSpotlight = DB::selectOne(<<<'SQL'
             SELECT
                 d.id AS driver_id,

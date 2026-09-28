@@ -133,7 +133,6 @@ class CarController extends Controller
                         updated_at
                     FROM cars
                     WHERE id = LAST_INSERT_ID()
-                    LIMIT 1
                 SQL);
 
                 if (!$insertedVehicle) {
@@ -367,7 +366,7 @@ class CarController extends Controller
                     updated_at
                 FROM cars
                 WHERE id = ?
-                LIMIT 1
+
             SQL,
             [$id],
         );

@@ -15,7 +15,7 @@ import AdminUsersPage from "./pages/AdminUsersPage";
 import AdminBookingsPage from "./pages/AdminBookingsPage";
 import AdminPaymentsPage from "./pages/AdminPaymentsPage";
 import AdminReportsPage from "./pages/AdminReportsPage";
-
+import AdminAmbulancePage from "./pages/AdminAmbulancePage";
 import RenterProfile from "./pages/RenterProfile";
 
 import AdminRoute from "./components/AdminRoute";

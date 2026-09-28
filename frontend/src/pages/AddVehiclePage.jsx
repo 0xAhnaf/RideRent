@@ -19,7 +19,7 @@ const navItems = [
   { label: "Drivers", icon: "♧", path: "/admin/drivers" },
   { label: "Bookings", icon: "▣", path: "/admin/bookings" },
   { label: "Payments", icon: "৳", path: "/admin/payments" },
-  { label: "Ambulance / Emergency", icon: "✚", danger: true },
+  { label: "Ambulance", icon: "✚", path: "/admin/ambulance" },
   { label: "Reviews", icon: "☆" },
   { label: "Reports", icon: "▥", path: "/admin/reports" },
 ];
@@ -313,8 +313,7 @@ function AddVehiclePage() {
               <h3>Add New Vehicle</h3>
 
               <p>
-                Enter the vehicle details below. Required fields
-                are marked with an asterisk.
+                Enter the vehicle details below. All informations are required!
               </p>
             </div>
           </div>
@@ -350,9 +349,7 @@ function AddVehiclePage() {
                   </strong>
 
                   <p>
-                    The ambulance module is not implemented yet,
-                    so no ambulance data will be submitted from
-                    this page.
+                    Ambulance requests are managed from the dedicated Ambulance dashboard.
                   </p>
                 </div>
               </div>
@@ -421,6 +418,9 @@ function AddVehiclePage() {
                       <option value="Bus">Bus</option>
                       <option value="Luxury Sedan">
                         Luxury Sedan
+                      </option>
+                      <option value="Super Car">
+                        Super Car
                       </option>
                     </select>
                   </div>
@@ -506,21 +506,14 @@ function AddVehiclePage() {
                 <div className="add-vehicle-image-section">
                   <div className="add-vehicle-image-instruction">
                     <div className="add-vehicle-instruction-icon">
-                      <ImageIcon size={22} />
+                      <ImageIcon size={34} />
                     </div>
 
                     <div>
-                      <strong>
+                      <h4>
                         Choose a clear vehicle image.
-                      </strong>
+                      </h4>
 
-                      <p>
-                        RideRent will create a unique filename and
-                        store the image in Laravel public storage.
-                      </p>
-
-                      <span>No manual rename is required.</span>
-                      <code>PNG, JPG, JPEG or WEBP</code>
                     </div>
                   </div>
 
@@ -592,11 +585,7 @@ function AddVehiclePage() {
                       </div>
                     )}
 
-                    <p className="add-vehicle-runtime-note">
-                      The image file is stored in Laravel public
-                      storage. Only its relative path is saved in
-                      the database.
-                    </p>
+
                   </div>
                 </div>
 

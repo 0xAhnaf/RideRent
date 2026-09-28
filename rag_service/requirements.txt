@@ -7,3 +7,7 @@ langchain-openai
 langchain-text-splitters
 pypdf
 rank-bm25
+langchain-huggingface
+langchain-chroma
+langchain-community
+sentence-transformers

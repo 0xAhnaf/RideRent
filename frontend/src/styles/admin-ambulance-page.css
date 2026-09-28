@@ -1,0 +1,83 @@
+.ambulance-sections, .ambulance-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.ambulance-section-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 22px;
+  text-align: left;
+  color: var(--admin-text);
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border-light);
+  border-top: 4px solid var(--admin-primary-container);
+  cursor: pointer;
+}
+
+.ambulance-section-link.selected {
+  border-top-color: var(--admin-accent);
+  background: var(--admin-surface-low);
+}
+
+.ambulance-section-link strong { margin-left: auto; font-size: 24px; }
+.ambulance-summary article { padding: 20px; border-left: 4px solid var(--admin-accent); }
+.ambulance-summary span { display: block; color: var(--admin-muted); margin-bottom: 10px; }
+.ambulance-summary strong { font-size: 24px; }
+.ambulance-records { overflow: hidden; }
+.ambulance-toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; padding: 22px; }
+.ambulance-toolbar h3 { margin-right: auto; }
+.ambulance-main input, .ambulance-main select { max-width: 100%; }
+.ambulance-records input, .ambulance-records select {
+  padding: 10px 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  min-width: 0;
+}
+
+.ambulance-records button, .ambulance-message button {
+  padding: 9px 12px;
+  border: 1px solid var(--admin-border-light);
+  border-radius: 6px;
+  color: var(--admin-text);
+  background: var(--admin-surface-high);
+  cursor: pointer;
+}
+
+.ambulance-records button.primary { background: var(--admin-primary-container); color: white; }
+.ambulance-records button.danger { background: var(--admin-danger-light); color: var(--admin-danger); }
+.ambulance-records button:disabled { opacity: 0.55; cursor: not-allowed; }
+.ambulance-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.ambulance-table-wrapper { overflow-x: auto; }
+.ambulance-table { width: 100%; border-collapse: collapse; }
+.ambulance-table th { background: var(--admin-surface-low); text-align: left; }
+.ambulance-table th, .ambulance-table td { padding: 18px; border-bottom: 1px solid var(--admin-border-light); vertical-align: top; }
+.ambulance-table p { margin: 7px 0; }
+.ambulance-badge { display: inline-block; padding: 6px 10px; border-radius: 6px; background: var(--admin-accent-light); text-transform: capitalize; }
+.ambulance-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; padding: 22px; background: var(--admin-surface-low); }
+.ambulance-form h4, .ambulance-form .ambulance-actions { grid-column: 1 / -1; }
+.ambulance-form label { display: flex; flex-direction: column; gap: 8px; }
+.ambulance-details { margin: 20px; padding: 20px; border-left: 4px solid var(--admin-accent); background: var(--admin-surface-low); overflow-wrap: anywhere; }
+.ambulance-main .ambulance-message { margin: 20px; padding: 16px; }
+.ambulance-main .ambulance-message.error { background: var(--admin-danger-light); color: var(--admin-danger); }
+.ambulance-main .ambulance-message.success { background: var(--admin-surface-low); border-left: 4px solid var(--admin-accent); }
+
+@media (max-width: 1100px) {
+  .ambulance-sections, .ambulance-summary { gap: 10px; }
+  .ambulance-section-link { flex-wrap: wrap; padding: 15px; }
+}
+
+@media (max-width: 800px) {
+  .ambulance-sections, .ambulance-summary { grid-template-columns: 1fr; }
+  .ambulance-form { grid-template-columns: 1fr; }
+  .ambulance-table thead { display: none; }
+  .ambulance-table, .ambulance-table tbody, .ambulance-table tr, .ambulance-table td { display: block; width: 100%; box-sizing: border-box; }
+  .ambulance-table tr { border-left: 4px solid var(--admin-accent); margin-bottom: 18px; }
+  .ambulance-table td::before { content: attr(data-label); display: block; color: var(--admin-muted); font-size: 12px; margin-bottom: 8px; }
+  .ambulance-toolbar { align-items: stretch; flex-direction: column; }
+}

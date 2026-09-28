@@ -65,11 +65,8 @@ class AggregateReportController extends Controller
             FROM payments
         SQL);
 
-        /*
-         * MySQL does not provide FIRST() and LAST() aggregate functions.
-         * ORDER BY with LIMIT 1 is the MySQL equivalent for retrieving the
-         * first and latest booking records.
-         */
+
+
         $firstBooking = DB::selectOne(<<<'SQL'
             SELECT
                 b_id,
@@ -77,7 +74,6 @@ class AggregateReportController extends Controller
                 created_at
             FROM bookings
             ORDER BY created_at ASC, b_id ASC
-            LIMIT 1
         SQL);
 
         $latestBooking = DB::selectOne(<<<'SQL'
@@ -87,7 +83,6 @@ class AggregateReportController extends Controller
                 created_at
             FROM bookings
             ORDER BY created_at DESC, b_id DESC
-            LIMIT 1
         SQL);
 
         return response()->json([

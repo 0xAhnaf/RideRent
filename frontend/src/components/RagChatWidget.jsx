@@ -94,7 +94,7 @@ function RagChatWidget() {
         {
           role: "assistant",
           content: data.answer,
-          sources: data.sources || [],
+          //sources: data.sources || [],
         },
       ]);
     } catch (error) {

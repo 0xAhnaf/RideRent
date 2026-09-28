@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { apiFetch, getCsrfCookie } from "../api";
 import AdminHeader from "../components/admin/AdminHeader";
 import AdminSidebar from "../components/admin/AdminSidebar";
+import { ambulanceRequest } from "../components/admin/ambulance/ambulanceApi";
 import "../styles/admin-dashboard.css";
 
 const stats = [
@@ -36,7 +37,7 @@ const stats = [
   },
   {
     title: "Pending Ambulance",
-    value: "3",
+    value: null,
     change: "Urgent",
     icon: "✚",
     type: "danger",
@@ -50,25 +51,23 @@ const stats = [
   },
 ];
 
-const emergencyRequests = [
-  {
-    location: "Downtown Metro",
-    time: "2 mins ago",
-    description:
-      "Cardiac emergency reported. Needs Immediate Life Support unit.",
-    urgent: true,
-  },
-  {
-    location: "Westside Clinic",
-    time: "15 mins ago",
-    description: "Non-emergency transport requested.",
-    urgent: false,
-  },
-];
-
 function AdminDashboard() {
   const navigate = useNavigate();
   const [activeNav, setActiveNav] = useState("Dashboard");
+  const [ambulanceBookings, setAmbulanceBookings] = useState(null);
+  const [ambulanceError, setAmbulanceError] = useState("");
+
+  useEffect(() => {
+    const controller = new AbortController();
+    ambulanceRequest("/bookings", { signal: controller.signal })
+      .then((data) => setAmbulanceBookings(data.bookings))
+      .catch((error) => {
+        if (error.name !== "AbortError") setAmbulanceError(error.message);
+      });
+    return () => controller.abort();
+  }, []);
+
+  const pendingAmbulances = ambulanceBookings?.filter((booking) => booking.status === "pending");
 
   const handleNavigation = (item) => {
     setActiveNav(item.label);
@@ -194,7 +193,7 @@ function AdminDashboard() {
 
               <div>
                 <h3>{stat.title}</h3>
-                <p>{stat.value}</p>
+                <p>{stat.title === "Pending Ambulance" ? (pendingAmbulances?.length ?? "—") : stat.value}</p>
               </div>
             </article>
           ))}
@@ -352,26 +351,26 @@ function AdminDashboard() {
               </div>
 
               <div className="emergency-list">
-                {emergencyRequests.map((request) => (
+                {ambulanceError && <p role="alert">{ambulanceError}</p>}
+                {!ambulanceError && ambulanceBookings === null && <p>Loading ambulance requests...</p>}
+                {pendingAmbulances?.length === 0 && <p>No pending ambulance requests.</p>}
+                {pendingAmbulances?.slice(0, 3).map((request) => (
                   <div
-                    key={request.location}
-                    className={`emergency-request ${
-                      request.urgent ? "urgent" : ""
-                    }`}
+                    key={request.id}
+                    className="emergency-request"
                   >
                     <div className="emergency-request-top">
-                      <strong>Loc: {request.location}</strong>
-                      <span>{request.time}</span>
+                      <strong>{request.pickup_district}</strong>
+                      <span>#{request.id}</span>
                     </div>
 
-                    <p>{request.description}</p>
+                    <p>{request.pickup_address} → {request.destination_district}</p>
 
                     <button
-                      className={
-                        request.urgent ? "dispatch-button" : "review-button"
-                      }
+                      className="review-button"
+                      onClick={() => navigate("/admin/ambulance?section=bookings")}
                     >
-                      {request.urgent ? "Dispatch Now" : "Review"}
+                      Review
                     </button>
                   </div>
                 ))}

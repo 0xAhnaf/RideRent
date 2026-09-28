@@ -9,10 +9,7 @@ class JoinReportController extends Controller
 {
     public function relationships(): JsonResponse
     {
-        /*
-         * INNER JOIN:
-         * Returns only bookings that have a matching vehicle record.
-         */
+
         $bookingVehicleRecords = DB::select(<<<'SQL'
             SELECT
                 b.b_id AS booking_id,
@@ -29,10 +26,7 @@ class JoinReportController extends Controller
             ORDER BY b.b_id DESC
         SQL);
 
-        /*
-         * LEFT JOIN:
-         * Keeps every vehicle, including vehicles without a booking.
-         */
+
         $fleetBookingCoverage = DB::select(<<<'SQL'
             SELECT
                 c.id AS vehicle_id,
@@ -47,10 +41,7 @@ class JoinReportController extends Controller
             ORDER BY c.id, b.b_id DESC
         SQL);
 
-        /*
-         * RIGHT JOIN:
-         * Keeps every driver, including drivers without a booking.
-         */
+
         $driverBookingCoverage = DB::select(<<<'SQL'
             SELECT
                 d.id AS driver_id,
@@ -65,12 +56,7 @@ class JoinReportController extends Controller
             ORDER BY d.id, b.b_id DESC
         SQL);
 
-        /*
-         * FULL JOIN equivalent for MySQL:
-         * MySQL has no native FULL OUTER JOIN, so a LEFT JOIN and a RIGHT
-         * JOIN are combined with UNION. The result keeps unmatched records
-         * from both the drivers and bookings tables.
-         */
+
         $completeAssignmentReview = DB::select(<<<'SQL'
             SELECT
                 d.id AS driver_id,

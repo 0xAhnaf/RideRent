@@ -173,6 +173,7 @@ export default function RentalActivity({
                   <th>Destination Address</th>
                   <th>Emergency Contact</th>
                   <th>Status</th>
+                  <th>Created At</th>
                   
                 </tr>
               </thead>
