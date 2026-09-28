@@ -47,12 +47,13 @@ function App() {
             
             Every route inside this group requires:
             1. User must be logged in.
+            2. User must be a renter for renter-only pages.
 
             Future user-only pages (e.g. My Bookings, Settings) 
             should be added inside this group.
             ================================================================= */}
 
-        <Route element={<ProtectedRoute />}>
+        <Route element={<ProtectedRoute renterOnly />}>
           <Route path="/renter-profile" element={<RenterProfile />} />
         </Route>
 
@@ -85,6 +86,7 @@ function App() {
           <Route path="/admin/payments" element={<AdminPaymentsPage />} />
 
           <Route path="/admin/reports" element={<AdminReportsPage />} />
+
           <Route path="/admin/ambulance" element={<AdminAmbulancePage />} />
         </Route>
 
@@ -108,3 +110,4 @@ function App() {
 }
 
 export default App;
+
