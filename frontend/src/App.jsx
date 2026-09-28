@@ -4,10 +4,10 @@ import { useAuth } from "./context/AuthContext";
 
 import LandingPage from "./pages/LandingPage";
 import VehiclesPage from "./pages/VehiclesPage";
-import RagChatWidget from "./components/RagChatWidget";
+
 import LoginPage from "./pages/AuthPages/LoginPage";
 import SignUpPage from "./pages/AuthPages/SignUpPage";
-
+import RagChatWidget from "./components/RagChatWidget";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminVehiclesPage from "./pages/AdminVehiclesPage";
 import AddVehiclePage from "./pages/AddVehiclePage";
@@ -22,20 +22,6 @@ import RenterProfile from "./pages/RenterProfile";
 
 import AdminRoute from "./components/AdminRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
-
-function GuestOnlyRoute({ children }) {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return null;
-  }
-
-  if (user) {
-    return <Navigate to="/" replace />;
-  }
-
-  return children;
-}
 
 function GuestOnlyRoute({ children }) {
   const { user, loading } = useAuth();
@@ -106,7 +92,6 @@ function App() {
         {/* Unknown URL */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-
       <RagChatWidget />
     </BrowserRouter>
   );
