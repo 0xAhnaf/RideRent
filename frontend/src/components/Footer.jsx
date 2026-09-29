@@ -111,27 +111,7 @@ function Footer() {
             }}
           >
             Ambulance Service
-          </a>
-
-          <a
-            href="#"
-            onClick={(event) => {
-              event.preventDefault();
-              scrollToSection("booking");
-            }}
-          >
-            Driver Service
-          </a>
-
-          <a
-            href="#"
-            onClick={(event) => {
-              event.preventDefault();
-              scrollToSection("booking");
-            }}
-          >
-            Corporate Travel
-          </a>
+          </a> 
         </div>
 
         {/* CONTACT */}

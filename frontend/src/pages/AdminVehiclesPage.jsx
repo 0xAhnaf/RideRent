@@ -185,7 +185,7 @@ function AdminVehiclesPage() {
                   <th>Brand</th>
                   <th>Category</th>
                   <th>Seats</th>
-                  <th>Quantity</th>
+                  <th>Availability</th>
                   <th>Price / Day</th>
                   <th>Status</th>
                   <th className="admin-vehicle-actions-heading">Actions</th>
@@ -243,7 +243,9 @@ function AdminVehiclesPage() {
                       <td data-label="Brand">{car.brand}</td>
                       <td data-label="Category">{car.category}</td>
                       <td data-label="Seats">{car.seats}</td>
-                      <td data-label="Quantity">{car.quantity}</td>
+                      <td data-label="Availability">
+                        Available: {car.available_quantity} / Total: {car.quantity}
+                      </td>
                       <td data-label="Price / Day">
                         ৳{Number(car.price).toLocaleString()}
                       </td>

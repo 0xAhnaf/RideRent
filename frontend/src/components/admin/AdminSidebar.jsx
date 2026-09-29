@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const navItems = [
   { label: "Dashboard", icon: "▦", path: "/admin" },
@@ -7,13 +8,19 @@ const navItems = [
   { label: "Drivers", icon: "♧", path: "/admin/drivers" },
   { label: "Bookings", icon: "▣", path: "/admin/bookings" },
   { label: "Payments", icon: "৳", path: "/admin/payments" },
-  { label: "Ambulance", icon: "✚", path: "/admin/ambulance" },
+  { label: "Ambulance", icon: "✚", path: "/admin/ambulance", danger: true },
   { label: "Reviews", icon: "☆", path: "/reviews" },
   { label: "Reports", icon: "▥", path: "/admin/reports" },
 ];
 
 function AdminSidebar({ activeItem, dashboardIcon = "▦" }) {
   const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/");
+  };
 
   const handleNavigation = (item) => {
     if (item.path) {
@@ -57,12 +64,11 @@ function AdminSidebar({ activeItem, dashboardIcon = "▦" }) {
       </nav>
 
       <div className="admin-sidebar-footer">
-        <button type="button" className="admin-nav-item">
-          <span className="nav-icon">?</span>
-          <span>Support</span>
-        </button>
-
-        <button type="button" className="admin-nav-item">
+        <button
+          type="button"
+          className="admin-nav-item danger-item"
+          onClick={handleLogout}
+        >
           <span className="nav-icon">↪</span>
           <span>Logout</span>
         </button>

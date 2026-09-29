@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\BookingFareService;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -196,111 +197,123 @@ class BookingController extends Controller
         ]);
     }
 
+    
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
             'booking_status' => 'required|in:Pending,Confirmed,Completed,Cancelled',
         ]);
 
-        $booking = DB::transaction(function () use ($id, $validated) {
-            $lockedBooking = $this->lockBooking($id);
+        try {
+            $booking = DB::transaction(function () use ($id, $validated) {
+                $lockedBooking = $this->lockBooking($id);
 
-            if (!$lockedBooking) {
-                abort(404, 'Booking not found.');
-            }
+                if (!$lockedBooking) {
+                    abort(404, 'Booking not found.');
+                }
 
-            $currentStatus = $lockedBooking->booking_status;
-            $newStatus = $validated['booking_status'];
+                $currentStatus = $lockedBooking->booking_status;
+                $newStatus = $validated['booking_status'];
 
-            if ($currentStatus === $newStatus) {
-                return $this->findBooking($lockedBooking->b_id);
-            }
+                if ($currentStatus === $newStatus) {
+                    return $this->findBooking($lockedBooking->b_id);
+                }
 
-            $allowedTransitions = [
-                'Pending' => ['Confirmed', 'Cancelled'],
-                'Confirmed' => ['Completed', 'Cancelled'],
-                'Completed' => [],
-                'Cancelled' => [],
-            ];
+                $allowedTransitions = [
+                    'Pending' => ['Confirmed', 'Cancelled'],
+                    'Confirmed' => ['Completed', 'Cancelled'],
+                    'Completed' => [],
+                    'Cancelled' => [],
+                ];
 
-            if (!in_array($newStatus, $allowedTransitions[$currentStatus] ?? [], true)) {
-                throw ValidationException::withMessages([
-                    'booking_status' => "A {$currentStatus} booking cannot be changed to {$newStatus}.",
-                ]);
-            }
-
-            if ($newStatus === 'Confirmed' && !$lockedBooking->driver_id) {
-                throw ValidationException::withMessages([
-                    'booking_status' => 'Assign an available driver before confirming this booking.',
-                ]);
-            }
-
-            if ($newStatus === 'Confirmed') {
-                $driver = $this->lockDriver($lockedBooking->driver_id);
-
-                if (!$driver || $driver->status === 'inactive') {
+                if (!in_array($newStatus, $allowedTransitions[$currentStatus] ?? [], true)) {
                     throw ValidationException::withMessages([
-                        'booking_status' => 'The assigned driver is unavailable.',
+                        'booking_status' => "A {$currentStatus} booking cannot be changed to {$newStatus}.",
                     ]);
                 }
 
-                if ($this->driverHasActiveBooking((int) $driver->id, (int) $lockedBooking->b_id)) {
+                if ($newStatus === 'Confirmed' && !$lockedBooking->driver_id) {
                     throw ValidationException::withMessages([
-                        'booking_status' => 'The assigned driver is already handling another active booking.',
+                        'booking_status' => 'Assign an available driver before confirming this booking.',
                     ]);
                 }
 
-                if ($driver->status !== 'busy') {
-                    DB::update(
-                        "UPDATE drivers SET status = 'busy', updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-                        [$driver->id],
+                if ($newStatus === 'Confirmed') {
+                    $driver = $this->lockDriver($lockedBooking->driver_id);
+
+                    if (!$driver || $driver->status === 'inactive') {
+                        throw ValidationException::withMessages([
+                            'booking_status' => 'The assigned driver is unavailable.',
+                        ]);
+                    }
+
+                    if ($this->driverHasActiveBooking((int) $driver->id, (int) $lockedBooking->b_id)) {
+                        throw ValidationException::withMessages([
+                            'booking_status' => 'The assigned driver is already handling another active booking.',
+                        ]);
+                    }
+
+                    if ($driver->status !== 'busy') {
+                        DB::update(
+                            "UPDATE drivers SET status = 'busy', updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                            [$driver->id],
+                        );
+                    }
+                }
+
+                if ($newStatus === 'Cancelled') {
+                    $payment = DB::selectOne(
+                        <<<'SQL'
+                            SELECT id, payment_status
+                            FROM payments
+                            WHERE booking_id = ?
+                            LIMIT 1
+                            FOR UPDATE
+                        SQL,
+                        [$lockedBooking->b_id],
                     );
-                }
-            }
 
-            if ($newStatus === 'Cancelled') {
-                $payment = DB::selectOne(
-                    <<<'SQL'
-                        SELECT id, payment_status
-                        FROM payments
-                        WHERE booking_id = ?
-                        LIMIT 1
-                        FOR UPDATE
-                    SQL,
-                    [$lockedBooking->b_id],
+                    if ($payment?->payment_status === 'paid') {
+                        throw ValidationException::withMessages([
+                            'booking_status' => 'Refund the paid payment before cancelling this booking.',
+                        ]);
+                    }
+
+                    if ($payment?->payment_status === 'pending') {
+                        DB::delete(
+                            'DELETE FROM payments WHERE id = ?',
+                            [$payment->id],
+                        );
+                    }
+                }
+
+                DB::update(
+                    'UPDATE bookings SET booking_status = ? WHERE b_id = ?',
+                    [$newStatus, $lockedBooking->b_id],
                 );
 
-                if ($payment?->payment_status === 'paid') {
-                    throw ValidationException::withMessages([
-                        'booking_status' => 'Refund the paid payment before cancelling this booking.',
-                    ]);
+                if (in_array($newStatus, ['Completed', 'Cancelled'], true) && $lockedBooking->driver_id) {
+                    $this->synchronizeDriverAvailability((int) $lockedBooking->driver_id);
                 }
 
-                if ($payment?->payment_status === 'pending') {
-                    DB::delete(
-                        'DELETE FROM payments WHERE id = ?',
-                        [$payment->id],
-                    );
-                }
+                return $this->findBooking($lockedBooking->b_id);
+            }, 3);
+
+            return response()->json([
+                'message' => 'Booking status updated successfully.',
+                'booking' => $booking,
+            ]);
+        } catch (QueryException $error) {
+            if (str_contains($error->getMessage(), 'VEHICLE_UNAVAILABLE')) {
+                throw ValidationException::withMessages([
+                    'booking_status' => 'This vehicle is no longer available. Please select another available vehicle.',
+                ]);
             }
 
-            DB::update(
-                'UPDATE bookings SET booking_status = ? WHERE b_id = ?',
-                [$newStatus, $lockedBooking->b_id],
-            );
-
-            if (in_array($newStatus, ['Completed', 'Cancelled'], true) && $lockedBooking->driver_id) {
-                $this->synchronizeDriverAvailability((int) $lockedBooking->driver_id);
-            }
-
-            return $this->findBooking($lockedBooking->b_id);
-        }, 3);
-
-        return response()->json([
-            'message' => 'Booking status updated successfully.',
-            'booking' => $booking,
-        ]);
+            throw $error;
+        }
     }
+
 
     public function destroy($id)
     {

@@ -18,10 +18,10 @@ import Footer from "../components/Footer";
 import { apiFetch } from "../api";
 import "../styles/vehicles-page.css";
 
-const getAvailabilityText = (quantity) => {
-  if (quantity === 0) return "Not Available";
-  if (quantity === 1) return "Only 1 Available";
-  return `${quantity} Available`;
+const getAvailabilityText = (availableQuantity) => {
+  if (availableQuantity === 0) return "Not Available";
+  if (availableQuantity === 1) return "Only 1 Available";
+  return `${availableQuantity} Available`;
 };
 
 const formatCarPrice = (price) => `৳${Number(price).toLocaleString()}`;
@@ -88,6 +88,7 @@ function VehiclesPage() {
           ...car,
           price: Number(car.price),
           quantity: Number(car.quantity),
+          available_quantity: Number(car.available_quantity),
           seats: Number(car.seats),
         }));
 
@@ -176,7 +177,7 @@ function VehiclesPage() {
         car.brand,
         car.category,
         `${car.seats} seat`,
-        `${car.quantity} available`,
+        `${car.available_quantity} available`,
         `${car.price} starting price`,
       ].join(" ").toLowerCase();
 
@@ -193,8 +194,17 @@ function VehiclesPage() {
     if (sortOption === "name-descending") return [...results].sort((a, b) => b.name.localeCompare(a.name));
     if (sortOption === "seats-low-high") return [...results].sort((a, b) => a.seats - b.seats);
     if (sortOption === "seats-high-low") return [...results].sort((a, b) => b.seats - a.seats);
-    if (sortOption === "availability-high-low") return [...results].sort((a, b) => b.quantity - a.quantity);
-    if (sortOption === "availability-low-high") return [...results].sort((a, b) => a.quantity - b.quantity);
+    if (sortOption === "availability-high-low") {
+      return [...results].sort(
+        (a, b) => b.available_quantity - a.available_quantity,
+      );
+    }
+
+    if (sortOption === "availability-low-high") {
+      return [...results].sort(
+        (a, b) => a.available_quantity - b.available_quantity,
+      );
+    }
     if (sortOption === "price-low-high") return [...results].sort((a, b) => a.price - b.price);
     if (sortOption === "price-high-low") return [...results].sort((a, b) => b.price - a.price);
 
@@ -202,7 +212,11 @@ function VehiclesPage() {
   }, [cars, searchTerm, selectedBrand, selectedCategory, selectedSeats, minimumPrice, maximumPrice, sortOption]);
 
   const filteredFleetCount = useMemo(
-    () => filteredCars.reduce((total, car) => total + car.quantity, 0),
+    () =>
+      filteredCars.reduce(
+        (total, car) => total + car.available_quantity,
+        0,
+      ),
     [filteredCars]
   );
 
@@ -248,21 +262,26 @@ function VehiclesPage() {
             </p>
 
             <div className="vehicles-hero-stats">
-              <div>
-                <strong>{totalFleetCount}</strong>
-                <span>Cars in Fleet</span>
-              </div>
-
-              <div>
-                <strong>{cars.length}</strong>
-                <span>Vehicle Models</span>
-              </div>
-
-              <div>
-                <strong>24/7</strong>
-                <span>Customer Support</span>
-              </div>
+            <div>
+              <strong>{totalFleetCount}</strong>
+              <span>Cars in Fleet</span>
             </div>
+
+            <div>
+              <strong>
+                {cars.reduce(
+                  (total, car) => total + car.available_quantity,
+                  0,
+                )}
+              </strong>
+              <span>Cars Available</span>
+            </div>
+
+            <div>
+              <strong>{cars.length}</strong>
+              <span>Vehicle Models</span>
+            </div>
+          </div>
           </div>
         </section>
 
@@ -514,10 +533,10 @@ function VehiclesPage() {
 
                         <span
                           className={`vehicle-availability-badge ${
-                            car.quantity === 1 ? "is-limited" : ""
-                          } ${car.quantity === 0 ? "is-unavailable" : ""}`}
+                            car.available_quantity === 1 ? "is-limited" : ""
+                          } ${car.available_quantity === 0 ? "is-unavailable" : ""}`}
                         >
-                          {getAvailabilityText(car.quantity)}
+                          {getAvailabilityText(car.available_quantity)}
                         </span>
                       </div>
 
@@ -555,7 +574,7 @@ function VehiclesPage() {
 
                           <button
                             type="button"
-                            disabled={car.quantity === 0}
+                            disabled={car.available_quantity === 0}
                             onClick={() =>
                               navigate("/", {
                                 state: {
@@ -565,8 +584,8 @@ function VehiclesPage() {
                               })
                             }
                           >
-                            {car.quantity === 0 ? "Unavailable" : "Book Now"}
-                            {car.quantity > 0 && <ArrowRight size={17} />}
+                            {car.available_quantity === 0 ? "Unavailable" : "Book Now"}
+                            {car.available_quantity > 0 && <ArrowRight size={17} />}
                           </button>
                         </div>
                       </div>

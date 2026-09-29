@@ -7,55 +7,14 @@ import AdminSidebar from "../components/admin/AdminSidebar";
 import { ambulanceRequest } from "../components/admin/ambulance/ambulanceApi";
 import "../styles/admin-dashboard.css";
 
-const stats = [
-  {
-    title: "Total Users",
-    value: "24,592",
-    change: "+12%",
-    icon: "♙",
-    type: "normal",
-  },
-  {
-    title: "Total Vehicles",
-    value: "84",
-    change: "+5%",
-    icon: "▱",
-    type: "normal",
-  },
-  {
-    title: "Active Bookings",
-    value: "342",
-    change: "Active",
-    icon: "▣",
-    type: "active",
-  },
-  {
-    title: "Available Vehicles",
-    value: "19",
-    icon: "▰",
-    type: "normal",
-  },
-  {
-    title: "Pending Ambulance",
-    value: null,
-    change: "Urgent",
-    icon: "✚",
-    type: "danger",
-  },
-  {
-    title: "Monthly Revenue",
-    value: "$124.5K",
-    change: "+18%",
-    icon: "৳",
-    type: "normal",
-  },
-];
-
 function AdminDashboard() {
   const navigate = useNavigate();
   const [activeNav, setActiveNav] = useState("Dashboard");
   const [ambulanceBookings, setAmbulanceBookings] = useState(null);
   const [ambulanceError, setAmbulanceError] = useState("");
+  const [stats, setStats] = useState(null);
+  const [loadingDashboard, setLoadingDashboard] = useState(true);
+const [dashboardError, setDashboardError] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -67,14 +26,47 @@ function AdminDashboard() {
     return () => controller.abort();
   }, []);
 
+  // Fetch dashboard metrics for KPI cards
+  const fetchDashboard = async (signal, showLoading = true) => {
+  try {
+    if (showLoading) {
+      setLoadingDashboard(true);
+    }
+
+    setDashboardError("");
+
+    const response = await apiFetch("/api/admin/dashboard", { signal });
+
+    if (!response.ok) {
+      throw new Error("Failed to load dashboard metrics");
+    }
+
+    const data = await response.json();
+    setStats(data.stats);
+  } catch (error) {
+    if (error.name !== "AbortError") {
+      setDashboardError(error.message);
+    }
+  } finally {
+    if (showLoading && !signal?.aborted) {
+      setLoadingDashboard(false);
+    }
+  }
+};
+
+useEffect(() => {
+  const controller = new AbortController();
+
+  fetchDashboard(controller.signal);
+
+  return () => controller.abort();
+}, []);
+
   const pendingAmbulances = ambulanceBookings?.filter((booking) => booking.status === "pending");
 
   const handleNavigation = (item) => {
     setActiveNav(item.label);
-
-    if (item.path) {
-      navigate(item.path);
-    }
+    if (item.path) navigate(item.path);
   };
 
   // Real bookings from Laravel API
@@ -128,6 +120,7 @@ function AdminDashboard() {
       setBookings((currentBookings) =>
         currentBookings.filter((booking) => booking.b_id !== bookingId),
       );
+      await fetchDashboard(undefined, false);
     } catch (error) {
       console.error("Error deleting booking:", error);
     }
@@ -160,6 +153,8 @@ function AdminDashboard() {
           booking.b_id === bookingId ? data.booking : booking,
         ),
       );
+
+      await fetchDashboard();
     } catch (error) {
       console.error("Error updating booking status:", error);
     }
@@ -176,27 +171,39 @@ function AdminDashboard() {
         <AdminHeader
           title="Overview"
           subtitle="Real-time system metrics and pending actions."
-          showNotifications
         />
 
         {/* KPI Cards */}
         <section className="stats-grid">
-          {stats.map((stat) => (
-            <article key={stat.title} className={`stat-card ${stat.type}`}>
-              <div className="stat-top">
-                <div className="stat-icon">{stat.icon}</div>
-
-                {stat.change && (
-                  <span className="stat-change">{stat.change}</span>
-                )}
-              </div>
-
-              <div>
-                <h3>{stat.title}</h3>
-                <p>{stat.title === "Pending Ambulance" ? (pendingAmbulances?.length ?? "—") : stat.value}</p>
-              </div>
-            </article>
-          ))}
+          {loadingDashboard ? (
+            <>
+              <article className="stat-card normal"><div className="stat-top"><div className="stat-icon">♙</div></div><div><h3>Total Users</h3><p>Loading...</p></div></article>
+              <article className="stat-card normal"><div className="stat-top"><div className="stat-icon">▱</div></div><div><h3>Total Vehicles</h3><p>Loading...</p></div></article>
+              <article className="stat-card active"><div className="stat-top"><div className="stat-icon">▣</div></div><div><h3>Active Bookings</h3><p>Loading...</p></div></article>
+              <article className="stat-card normal"><div className="stat-top"><div className="stat-icon">▰</div></div><div><h3>Available Vehicles</h3><p>Loading...</p></div></article>
+              <article className="stat-card danger"><div className="stat-top"><div className="stat-icon">✚</div></div><div><h3>Pending Ambulance</h3><p>Loading...</p></div></article>
+              <article className="stat-card normal"><div className="stat-top"><div className="stat-icon">৳</div></div><div><h3>Monthly Revenue</h3><p>Loading...</p></div></article>
+            </>
+          ) : dashboardError ? (
+            <>
+              <article className="stat-card normal"><div className="stat-top"><div className="stat-icon">♙</div></div><div><h3>Total Users</h3><p>Error</p></div></article>
+              <article className="stat-card normal"><div className="stat-top"><div className="stat-icon">▱</div></div><div><h3>Total Vehicles</h3><p>Error</p></div></article>
+              <article className="stat-card active"><div className="stat-top"><div className="stat-icon">▣</div></div><div><h3>Active Bookings</h3><p>Error</p></div></article>
+              <article className="stat-card normal"><div className="stat-top"><div className="stat-icon">▰</div></div><div><h3>Available Vehicles</h3><p>Error</p></div></article>
+              <article className="stat-card danger"><div className="stat-top"><div className="stat-icon">✚</div></div><div><h3>Pending Ambulance</h3><p>Error</p></div></article>
+              <article className="stat-card normal"><div className="stat-top"><div className="stat-icon">৳</div></div><div><h3>Monthly Revenue</h3><p>Error</p></div></article>
+            </>
+          ) : (
+            stats?.map((stat) => (
+              <article key={stat.title} className={`stat-card ${stat.type}`}>
+                <div className="stat-top"><div className="stat-icon">{stat.icon}</div></div>
+                <div>
+                  <h3>{stat.title}</h3>
+                  <p>{stat.value}</p>
+                </div>
+              </article>
+            ))
+          )}
         </section>
 
         {/* Main Dashboard Grid */}
@@ -384,16 +391,16 @@ function AdminDashboard() {
                 <button className="more-button">⋮</button>
               </div>
 
-              <div className="revenue-chart">
-                <div className="chart-bars">
-                  <span style={{ height: "40%" }} />
-                  <span style={{ height: "60%" }} />
-                  <span style={{ height: "30%" }} />
-                  <span style={{ height: "80%" }} />
-                  <span className="highlight" style={{ height: "95%" }} />
-                </div>
-
-                <p>Chart Data Loading...</p>
+              <div className="revenue-summary">
+                {stats && stats.map((stat) => {
+                  if (!['Monthly Revenue', 'Total Users', 'Active Bookings'].includes(stat.title)) return null;
+                  return (
+                    <div key={stat.title} className="revenue-stat">
+                      <span>{stat.title}</span>
+                      <strong>{stat.value}</strong>
+                    </div>
+                  );
+                })}
               </div>
             </article>
           </div>

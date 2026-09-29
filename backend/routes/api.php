@@ -20,6 +20,7 @@ use App\Http\Controllers\AdminAmbulanceBookingController;
 use App\Http\Controllers\AmbulanceDriverController;
 use App\Http\Controllers\AmbulancePaymentController;
 use App\Http\Controllers\RenterProfileController;
+use App\Http\Controllers\AdminDashboardController;
 
 
 /*
@@ -168,6 +169,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/bookings', [AdminBookingController::class, 'index']);
         Route::get('/admin/bookings/{id}', [AdminBookingController::class, 'show'])
             ->whereNumber('id');
+        Route::get('/admin/dashboard', [AdminDashboardController::class, 'index']);
 
         Route::prefix('admin/ambulance')->where(['id' => '[0-9]+'])->group(function () {
             Route::apiResource('drivers', AmbulanceDriverController::class)->parameters(['drivers' => 'id'])->names('admin.ambulance.drivers');

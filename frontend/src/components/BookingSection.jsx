@@ -60,8 +60,8 @@ function BookingSection() {
   const formatCarPrice = (price) =>
     `BDT ${Number(price).toLocaleString()}`;
 
-  const getCarQuantity = (car) =>
-    Number(car?.quantity || 0);
+  const getCarAvailability = (car) =>
+  Number(car?.available_quantity || 0);
 
   const getCarStartingPrice = (car) =>
     Number(car?.price || 0);
@@ -192,7 +192,7 @@ function BookingSection() {
       return;
     }
 
-    if (getCarQuantity(selectedCarData) < 1) {
+    if (getCarAvailability(selectedCarData) < 1) {
       setError(
         "This car is currently unavailable. Please select another car.",
       );
@@ -495,57 +495,42 @@ function BookingSection() {
                 Select Car - Model
               </option>
 
-              {cars.map((car) => {
-                const quantity =
-                  getCarQuantity(car);
+            {cars.map((car) => {
+                const available = getCarAvailability(car);
 
                 return (
                   <option
                     key={car.id}
                     value={String(car.id)}
-                    disabled={quantity < 1}
+                    disabled={available < 1}
                   >
                     {car.name} - {car.seats} Seat -{" "}
-                    {formatCarPrice(
-                      getCarStartingPrice(car),
-                    )}
-                    /day - {quantity}{" "}
-                    {quantity === 1
-                      ? "Car"
-                      : "Cars"}{" "}
-                    Available
+                    {formatCarPrice(getCarStartingPrice(car))}
+                    /day - {available}{" "}
+                    {available === 1 ? "Car" : "Cars"} Available
                   </option>
                 );
-              })}
-            </select>
+            })}</select>
 
             {selectedCarData && (
-              <p
-                className={`booking-availability-message ${
-                  getCarQuantity(
-                    selectedCarData,
-                  ) === 1
-                    ? "is-limited"
-                    : ""
-                }`}
-              >
-                {getCarQuantity(
-                  selectedCarData,
-                ) === 1
-                  ? `Only 1 car of this model is currently listed. Starting body rent: ${formatCarPrice(
-                      getCarStartingPrice(
+                <p
+                  className={`booking-availability-message ${
+                    getCarAvailability(selectedCarData) === 1
+                      ? "is-limited"
+                      : ""
+                  }`}
+                >
+                  {getCarAvailability(selectedCarData) === 1
+                    ? `Only 1 car of this model is currently available. Starting body rent: ${formatCarPrice(
+                        getCarStartingPrice(selectedCarData),
+                      )}/day for 1 day.`
+                    : `${getCarAvailability(
                         selectedCarData,
-                      ),
-                    )}/day for 1 day.`
-                  : `${getCarQuantity(
-                      selectedCarData,
-                    )} cars of this model are currently listed. Starting body rent: ${formatCarPrice(
-                      getCarStartingPrice(
-                        selectedCarData,
-                      ),
-                    )}/day for 1 day.`}
-              </p>
-            )}
+                      )} cars of this model are currently available. Starting body rent: ${formatCarPrice(
+                        getCarStartingPrice(selectedCarData),
+                      )}/day for 1 day.`}
+                </p>
+              )}
           </div>
 
           {/* TRIP TYPE */}
