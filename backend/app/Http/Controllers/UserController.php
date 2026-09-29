@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
@@ -157,14 +159,77 @@ class UserController extends Controller
 
     public function destroy($id)
     {
-        $user = User::where('role', 'renter')->find($id);
+        $deleted = DB::transaction(function () use ($id) {
+            // 1. Lock the renter row first. Booking creation takes a shared lock
+            //    on this same row, so no new booking can slip in while we check.
+            $user = DB::selectOne(
+                "SELECT id FROM users WHERE id = ? AND role = 'renter' LIMIT 1 FOR UPDATE",
+                [$id],
+            );
 
-        if (!$user) {
+            if (!$user) {
+                return false;
+            }
+
+            // 2. Refuse to delete while the user still has live work.
+            $activeCarBooking = DB::selectOne(
+                "SELECT b_id FROM bookings
+                 WHERE u_id = ? AND booking_status IN ('Pending', 'Confirmed')
+                 LIMIT 1",
+                [$user->id],
+            );
+
+            $activeAmbulanceBooking = DB::selectOne(
+                "SELECT id FROM ambulance_bookings
+                 WHERE user_id = ? AND status IN ('pending', 'confirmed')
+                 LIMIT 1",
+                [$user->id],
+            );
+
+            if ($activeCarBooking || $activeAmbulanceBooking) {
+                throw ValidationException::withMessages([
+                    'user' => 'This user has an active booking. Complete or cancel it before deleting the user.',
+                ]);
+            }
+
+            // 3. Ambulance payments are RESTRICTed by the database; give a clear
+            //    message instead of a raw foreign-key error.
+            $ambulancePayment = DB::selectOne(
+                'SELECT p.id
+                 FROM ambulance_payments p
+                 JOIN ambulance_bookings b ON b.id = p.ambulance_booking_id
+                 WHERE b.user_id = ?
+                 LIMIT 1',
+                [$user->id],
+            );
+
+            if ($ambulancePayment) {
+                throw ValidationException::withMessages([
+                    'user' => 'This user has ambulance payment records and cannot be deleted.',
+                ]);
+            }
+
+            // 4. Delete. Tokens are polymorphic (no foreign key), so remove them explicitly.
+            DB::delete(
+                'DELETE FROM personal_access_tokens WHERE tokenable_type = ? AND tokenable_id = ?',
+                [User::class, $user->id],
+            );
+
+            $rows = DB::delete(
+                "DELETE FROM users WHERE id = ? AND role = 'renter'",
+                [$user->id],
+            );
+
+            if ($rows !== 1) {
+                throw new \RuntimeException('The user record could not be deleted.');
+            }
+
+            return true;
+        }, 3);
+
+        if (!$deleted) {
             return $this->notFoundResponse();
         }
-
-
-        $user->delete();
 
         return response()->json([
             'message' => 'User deleted successfully.',

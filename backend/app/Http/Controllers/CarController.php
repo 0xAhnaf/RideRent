@@ -20,6 +20,7 @@ class CarController extends Controller
                 category,
                 seats,
                 quantity,
+                available_quantity,
                 price,
                 image_key,
                 image_path,
@@ -86,24 +87,26 @@ class CarController extends Controller
                 $inserted = DB::insert(
                     <<<'SQL'
                         INSERT INTO cars (
-                            name,
-                            brand,
-                            category,
-                            seats,
-                            quantity,
-                            price,
-                            image_path,
-                            status,
-                            created_at,
-                            updated_at
-                        )
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        name,
+                        brand,
+                        category,
+                        seats,
+                        quantity,
+                        available_quantity,
+                        price,
+                        image_path,
+                        status,
+                        created_at,
+                        updated_at
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     SQL,
                     [
                         trim($validated['name']),
                         trim($validated['brand']),
                         trim($validated['category']),
                         $validated['seats'],
+                        $validated['quantity'],
                         $validated['quantity'],
                         $validated['price'],
                         $imagePath,
@@ -160,6 +163,7 @@ class CarController extends Controller
         }
     }
 
+    
     public function update(Request $request, $id)
     {
         $vehicle = $this->findVehicle($id);
@@ -213,6 +217,30 @@ class CarController extends Controller
             ) {
                 $timestamp = now();
 
+                $lockedVehicle = DB::selectOne(
+                    'SELECT id, quantity, available_quantity FROM cars WHERE id = ? FOR UPDATE',
+                    [$id],
+                );
+
+                if (!$lockedVehicle) {
+                    throw new \RuntimeException('The vehicle could not be locked for update.');
+                }
+
+                $reservedQuantity =
+                    $lockedVehicle->quantity - $lockedVehicle->available_quantity;
+
+                if ($validated['quantity'] < $reservedQuantity) {
+                    throw new \RuntimeException(
+                        "Vehicle quantity cannot be reduced below the {$reservedQuantity} currently reserved unit(s)."
+                    );
+                }
+
+                $quantityDelta =
+                    $validated['quantity'] - $lockedVehicle->quantity;
+
+                $newAvailableQuantity =
+                    $lockedVehicle->available_quantity + $quantityDelta;
+
                 if ($newImagePath) {
                     DB::update(
                         <<<'SQL'
@@ -223,6 +251,7 @@ class CarController extends Controller
                                 category = ?,
                                 seats = ?,
                                 quantity = ?,
+                                available_quantity = ?,
                                 price = ?,
                                 image_path = ?,
                                 status = ?,
@@ -235,6 +264,7 @@ class CarController extends Controller
                             trim($validated['category']),
                             $validated['seats'],
                             $validated['quantity'],
+                            $newAvailableQuantity,
                             $validated['price'],
                             $newImagePath,
                             $validated['status'],
@@ -252,6 +282,7 @@ class CarController extends Controller
                                 category = ?,
                                 seats = ?,
                                 quantity = ?,
+                                available_quantity = ?,
                                 price = ?,
                                 status = ?,
                                 updated_at = ?
@@ -263,6 +294,7 @@ class CarController extends Controller
                             trim($validated['category']),
                             $validated['seats'],
                             $validated['quantity'],
+                            $newAvailableQuantity,
                             $validated['price'],
                             $validated['status'],
                             $timestamp,
@@ -301,6 +333,8 @@ class CarController extends Controller
             ], 500);
         }
     }
+
+
 
     public function destroy($id)
     {
@@ -358,6 +392,7 @@ class CarController extends Controller
                     category,
                     seats,
                     quantity,
+                    available_quantity,
                     price,
                     image_key,
                     image_path,
@@ -389,6 +424,7 @@ class CarController extends Controller
             'category' => $vehicle->category,
             'seats' => $vehicle->seats,
             'quantity' => $vehicle->quantity,
+            'available_quantity' => $vehicle->available_quantity,
             'price' => $vehicle->price,
             'image_key' => $vehicle->image_key,
             'image_path' => $vehicle->image_path,

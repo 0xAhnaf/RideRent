@@ -53,7 +53,6 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 # If OPENROUTER_MODEL does not exist, Gemini 2.5 Flash will be used as the default.
 OPENROUTER_MODEL = os.getenv(
     "OPENROUTER_MODEL",
-    "google/gemini-2.5-flash"
 )
 
 
@@ -284,25 +283,22 @@ def generate_answer(state: AgentState):
     prompt = f"""
 You are the RideRent AI assistant.
 
-Answer the user's question using ONLY the information
-provided in the PDF context below.
+Rules:
+Answer ONLY using the PDF context.
+Respond ONLY in English.
+If the user uses any other language, politely ask them to switch to English.
+If the question is off-topic, politely say you can only help with RideRent information in the document.
+If the answer is not in the PDF, say:
+"I couldn't find the information."
+Do not invent or use outside information.
+Keep responses concise and professional.
 
-If the answer cannot be found in the PDF, say:
-
-"I couldn't find that information in the provided document."
-
-Do not invent information.
-
-Keep the answer clear and concise.
-
-PDF CONTEXT:
-----------------
+PDF:
 {context}
-----------------
 
-USER QUESTION:
+USER:
 {question}
-"""
+""" 
 
     # Send the prompt to the configured OpenRouter model.
     response = llm.invoke(prompt)

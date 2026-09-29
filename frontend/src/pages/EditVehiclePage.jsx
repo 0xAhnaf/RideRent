@@ -450,7 +450,7 @@ function EditVehiclePage() {
                 </div>
 
                 <div className="edit-vehicle-field">
-                  <label htmlFor="quantity">Quantity Available *</label>
+                  <label htmlFor="quantity">Total Quantity *</label>
                   <input
                     id="quantity"
                     type="number"
@@ -461,6 +461,13 @@ function EditVehiclePage() {
                     onChange={handleChange}
                     required
                   />
+                  
+                  {vehicle && (
+                    <small className="edit-vehicle-quantity-hint">
+                      Currently available: {vehicle.available_quantity} /{" "}
+                      {vehicle.quantity} total
+                    </small>
+                  )}
                 </div>
 
                 <div className="edit-vehicle-field">

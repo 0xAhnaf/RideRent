@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\AdminBookingController;
+use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\AmbulanceDriverController;
 use App\Http\Controllers\AmbulancePaymentController;
 use App\Http\Controllers\RenterProfileController;
 use App\Http\Controllers\RagAgentController;
+use App\Http\Controllers\ReviewController;
 
 
 /*
@@ -63,6 +65,7 @@ Route::get('/cars/{id}', [CarController::class, 'show']);
 
 /* AI DOCUMENT ASSISTANT */
 Route::post('/agent/chat', [RagAgentController::class, 'chat']);
+Route::get('/reviews', [ReviewController::class, 'index']);
 
 
 
@@ -86,6 +89,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/user', [AuthController::class, 'user']);
     Route::put('/profile', [AuthController::class, 'updateProfile']);
+
+    Route::get('/reviews/eligibility', [ReviewController::class, 'eligibility']);
+    Route::post('/reviews', [ReviewController::class, 'store']);
 
     /*
     |--------------------------------------------------------------------------
@@ -171,6 +177,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/bookings', [AdminBookingController::class, 'index']);
         Route::get('/admin/bookings/{id}', [AdminBookingController::class, 'show'])
             ->whereNumber('id');
+        Route::get('/admin/dashboard', [AdminDashboardController::class, 'index']);
 
         Route::prefix('admin/ambulance')->where(['id' => '[0-9]+'])->group(function () {
             Route::apiResource('drivers', AmbulanceDriverController::class)->parameters(['drivers' => 'id'])->names('admin.ambulance.drivers');
