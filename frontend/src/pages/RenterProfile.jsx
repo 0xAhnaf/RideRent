@@ -67,17 +67,23 @@ export default function RenterProfile() {
         body: JSON.stringify(formData),
       });
       const data = await response.json();
-
       if (!response.ok) {
         const validation =
           data.errors && Object.values(data.errors).flat().join(" ");
-        throw new Error(validation || data.message || "Failed to update profile.");
+        throw new Error(
+          validation || data.message || "Failed to update profile.",
+        );
       }
 
       if (!data.user) {
-        throw new Error("Profile response was incomplete. Please reload to check your details.");
+        throw new Error(
+          "Profile response was incomplete. Please reload to check your details.",
+        );
       }
-
+      if (!data.user)
+        throw new Error(
+          "Profile response was incomplete. Please reload to check your details.",
+        );
       setUser(data.user);
       setEditing(false);
       setNotice({ type: "success", text: "Profile updated successfully." });
@@ -113,27 +119,27 @@ export default function RenterProfile() {
           const data = await response.json();
           if (!Array.isArray(data)) throw new Error(endpoint);
           return data;
-        })
+        }),
       );
 
       if (cancelled) return;
 
       setBookingStatistics(
-        results[0].status === "fulfilled" ? results[0].value[0] || null : null
+        results[0].status === "fulfilled" ? results[0].value[0] || null : null,
       );
       setVehicleBookings(
-        results[1].status === "fulfilled" ? results[1].value : []
+        results[1].status === "fulfilled" ? results[1].value : [],
       );
       setCompletedVehicleTrips(
-        results[2].status === "fulfilled" ? results[2].value : []
+        results[2].status === "fulfilled" ? results[2].value : [],
       );
       setAmbulanceBookings(
-        results[3].status === "fulfilled" ? results[3].value : []
+        results[3].status === "fulfilled" ? results[3].value : [],
       );
 
       if (results.some((result) => result.status === "rejected")) {
         setActivityError(
-          "Rental activity could not be loaded completely. Please refresh the page to try again."
+          "Rental activity could not be loaded completely. Please refresh the page to try again.",
         );
       }
 
@@ -151,7 +157,9 @@ export default function RenterProfile() {
     return (
       <div className="renter-profile-page">
         <div className="renter-profile-loading" role="status">
-          {loading ? "Loading profile..." : "Please login to view your profile."}
+          {loading
+            ? "Loading profile..."
+            : "Please login to view your profile."}
         </div>
       </div>
     );

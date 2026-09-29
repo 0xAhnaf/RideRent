@@ -76,70 +76,137 @@ class BookingController extends Controller
             'driver_id' => ['required', 'integer'],
         ]);
 
-        $booking = DB::transaction(function () use ($id, $validated) {
-            $lockedBooking = $this->lockBooking($id);
-
-            if (!$lockedBooking) {
-                abort(404, 'Booking not found.');
-            }
-
-            if (!in_array($lockedBooking->booking_status, self::ACTIVE_STATUSES, true)) {
-                throw ValidationException::withMessages([
-                    'driver_id' => 'A driver cannot be assigned to a completed or cancelled booking.',
-                ]);
-            }
-
-            $driver = $this->lockDriver($validated['driver_id']);
-
-            if (!$driver) {
-                throw ValidationException::withMessages([
-                    'driver_id' => 'The selected driver does not exist.',
-                ]);
-            }
-
-            if ($driver->status === 'inactive') {
-                throw ValidationException::withMessages([
-                    'driver_id' => 'The selected driver is inactive.',
-                ]);
-            }
-
-            $alreadyAssignedHere = (int) $lockedBooking->driver_id === (int) $driver->id;
-            $hasAnotherActiveBooking = $this->driverHasActiveBooking(
-                (int) $driver->id,
-                (int) $lockedBooking->b_id,
-            );
-
-            if ($hasAnotherActiveBooking || ($driver->status === 'busy' && !$alreadyAssignedHere)) {
-                throw ValidationException::withMessages([
-                    'driver_id' => 'The selected driver is currently busy.',
-                ]);
-            }
-
-            $previousDriverId = $lockedBooking->driver_id;
-
-            DB::update(
-                'UPDATE bookings SET driver_id = ? WHERE b_id = ?',
-                [$driver->id, $lockedBooking->b_id],
-            );
-
-            if ($driver->status !== 'busy') {
-                DB::update(
-                    "UPDATE drivers SET status = 'busy', updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-                    [$driver->id],
-                );
-            }
-
-            if ($previousDriverId && (int) $previousDriverId !== (int) $driver->id) {
-                $this->synchronizeDriverAvailability((int) $previousDriverId);
-            }
-
-            return $this->findBooking($lockedBooking->b_id);
-        }, 3);
+        $booking = $this->assignDriverAtomically((int) $id, (int) $validated['driver_id']);
 
         return response()->json([
             'message' => 'Driver assigned successfully.',
             'booking' => $booking,
         ]);
+    }
+
+    /**
+     * Atomic driver assignment (raw SQL only).
+     *
+     * Lock order (always the same, so concurrent requests cannot deadlock):
+     *   1. booking row                      (SELECT ... FOR UPDATE)
+     *   2. previous + selected driver rows  (single statement, ORDER BY id)
+     *
+     * Every code path that changes bookings.driver_id takes the driver lock
+     * before writing, so the driver row acts as a mutex. The "active booking"
+     * check below runs only after both locks are held (and no consistent read
+     * has happened before that), so it sees every committed assignment.
+     *
+     * A deadlock / lock-wait timeout rolls back the whole attempt and retries.
+     */
+    private function assignDriverAtomically(int $bookingId, int $driverId): array
+    {
+        $maxAttempts = 3;
+
+        for ($attempt = 1; ; $attempt++) {
+            DB::beginTransaction();
+
+            try {
+                // 1. Booking lock
+                $lockedBooking = $this->lockBooking($bookingId);
+
+                if (!$lockedBooking) {
+                    abort(404, 'Booking not found.');
+                }
+
+                if (!in_array($lockedBooking->booking_status, self::ACTIVE_STATUSES, true)) {
+                    throw ValidationException::withMessages([
+                        'driver_id' => 'A driver cannot be assigned to a completed or cancelled booking.',
+                    ]);
+                }
+
+                $previousDriverId = $lockedBooking->driver_id !== null
+                    ? (int) $lockedBooking->driver_id
+                    : null;
+
+                // 2. Driver lock(s), ascending id order
+                $drivers = $this->lockDriversInOrder(array_filter([$previousDriverId, $driverId]));
+                $driver = $drivers[$driverId] ?? null;
+
+                if (!$driver) {
+                    throw ValidationException::withMessages([
+                        'driver_id' => 'The selected driver does not exist.',
+                    ]);
+                }
+
+                if ($driver->status === 'inactive') {
+                    throw ValidationException::withMessages([
+                        'driver_id' => 'The selected driver is inactive.',
+                    ]);
+                }
+
+                $alreadyAssignedHere = $previousDriverId === $driverId;
+
+                if (
+                    $this->driverHasActiveBooking($driverId, (int) $lockedBooking->b_id)
+                    || ($driver->status === 'busy' && !$alreadyAssignedHere)
+                ) {
+                    throw ValidationException::withMessages([
+                        'driver_id' => 'The selected driver is currently busy.',
+                    ]);
+                }
+
+                // 3. Booking.driver_id
+                if (!$alreadyAssignedHere) {
+                    $updated = DB::update(
+                        'UPDATE bookings SET driver_id = ? WHERE b_id = ? AND booking_status IN (\'Pending\', \'Confirmed\')',
+                        [$driverId, $lockedBooking->b_id],
+                    );
+
+                    if ($updated !== 1) {
+                        throw new \RuntimeException('Booking could not be updated during driver assignment.');
+                    }
+                }
+
+                // 4. Selected driver -> busy
+                if ($driver->status !== 'busy') {
+                    $updated = DB::update(
+                        "UPDATE drivers SET status = 'busy', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status <> 'inactive'",
+                        [$driverId],
+                    );
+
+                    if ($updated !== 1) {
+                        throw new \RuntimeException('Driver could not be updated during driver assignment.');
+                    }
+                }
+
+                // 5. Previous driver -> available (only if no other active booking remains)
+                if ($previousDriverId !== null && !$alreadyAssignedHere) {
+                    $this->synchronizeDriverAvailability($previousDriverId);
+                }
+
+                $booking = $this->findBooking($lockedBooking->b_id);
+
+                // 6. All steps succeeded
+                DB::commit();
+
+                return $booking;
+            } catch (\Throwable $error) {
+                // 7. Any failure
+                DB::rollBack();
+
+                if ($attempt < $maxAttempts && $this->isRetryableLockError($error)) {
+                    usleep(random_int(20, 80) * 1000);
+                    continue;
+                }
+
+                throw $error;
+            }
+        }
+    }
+
+    private function isRetryableLockError(\Throwable $error): bool
+    {
+        if (!$error instanceof QueryException) {
+            return false;
+        }
+
+        // 1213 = deadlock, 1205 = lock wait timeout
+        return in_array((int) ($error->errorInfo[1] ?? 0), [1213, 1205], true);
     }
 
     public function unassignDriver($id)
@@ -394,6 +461,33 @@ class BookingController extends Controller
             SQL,
             [$id],
         );
+    }
+
+    /**
+     * @param  array<int>  $ids
+     * @return array<int, object>  driver rows keyed by id
+     */
+    private function lockDriversInOrder(array $ids): array
+    {
+        $ids = array_values(array_unique(array_map('intval', $ids)));
+
+        if ($ids === []) {
+            return [];
+        }
+
+        $placeholders = implode(', ', array_fill(0, count($ids), '?'));
+
+        $rows = DB::select(
+            "SELECT id, status FROM drivers WHERE id IN ({$placeholders}) ORDER BY id ASC FOR UPDATE",
+            $ids,
+        );
+
+        $byId = [];
+        foreach ($rows as $row) {
+            $byId[(int) $row->id] = $row;
+        }
+
+        return $byId;
     }
 
     private function driverHasActiveBooking(int $driverId, ?int $ignoredBookingId = null): bool

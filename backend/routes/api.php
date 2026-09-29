@@ -1,11 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\BookingFareController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\BookingController;
-use App\Http\Controllers\BookingFareController;
 use App\Http\Controllers\AdminBookingController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\DriverController;
@@ -21,6 +20,7 @@ use App\Http\Controllers\AdminAmbulanceBookingController;
 use App\Http\Controllers\AmbulanceDriverController;
 use App\Http\Controllers\AmbulancePaymentController;
 use App\Http\Controllers\RenterProfileController;
+use App\Http\Controllers\RagAgentController;
 use App\Http\Controllers\ReviewController;
 
 
@@ -63,6 +63,8 @@ Route::get('/cars', [CarController::class, 'index']);
 
 Route::get('/cars/{id}', [CarController::class, 'show']);
 
+/* AI DOCUMENT ASSISTANT */
+Route::post('/agent/chat', [RagAgentController::class, 'chat']);
 Route::get('/reviews', [ReviewController::class, 'index']);
 
 

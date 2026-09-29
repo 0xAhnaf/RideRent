@@ -266,9 +266,10 @@
 }
 
 .admin-user-filters {
-  width: min(100%, 480px);
+  width: min(100%, 320px);
+  margin-left: auto;
   display: grid;
-  grid-template-columns: minmax(190px, 1fr) minmax(135px, 0.55fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 9px;
 }
 

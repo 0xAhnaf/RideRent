@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
@@ -13,14 +15,15 @@ class UserController extends Controller
     | LIST USERS
     |--------------------------------------------------------------------------
     |
-    | Returns every account (Admins and Renters) for the Admin
-    | "Manage Users" dashboard page.
+    | Returns ONLY Renter accounts for the Admin "Manage Users"
+    | dashboard page. Admin accounts are never returned.
     |
     */
 
     public function index()
     {
-        $users = User::orderBy('name')->orderBy('id')->get();
+        $users = User::where('role', 'renter')
+            ->orderBy('name')->orderBy('id')->get();
 
         return response()->json([
             'users' => $users,
@@ -33,8 +36,8 @@ class UserController extends Controller
     | CREATE USER
     |--------------------------------------------------------------------------
     |
-    | Admin can create either a Renter or another Admin account
-    | directly from the dashboard.
+    | Admin can create Renter accounts from the dashboard.
+    | The role is always "renter" and is never read from the request.
     |
     */
 
@@ -50,8 +53,6 @@ class UserController extends Controller
             'address' => ['nullable', 'string', 'max:1000'],
 
             'password' => ['required', 'string', 'min:8'],
-
-            'role' => ['required', Rule::in(['admin', 'renter'])],
         ]);
 
         $user = User::create([
@@ -60,7 +61,7 @@ class UserController extends Controller
             'phone' => trim($validated['phone']),
             'address' => $validated['address'] ?? null,
             'password' => $validated['password'],
-            'role' => $validated['role'],
+            'role' => 'renter',
         ]);
 
         return response()->json([
@@ -77,7 +78,7 @@ class UserController extends Controller
 
     public function show($id)
     {
-        $user = User::find($id);
+        $user = User::where('role', 'renter')->find($id);
 
         if (!$user) {
             return $this->notFoundResponse();
@@ -100,7 +101,7 @@ class UserController extends Controller
 
     public function update(Request $request, $id)
     {
-        $user = User::find($id);
+        $user = User::where('role', 'renter')->find($id);
 
         if (!$user) {
             return $this->notFoundResponse();
@@ -126,8 +127,6 @@ class UserController extends Controller
             'address' => ['nullable', 'string', 'max:1000'],
 
             'password' => ['nullable', 'string', 'min:8'],
-
-            'role' => ['required', Rule::in(['admin', 'renter'])],
         ]);
 
         $updateData = [
@@ -135,7 +134,6 @@ class UserController extends Controller
             'email' => $validated['email'],
             'phone' => trim($validated['phone']),
             'address' => $validated['address'] ?? null,
-            'role' => $validated['role'],
         ];
 
         if (!empty($validated['password'])) {
@@ -155,25 +153,83 @@ class UserController extends Controller
     | DELETE USER
     |--------------------------------------------------------------------------
     |
-    | An Admin cannot delete their own account through this endpoint.
+    | Only Renter accounts can be deleted here.
     |
     */
 
-    public function destroy(Request $request, $id)
+    public function destroy($id)
     {
-        $user = User::find($id);
+        $deleted = DB::transaction(function () use ($id) {
+            // 1. Lock the renter row first. Booking creation takes a shared lock
+            //    on this same row, so no new booking can slip in while we check.
+            $user = DB::selectOne(
+                "SELECT id FROM users WHERE id = ? AND role = 'renter' LIMIT 1 FOR UPDATE",
+                [$id],
+            );
 
-        if (!$user) {
+            if (!$user) {
+                return false;
+            }
+
+            // 2. Refuse to delete while the user still has live work.
+            $activeCarBooking = DB::selectOne(
+                "SELECT b_id FROM bookings
+                 WHERE u_id = ? AND booking_status IN ('Pending', 'Confirmed')
+                 LIMIT 1",
+                [$user->id],
+            );
+
+            $activeAmbulanceBooking = DB::selectOne(
+                "SELECT id FROM ambulance_bookings
+                 WHERE user_id = ? AND status IN ('pending', 'confirmed')
+                 LIMIT 1",
+                [$user->id],
+            );
+
+            if ($activeCarBooking || $activeAmbulanceBooking) {
+                throw ValidationException::withMessages([
+                    'user' => 'This user has an active booking. Complete or cancel it before deleting the user.',
+                ]);
+            }
+
+            // 3. Ambulance payments are RESTRICTed by the database; give a clear
+            //    message instead of a raw foreign-key error.
+            $ambulancePayment = DB::selectOne(
+                'SELECT p.id
+                 FROM ambulance_payments p
+                 JOIN ambulance_bookings b ON b.id = p.ambulance_booking_id
+                 WHERE b.user_id = ?
+                 LIMIT 1',
+                [$user->id],
+            );
+
+            if ($ambulancePayment) {
+                throw ValidationException::withMessages([
+                    'user' => 'This user has ambulance payment records and cannot be deleted.',
+                ]);
+            }
+
+            // 4. Delete. Tokens are polymorphic (no foreign key), so remove them explicitly.
+            DB::delete(
+                'DELETE FROM personal_access_tokens WHERE tokenable_type = ? AND tokenable_id = ?',
+                [User::class, $user->id],
+            );
+
+            $rows = DB::delete(
+                "DELETE FROM users WHERE id = ? AND role = 'renter'",
+                [$user->id],
+            );
+
+            if ($rows !== 1) {
+                throw new \RuntimeException('The user record could not be deleted.');
+            }
+
+            return true;
+        }, 3);
+
+        if (!$deleted) {
             return $this->notFoundResponse();
         }
-
-        if ($request->user() && (int) $request->user()->id === (int) $user->id) {
-            return response()->json([
-                'message' => 'You cannot delete your own account while logged in.',
-            ], 422);
-        }
-
-        $user->delete();
 
         return response()->json([
             'message' => 'User deleted successfully.',
