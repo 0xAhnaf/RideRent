@@ -81,6 +81,11 @@ function Navbar() {
     navigate("/vehicles");
   };
 
+  const goToReviewsPage = () => {
+    closeMenus();
+    navigate("/reviews");
+  };
+
   const goToLogin = () => {
     closeMenus();
     navigate("/login");
@@ -150,6 +155,7 @@ function Navbar() {
 
   const isHome = location.pathname === "/";
   const isVehicles = location.pathname === "/vehicles";
+  const isReviews = location.pathname === "/reviews";
 
   /*
   |--------------------------------------------------------------------------
@@ -218,6 +224,13 @@ function Navbar() {
           onClick={goToVehiclesPage}
         >
           Vehicles
+        </li>
+
+        <li
+          className={isReviews ? "active-link" : ""}
+          onClick={goToReviewsPage}
+        >
+          Reviews
         </li>
 
         <li
@@ -355,7 +368,11 @@ function Navbar() {
               {profileOpen && (
                 <div className="profile-dropdown">
 
-                  <div className="profile-info" onClick={goToProfile} style={{ cursor: "pointer" }}>
+                  <div
+                    className="profile-info"
+                    onClick={goToProfile}
+                    style={{ cursor: "pointer" }}
+                  >
 
                     <div className="profile-avatar large">
                       {userInitial}

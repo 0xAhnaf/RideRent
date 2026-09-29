@@ -1,0 +1,11 @@
+.booking-fare-summary { grid-column: 1 / -1; padding: 20px; border: 1px solid #d7b34a; border-radius: 8px; background: #fffaf0; color: #0b2338; min-width: 0; }
+.booking-fare-summary h3 { margin: 0 0 12px; font-size: 1.2rem; }
+.booking-fare-summary p { margin: 8px 0; overflow-wrap: anywhere; }
+.booking-fare-summary dl { margin: 12px 0; }
+.booking-fare-summary dl > div { display: flex; justify-content: space-between; gap: 16px; padding: 8px 0; }
+.booking-fare-summary dt { font-weight: 500; }
+.booking-fare-summary dd { margin: 0; font-weight: 700; white-space: nowrap; }
+.booking-fare-summary .booking-fare-total { border-top: 1px solid #d7b34a; margin-top: 8px; font-size: 1.15rem; }
+.booking-fare-summary small { display: block; line-height: 1.5; }
+.booking-fare-summary button { padding: 6px 12px; margin-left: 8px; border-radius: 4px; border: 1px solid #0b2338; cursor: pointer; color: #0b2338; background: white; }
+@media (max-width: 480px) { .booking-fare-summary { padding: 14px; } .booking-fare-summary dl > div { flex-direction: column; gap: 4px; } }

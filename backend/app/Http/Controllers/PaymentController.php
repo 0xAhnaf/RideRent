@@ -74,6 +74,7 @@ class PaymentController extends Controller
                     ]);
                 }
 
+                $this->assertSavedFare((int) $booking->b_id, $validated['amount']);
                 $status = $validated['payment_status'] ?? 'pending';
 
                 DB::insert(
@@ -164,6 +165,8 @@ class PaymentController extends Controller
                 if (!$lockedPayment) {
                     abort(404, 'Payment not found.');
                 }
+
+                $this->assertSavedFare((int) $lockedPayment->booking_id, $validated['amount']);
 
                 if ($lockedPayment->payment_status !== 'pending') {
                     throw ValidationException::withMessages([
@@ -338,6 +341,14 @@ class PaymentController extends Controller
         }
 
         return $rules;
+    }
+
+    private function assertSavedFare(int $bookingId, mixed $amount): void
+    {
+        $fare = DB::selectOne('SELECT total_fare FROM booking_fares WHERE booking_id = ?', [$bookingId]);
+        if ($fare && abs((float) $fare->total_fare - (float) $amount) > 0.000001) {
+            throw ValidationException::withMessages(['amount' => 'Payment amount must match the saved booking fare of BDT '.$fare->total_fare.'.']);
+        }
     }
 
     private function lockBooking($id): ?object

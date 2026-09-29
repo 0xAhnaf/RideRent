@@ -8,6 +8,7 @@ import VehiclesPage from "./pages/VehiclesPage";
 import LoginPage from "./pages/AuthPages/LoginPage";
 import SignUpPage from "./pages/AuthPages/SignUpPage";
 import RagChatWidget from "./components/RagChatWidget";
+
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminVehiclesPage from "./pages/AdminVehiclesPage";
 import AddVehiclePage from "./pages/AddVehiclePage";
@@ -18,7 +19,9 @@ import AdminBookingsPage from "./pages/AdminBookingsPage";
 import AdminPaymentsPage from "./pages/AdminPaymentsPage";
 import AdminReportsPage from "./pages/AdminReportsPage";
 import AdminAmbulancePage from "./pages/AdminAmbulancePage";
+
 import RenterProfile from "./pages/RenterProfile";
+import ReviewsPage from "./pages/ReviewsPage";
 
 import AdminRoute from "./components/AdminRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -44,6 +47,7 @@ function App() {
         {/* Public pages */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/vehicles" element={<VehiclesPage />} />
+        <Route path="/reviews" element={<ReviewsPage />} />
 
         {/* Login and signup: logged-in users return to Landing Page */}
         <Route
@@ -72,14 +76,23 @@ function App() {
         {/* Admin pages */}
         <Route element={<AdminRoute />}>
           <Route path="/admin" element={<AdminDashboard />} />
+
           <Route path="/admin/admin-vehicle" element={<AdminVehiclesPage />} />
+
           <Route path="/admin/add-vehicle" element={<AddVehiclePage />} />
+
           <Route path="/admin/edit-vehicle/:id" element={<EditVehiclePage />} />
+
           <Route path="/admin/users" element={<AdminUsersPage />} />
+
           <Route path="/admin/drivers" element={<AdminDriversPage />} />
+
           <Route path="/admin/bookings" element={<AdminBookingsPage />} />
+
           <Route path="/admin/payments" element={<AdminPaymentsPage />} />
+
           <Route path="/admin/reports" element={<AdminReportsPage />} />
+
           <Route path="/admin/ambulance" element={<AdminAmbulancePage />} />
         </Route>
 
@@ -92,6 +105,8 @@ function App() {
         {/* Unknown URL */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+
+      {/* RAG Chat Widget */}
       <RagChatWidget />
     </BrowserRouter>
   );
