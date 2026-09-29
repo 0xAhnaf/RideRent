@@ -7,6 +7,7 @@ use App\Http\Controllers\CarController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\BookingFareController;
 use App\Http\Controllers\AdminBookingController;
+use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserController;
@@ -20,7 +21,7 @@ use App\Http\Controllers\AdminAmbulanceBookingController;
 use App\Http\Controllers\AmbulanceDriverController;
 use App\Http\Controllers\AmbulancePaymentController;
 use App\Http\Controllers\RenterProfileController;
-use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\ReviewController;
 
 
 /*
@@ -62,6 +63,8 @@ Route::get('/cars', [CarController::class, 'index']);
 
 Route::get('/cars/{id}', [CarController::class, 'show']);
 
+Route::get('/reviews', [ReviewController::class, 'index']);
+
 
 
 /*
@@ -84,6 +87,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/user', [AuthController::class, 'user']);
     Route::put('/profile', [AuthController::class, 'updateProfile']);
+
+    Route::get('/reviews/eligibility', [ReviewController::class, 'eligibility']);
+    Route::post('/reviews', [ReviewController::class, 'store']);
 
     /*
     |--------------------------------------------------------------------------
